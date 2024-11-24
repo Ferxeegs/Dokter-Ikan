@@ -83,19 +83,24 @@
 
             {/* Empat Button Berderet */}
             <div className="flex gap-4 justify-center mt-6 mx-6">
-            <button className="bg-[#69CBF4] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto">
-                Button 1
-            </button>
-            <button className="bg-[#69CBF4] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto">
-                Button 2
-            </button>
-            <button className="bg-[#69CBF4] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto">
-                Button 3
-            </button>
-            <button className="bg-[#69CBF4] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto">
-                Button 4
-            </button>
-            </div>
+  <button className="bg-white text-[#69CBF4] px-6 py-2 rounded-lg hover:bg-[#f0f0f0] transition text-sm font-semibold w-full md:w-auto border border-[#69CBF4] flex items-center justify-center space-x-2">
+    <img src="path-to-image1.png" alt="Button 1" className="w-4 h-4" />
+    <span>Button 1</span>
+  </button>
+  <button className="bg-white text-[#69CBF4] px-6 py-2 rounded-lg hover:bg-[#f0f0f0] transition text-sm font-semibold w-full md:w-auto border border-[#69CBF4] flex items-center justify-center space-x-2">
+    <img src="path-to-image2.png" alt="Button 2" className="w-4 h-4" />
+    <span>Button 2</span>
+  </button>
+  <button className="bg-white text-[#69CBF4] px-6 py-2 rounded-lg hover:bg-[#f0f0f0] transition text-sm font-semibold w-full md:w-auto border border-[#69CBF4] flex items-center justify-center space-x-2">
+    <img src="path-to-image3.png" alt="Button 3" className="w-4 h-4" />
+    <span>Button 3</span>
+  </button>
+  <button className="bg-white text-[#69CBF4] px-6 py-2 rounded-lg hover:bg-[#f0f0f0] transition text-sm font-semibold w-full md:w-auto border border-[#69CBF4] flex items-center justify-center space-x-2">
+    <img src="path-to-image4.png" alt="Button 4" className="w-4 h-4" />
+    <span>Button 4</span>
+  </button>
+</div>
+
         </main>
 
         {/* Footer */}

@@ -32,8 +32,8 @@ export default function Riwayat() {
         {/* Buttons */}
         <div className="flex justify-center gap-4 mb-8 mt-60">
           {/* Button Konsultasi */}
-          <button className="flex flex-col bg-white border-4 text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-96 mr-9">
-            <img src="/Ndas.png" alt="Konsultasi Icon" className="w-16 h-16 mb-4 rounded-full bo" />
+          <button className="flex flex-col bg-white border-blue-300 border-4 text-white px-8 py-10 rounded-3xl shadow-lg hover:shadow-2xl transition w-96 mr-9">
+            <img src="/profil.png" alt="Konsultasi Icon" className="w-16 h-16 mb-4 rounded-full bo" />
             <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">DETEKSI SEPSIES IKAN</h3>
             <p className="text-xs text-black text-center">
               Fitur ini menggunakan AI untuk menganalisis foto ikan yang diunggah oleh petambak. AI mengenali ciri-ciri visual seperti bentuk tubuh, warna, dan pola sisik guna mengidentifikasi spesies ikan secara akurat.
@@ -43,7 +43,7 @@ export default function Riwayat() {
           {/* Button Riwayat */}
           {/* Button Konsultasi */}
           <button className="flex flex-col bg-white border-4 text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-96 mr-9">
-            <img src="/Ndas.png" alt="Konsultasi Icon" className="w-16 h-16 mb-4 rounded-full bo" />
+            <img src="/profil.png" alt="Konsultasi Icon" className="w-16 h-16 mb-4 rounded-full bo" />
             <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">DETEKSI SEPSIES IKAN</h3>
             <p className="text-xs text-black text-center">
               Fitur ini menggunakan AI untuk menganalisis foto ikan yang diunggah oleh petambak. AI mengenali ciri-ciri visual seperti bentuk tubuh, warna, dan pola sisik guna mengidentifikasi spesies ikan secara akurat.

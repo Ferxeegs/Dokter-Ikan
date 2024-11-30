@@ -1,17 +1,21 @@
-'use client';
+'use client'
 
 import { useState } from 'react';
-
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 
-export default function UserPost() {
+export default function ExpertPost() {
   const [inputText, setInputText] = useState('');
   const [description, setDescription] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false); // State untuk modal
 
   const handleSubmit = () => {
     setDescription(inputText);
     setInputText('');
+  };
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen); // Toggle modal open/close
   };
 
   return (
@@ -55,26 +59,6 @@ export default function UserPost() {
             <p className="text-sm text-gray-700 text-justify mb-8">
               It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using.
             </p>
-
-            {/* Button untuk melihat detail resep */}
-            <button
-              className="absolute bottom-4 right-4 px-4 py-2 rounded-2xl text-xs font-bold"
-              style={{
-                backgroundColor: 'rgba(105, 203, 244, 0.3)', // Transparan 30%
-                color: 'black',
-              }}
-            >
-              Lihat Detail Resep
-            </button>
-
-            {/* Foto Profil di kiri bawah */}
-            <div className="absolute bottom-4 left-4 flex items-center space-x-2">
-              <img src="profil.png" alt="Foto Profil" className="w-10 h-10 rounded-full" />
-              <div className="flex flex-col text-left font-sans">
-                <span className="text-sm font-bold text-black">Nama Tenaga Ahli</span>
-                <span className="text-xs font-light text-black italic">Spesialis Ikan</span>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -82,15 +66,90 @@ export default function UserPost() {
         <div className="flex justify-center mt-6">
           <button
             className="bg-[rgba(105,203,244,0.4)] text-black px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold flex items-center gap-2"
-            onClick={handleSubmit}
+            onClick={toggleModal} // Membuka modal saat tombol ditekan
           >
-            <img src="crown.png" alt="Icon" className="w-6 h-6" />
+            <img src="obat.png" alt="Icon" className="w-6 h-6" />
             <div className="flex flex-col text-left font-sans">
-              <span className="font-light text-xs italic">Punya pertanyaan lebih lanjut?</span>
-              <span className="font-bold text-sm">Chat Tenaga Ahli Sekarang!</span>
+              <span className="font-light text-xs italic">Ayo bantu klien lebih lanjut</span>
+              <span className="font-bold text-sm">Berikan resep obat disini!</span>
             </div>
           </button>
         </div>
+
+        {/* Modal: Card List Obat */}
+        {isModalOpen && (
+  <div
+    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+    onClick={toggleModal} // Tutup modal saat area luar diklik
+  >
+    <div
+      className="bg-white p-6 rounded-xl w-[80%] md:w-[50%] max-h-[70vh] overflow-y-auto relative"
+      onClick={(e) => e.stopPropagation()} // Menghentikan bubbling agar modal tidak tertutup saat klik di dalamnya
+    >
+      <h2 className="text-2xl font-bold mb-4 text-center text-black">Rekomendasi Obat</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Card Obat */}
+        {[
+          {
+            title: 'Antibiotik',
+            content: 'Kandungan: Amoxicillin',
+            usage: 'Campurkan dengan air selama 7 hari.',
+            dose: 'Takaran: 10mg/L air',
+          },
+          {
+            title: 'Antijamur',
+            content: 'Kandungan: Methylene Blue',
+            usage: 'Rendam ikan selama 10 menit.',
+            dose: 'Takaran: 5ml/L air',
+          },
+          {
+            title: 'Vitamin',
+            content: 'Kandungan: Multivitamin Kompleks',
+            usage: 'Campurkan ke pakan setiap hari.',
+            dose: 'Takaran: 1 tablet/10kg ikan',
+          },
+        ].map((item, index) => (
+          <div
+            key={index}
+            className="flex items-center p-4 bg-gradient-to-r from-[#DCF5FF] to-[#80B7F5] rounded-lg shadow"
+          >
+            <img
+              src="https://via.placeholder.com/80" // Ukuran gambar lebih kecil
+              alt={`Obat ${index + 1}`}
+              className="w-16 h-16 rounded-lg object-cover" // Ukuran gambar
+            />
+            <div className="ml-4">
+              <h3 className="font-bold text-black text-xs">{item.title}</h3> {/* Ukuran teks lebih kecil */}
+              <p className="text-xs text-gray-700">{item.content}</p> {/* Ukuran teks lebih kecil */}
+              <p className="text-xs text-gray-700">{item.dose}</p>
+              <p className="text-xs text-gray-700">{item.usage}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tombol Kirim Resep */}
+      <div className="mt-4 text-center">
+        <button
+          className="bg-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold"
+          onClick={() => alert('Resep telah dikirim ke klien.')} // Contoh aksi kirim resep
+        >
+          Kirim Resep ke Klien
+        </button>
+      </div>
+
+      {/* Tombol Tutup Modal */}
+      <button
+        className="absolute top-2 right-2 text-black font-bold text-lg"
+        onClick={toggleModal}
+      >
+        &times;
+      </button>
+    </div>
+  </div>
+)}
+
+
 
         {/* Kotak Input */}
         <div className="mt-8 flex justify-center">
@@ -98,7 +157,7 @@ export default function UserPost() {
             <img src="profil.png" alt="Foto Profil" className="w-12 h-12 rounded-full ml-8 mr-4" />
             <textarea
               className="flex-1 h-full p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
-              placeholder="Masukkan detail keluhan atau informasi tambahan mengenai kondisi ikan Anda..."
+              placeholder="Masukan jawaban dari keluhan yang diberikan klien..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
             />

@@ -10,6 +10,11 @@ export default function UserPost() {
   const [inputText, setInputText] = useState('');
   const [description, setDescription] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [judul, setJudul] = useState('');
+  const [jenisIkan, setJenisIkan] = useState('');
+  const [panjang, setPanjang] = useState('');
+  const [berat, setBerat] = useState('');
+
 
   const handleSubmit = () => {
     setDescription(inputText);
@@ -161,15 +166,54 @@ export default function UserPost() {
       )}
 
         {/* Kotak Input */}
-        <div className="mt-8 flex justify-center">
-          <div className="flex items-center w-[80%] h-32 p-4 border-2 border-[#0795D2] rounded-lg shadow-md">
-            <img src="profil.png" alt="Foto Profil" className="w-12 h-12 rounded-full ml-8 mr-4" />
-            <textarea
-              className="flex-1 h-full p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
-              placeholder="Masukan jawaban dari keluhan yang diberikan klien..."
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+          <div className="mt-8 flex justify-center">
+          <div className="w-[80%] p-4">
+            {/* Input untuk Judul */}
+            <input
+              type="text"
+              className="w-full p-4 mb-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
+              placeholder="Masukkan judul keluhan..."
+              value={judul}
+              onChange={(e) => setJudul(e.target.value)}
             />
+            
+            {/* Input untuk Jenis Ikan */}
+            <div className="flex space-x-4 mb-4">
+              <input
+                type="text"
+                className="flex-1 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
+                placeholder="Jenis Ikan"
+                value={jenisIkan}
+                onChange={(e) => setJenisIkan(e.target.value)}
+              />
+              {/* Input untuk Panjang */}
+              <input
+                type="number"
+                className="w-[30%] p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
+                placeholder="Panjang (cm)"
+                value={panjang}
+                onChange={(e) => setPanjang(e.target.value)}
+              />
+              {/* Input untuk Berat */}
+              <input
+                type="number"
+                className="w-[30%] p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
+                placeholder="Berat (g)"
+                value={berat}
+                onChange={(e) => setBerat(e.target.value)}
+              />
+            </div>
+            
+            {/* Textarea untuk Keluhan */}
+            <div className="flex items-center w-full h-32 p-4 border-2 border-[#0795D2] rounded-lg shadow-md">
+              <img src="profil.png" alt="Foto Profil" className="w-12 h-12 rounded-full ml-8 mr-4" />
+              <textarea
+                className="flex-1 h-full p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
+                placeholder="Masukkan jawaban dari keluhan yang diberikan klien..."
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 

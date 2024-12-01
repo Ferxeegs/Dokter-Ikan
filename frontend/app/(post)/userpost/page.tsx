@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
+import Navbar from '../../components/navbar';
+import Footer from '../../components/footer';
 import Link from 'next/link';
 
 export default function UserPost() {
@@ -104,7 +104,7 @@ export default function UserPost() {
             className="bg-white p-6 rounded-xl w-[90%] md:w-[40%] relative overflow-y-auto max-h-[80vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold font-sans text-black mb-4 text-center">Daftar Obat</h2>
+            <h2 className="text-lg font-bold font-sans text-black mb-4 text-center">Resep Obat dari Tenaga Ahli</h2>
             <div className="font-sans space-y-4 mb-6">
               {/* Card Obat */}
               {[
@@ -190,7 +190,7 @@ export default function UserPost() {
               <input
                 type="number"
                 className="w-[30%] p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
-                placeholder="Panjang (cm)"
+                placeholder="Panjang ikan (cm)"
                 value={panjang}
                 onChange={(e) => setPanjang(e.target.value)}
               />
@@ -198,7 +198,7 @@ export default function UserPost() {
               <input
                 type="number"
                 className="w-[30%] p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
-                placeholder="Berat (g)"
+                placeholder="Umur ikan"
                 value={berat}
                 onChange={(e) => setBerat(e.target.value)}
               />

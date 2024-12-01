@@ -21,7 +21,7 @@ export default function Footer() {
             <p className="text-black font-semibold mb-4">Layanan Pengaduan</p>
             <p className="text-black font-semibold text-sm mb-2">PT Rekayasa Agromarin Indonesia</p>
             <p className="text-black text-sm mb-2">Jl. H.R. Rasuna Said, Jakarta Selatan</p>
-            <p className="text-black text-sm">help@dokterikan.com/012-3456-7890</p>
+            <p className="text-black text-sm">help@dokterikan.com / 012-3456-7890</p>
           </div>
           <div className="text-left -mt-4">
             <p className="text-black font-semibold text-sm">Kolaborasi dengan:</p>
@@ -41,6 +41,13 @@ export default function Footer() {
               Daftar
             </button>
           </div>
+        </div>
+
+        {/* Teks Tambahan */}
+        <div className="mt-6 text-black font-semibold text-sm text-center">
+          <p>
+            <span className="font-bold">PT Rekayasa Agromarin Indonesia</span> | All Rights Reserved 2024
+          </p>
         </div>
       </div>
     </footer>

@@ -45,13 +45,20 @@ export default function Home() {
           </button>
 
           {/* Button Deteksi Gejala */}
+        
           <button className="flex flex-col items-center bg-gradient-to-b from-white to-[#BCEBFF] text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-64 mr-4">
-            <img src="/fish.png" alt="Artikel Icon" className="w-16 h-16 mb-4" />
-            <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">DETEKSI PENYAKIT IKAN</h3>
-            <p className="text-xs text-black text-center">
-              Fitur ini digunakan menganalisis penyakit ikan yang telah di unggah. AI akan mendeteksi gejala penyakit, seperti perubahan warna, luka, atau tanda-tanda abnormal lainnya pada tubuh ikan.
-            </p>
+            <Link href="/diseasedetection">
+              <div className="flex flex-col items-center">
+                <img src="/fish.png" alt="Artikel Icon" className="w-16 h-16 mb-4" />
+                <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">DETEKSI PENYAKIT IKAN</h3>
+                <p className="text-xs text-black text-center">
+                  Fitur ini digunakan menganalisis penyakit ikan yang telah di unggah. AI akan mendeteksi gejala penyakit, seperti perubahan warna, luka, atau tanda-tanda abnormal lainnya pada tubuh ikan.
+                </p>
+            </div>
+            </Link>
           </button>
+         
+          
 
           {/* Button Konsultasi */}
           <button className="flex flex-col items-center bg-gradient-to-b from-white to-[#BCEBFF] text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-64 sm:w-72">

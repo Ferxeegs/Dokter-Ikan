@@ -11,7 +11,8 @@ import FishExpertAnswer from "./routes/FishExpertAnswerRoute.js";
 import Vendor from "./routes/VendorRoute.js";
 import Medicine from "./routes/MedicineRoute.js";
 import Consultation from "./routes/ConsultationRoute.js";
-
+import MedicalPrescriptionRoutes from './routes/MedicalPrescriptionRoute.js';
+import Payment from "./routes/PaymentRoute.js";
 
 dotenv.config();
 
@@ -44,6 +45,8 @@ app.use(FishExpertAnswer);
 app.use(Vendor);
 app.use(Medicine);
 app.use(Consultation);
+app.use(MedicalPrescriptionRoutes);
+app.use(Payment);
 
 
 // Menjalankan server

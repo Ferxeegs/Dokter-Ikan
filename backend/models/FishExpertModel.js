@@ -28,6 +28,18 @@ const FishExperts = db.define('FishExperts', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true, // Email harus unik
+    validate: {
+      isEmail: true, // Validasi format email
+    },
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   role: {
     type: DataTypes.STRING,
     allowNull: false,

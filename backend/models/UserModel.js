@@ -4,10 +4,10 @@ import db from '../config/Database.js';
 const { DataTypes } = Sequelize;
 
 const User = db.define('User', {
-  user_id: {  // Sesuaikan dengan nama kolom primary key yang ada di database
+  user_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true  // Jika kolom ini auto increment
+    autoIncrement: true
   },
   name: {
     type: DataTypes.STRING,
@@ -16,7 +16,16 @@ const User = db.define('User', {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true
+    unique: {
+      args: true,
+      msg: 'Email sudah terdaftar'  // Pesan error jika email sudah ada
+    },
+    validate: {
+      isEmail: {
+        args: true,
+        msg: 'Format email tidak valid'
+      }
+    }
   },
   password: {
     type: DataTypes.STRING,
@@ -30,8 +39,8 @@ const User = db.define('User', {
     defaultValue: 'user'
   }
 }, {
-  tableName: 'user',  // Nama tabel di database
-  timestamps: false   // Jika tidak menggunakan timestamps
+  tableName: 'user',
+  timestamps: false
 });
 
 export default User;

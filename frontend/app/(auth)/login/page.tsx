@@ -18,6 +18,11 @@ export default function Login() {
     else if (name === 'password') setPassword(value);
   };
 
+  // Fungsi untuk menyimpan token
+  const saveToken = (token: string) => {
+    localStorage.setItem('token', token);
+  };
+
   // Fungsi untuk menangani pengiriman formulir login
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,11 +43,12 @@ export default function Login() {
 
       if (response.ok) {
         const result = await response.json();
+        saveToken(result.token); // Simpan token di localStorage
         console.log('Login successful:', result);
         toast.success('Login successful! Redirecting to the homepage.');
         setTimeout(() => {
-          router.push('/'); // Arahkan ke halaman utama setelah 2 detik
-        }, 2000); // Arahkan ke halaman utama setelah login berhasil
+          router.push('/'); // Arahkan ke halaman utama setelah login berhasil
+        }, 2000);
       } else {
         const result = await response.json();
         // Menampilkan notifikasi error dengan pesan dari server
@@ -199,7 +205,7 @@ export default function Login() {
       </section>
 
       <ToastContainer
-        autoClose={2000}  // Mempercepat notifikasi untuk otomatis hilang dalam 1,5 detik
+        autoClose={2000}  // Mempercepat notifikasi untuk otomatis hilang dalam 2 detik
         hideProgressBar={false}
       /> {/* Menambahkan ToastContainer */}
     </div>

@@ -27,8 +27,8 @@ export const loginUser = async (req, res) => {
 
     // Membuat token JWT (untuk autentikasi pengguna di frontend)
     const token = jwt.sign(
-      { id: user.id, name: user.name, email: user.email },
-      process.env.JWT_SECRET, // Gantilah dengan key yang aman
+      { id: user.user_id, name: user.name, email: user.email },
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
@@ -61,7 +61,7 @@ export const getAllUsers = async (req, res) => {
 // Fungsi untuk mendapatkan pengguna berdasarkan ID
 export const getUserById = async (req, res) => {
   try {
-    const user = await user.findByPk(req.params.id);
+    const user = await User.findByPk(req.params.id);  // Perbaiki 'user' menjadi 'User'
     if (!user) {
       return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
     }
@@ -70,6 +70,7 @@ export const getUserById = async (req, res) => {
     res.status(500).json({ message: 'Gagal mengambil data pengguna', error });
   }
 };
+
 
 // Fungsi untuk menambahkan pengguna baru
 export const createUser = async (req, res) => {
@@ -114,13 +115,22 @@ export const updateUser = async (req, res) => {
     }
 
     const { name, email, password, address, role } = req.body;
-    await user.update({ name, email, password, address, role });
+
+    // Jika password diberikan, enkripsi password baru
+    let updatedData = { name, email, address, role };
+
+    if (password) {
+      updatedData.password = await bcrypt.hash(password, 10);  // Hash password baru
+    }
+
+    await user.update(updatedData);
 
     res.status(200).json({ message: 'Pengguna berhasil diperbarui', user });
   } catch (error) {
     res.status(500).json({ message: 'Gagal memperbarui pengguna', error });
   }
 };
+
 
 // Fungsi untuk menghapus pengguna
 export const deleteUser = async (req, res) => {
@@ -136,3 +146,20 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Gagal menghapus pengguna', error });
   }
 };
+
+export const getMe = async (req, res) => {
+  try {
+    console.log('User ID from token:', req.user.id); // Log ID pengguna dari token
+    const user = await User.findByPk(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
+    }
+
+    res.status(200).json(user); // Mengirimkan data pengguna
+  } catch (error) {
+    console.error('Error in getMe:', error); // Log jika ada kesalahan di server
+    res.status(500).json({ message: 'Gagal mengambil data pengguna', error: error.message });
+  }
+};
+

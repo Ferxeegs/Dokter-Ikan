@@ -4,8 +4,7 @@ import "./globals.css";
 import Head from 'next/head';
 import { Open_Sans } from 'next/font/google';
 import { Lato } from 'next/font/google';
-import Navbar from './components/navbar';
-import Footer from './components/footer';
+
 
 
 const geistSans = localFont({
@@ -17,15 +16,6 @@ const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
-});
-
-const openSans = Open_Sans({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
-});
-const lato = Lato({
-  subsets: ['latin'],
-  weight: ['400', '700'],
 });
 
 export const metadata: Metadata = {

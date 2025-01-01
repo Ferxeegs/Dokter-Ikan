@@ -1,25 +1,27 @@
 import express from "express";
 import {
-    getAllUsers,
-    getUserById,
-    createUser,
-    updateUser,
-    deleteUser,
-    loginUser,
-
-} from "../controllers/UserController.js"
-// const express = require('express');
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+  loginUser,
+  getMe,
+} from "../controllers/UserController.js";
+import { authenticate } from "../middlewares/authMiddleware.js"; // Impor middleware authenticate
 
 const router = express.Router();
-// const UserController = require('../controllers/UserController.js');
 
-// Definisi route
-router.get('/users', getAllUsers);
-router.get('/users/:id', getUserById);
-router.post('/register', createUser);
-router.put('/users/:id', updateUser);
-router.delete('/users/:id', deleteUser);
-router.post('/login', loginUser);
+// Rute yang tidak memerlukan autentikasi
+router.post('/register', createUser); // Mendaftar pengguna baru
+router.post('/login', loginUser); // Login pengguna
+
+// Rute yang memerlukan autentikasi
+router.get('/users', authenticate, getAllUsers); // Mendapatkan semua pengguna (diperlukan autentikasi)
+router.get('/users/:id', authenticate, getUserById); // Mendapatkan pengguna berdasarkan ID (diperlukan autentikasi)
+router.put('/users/:id', authenticate, updateUser); // Memperbarui pengguna berdasarkan ID (diperlukan autentikasi)
+router.delete('/users/:id', authenticate, deleteUser); // Menghapus pengguna berdasarkan ID (diperlukan autentikasi)
+router.get('/me', authenticate, getMe);
+
 
 export default router;
-// module.exports = router;

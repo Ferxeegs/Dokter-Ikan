@@ -1,7 +1,7 @@
 import Consultation from '../models/ConsultationModel.js';
 import User from '../models/UserModel.js';
 import UserConsultation from '../models/UserConsultationModel.js';
-import FishExpert from '../models/FishExpertModel.js';
+import FishExpert from '../models/FishExpertsModel.js';
 import FishExpertAnswer from '../models/FishExpertAnswerModel.js';
 
 // Fungsi untuk mendapatkan semua konsultasi

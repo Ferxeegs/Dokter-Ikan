@@ -4,7 +4,7 @@ import db from '../config/Database.js';
 // Import model-model terkait untuk relasi
 import User from './UserModel.js';
 import UserConsultation from './UserConsultationModel.js';
-import FishExpert from './FishExpertModel.js';
+import FishExpert from './FishExpertsModel.js';
 import FishExpertAnswer from './FishExpertAnswerModel.js';
 
 const { DataTypes } = Sequelize;

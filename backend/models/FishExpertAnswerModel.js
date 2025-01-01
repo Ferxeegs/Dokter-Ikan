@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 import db from '../config/Database.js';
-import FishExpert from './FishExpertModel.js';  // Asumsi model FishExpert sudah ada
+import FishExpert from './FishExpertsModel.js';  // Asumsi model FishExpert sudah ada
 
 const { DataTypes } = Sequelize;
 

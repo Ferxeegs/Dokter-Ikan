@@ -31,7 +31,7 @@ app.use(session({
 // Konfigurasi CORS
 app.use(cors({
     credentials: true,
-    origin: 'http://localhost:9000'  // Sesuaikan dengan frontend kamu
+    origin: 'http://localhost:3000'  // Sesuaikan dengan frontend kamu
 }));
 
 app.use(express.json());

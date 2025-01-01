@@ -5,6 +5,9 @@ import { useState } from 'react';
 import Navbar from '../../components/navbar';
 import Footer from '../../components/footer';
 import Link from 'next/link';
+import UploadFotoButton from '@/app/components/upload-foto';
+import UploadVideoButton from '@/app/components/upload-video';
+import UploadFileButton from '@/app/components/upload-file';
 
 export default function UserPost() {
   const [inputText, setInputText] = useState('');
@@ -198,7 +201,7 @@ export default function UserPost() {
               <input
                 type="number"
                 className="w-[30%] p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
-                placeholder="Umur ikan"
+                placeholder="Umur ikan (bulan)"
                 value={berat}
                 onChange={(e) => setBerat(e.target.value)}
               />
@@ -219,18 +222,9 @@ export default function UserPost() {
 
         {/* Empat Button Berderet */}
         <div className="flex gap-12 justify-center mt-6 mx-6 font-sans">
-          <button className="bg-white text-[#69CBF4] px-6 py-2 rounded-lg hover:bg-[#f0f0f0] transition text-sm font-semibold w-full md:w-auto border-2 border-[#69CBF4] flex items-center justify-center space-x-2">
-            <img src="foto.png" alt="Foto" className="w-4 h-4" />
-            <span>Foto</span>
-          </button>
-          <button className="bg-white text-[#69CBF4] px-6 py-2 rounded-lg hover:bg-[#f0f0f0] transition text-sm font-semibold w-full md:w-auto border-2 border-[#69CBF4] flex items-center justify-center space-x-2">
-            <img src="video.png" alt="Video" className="w-4 h-4" />
-            <span>Video</span>
-          </button>
-          <button className="bg-white text-[#69CBF4] px-6 py-2 rounded-lg hover:bg-[#f0f0f0] transition text-sm font-semibold w-full md:w-auto border-2 border-[#69CBF4] flex items-center justify-center space-x-2">
-            <img src="file.png" alt="File" className="w-4 h-4" />
-            <span>File</span>
-          </button>
+          <UploadFotoButton />
+          <UploadVideoButton/>
+          <UploadFileButton/>
           <button className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2">
             <img src="send.png" alt="Kirim" className="w-4 h-4" />
             <span>Kirim</span>

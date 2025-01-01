@@ -5,6 +5,7 @@ import {
     createUser,
     updateUser,
     deleteUser,
+    loginUser,
 
 } from "../controllers/UserController.js"
 // const express = require('express');
@@ -15,9 +16,10 @@ const router = express.Router();
 // Definisi route
 router.get('/users', getAllUsers);
 router.get('/users/:id', getUserById);
-router.post('/users', createUser);
+router.post('/register', createUser);
 router.put('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
+router.post('/login', loginUser);
 
 export default router;
 // module.exports = router;

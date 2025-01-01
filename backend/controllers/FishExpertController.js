@@ -1,67 +1,93 @@
-import FishExpert from "../models/FishExpertModel.js";  // Import model FishExpert
+import FishExperts from "../models/FishExpertsModel.js";
 
-// Fungsi untuk mendapatkan semua data Fish Expert
+// Mendapatkan semua data Fish Experts
 export const getAllFishExperts = async (req, res) => {
   try {
-    const fishExperts = await FishExpert.findAll();
-    res.status(200).json(fishExperts);
+    const experts = await FishExperts.findAll();
+    res.status(200).json(experts);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data fish expert', error });
+    res.status(500).json({ message: "Gagal mengambil data Fish Experts", error });
   }
 };
 
-// Fungsi untuk mendapatkan Fish Expert berdasarkan ID
+// Mendapatkan Fish Expert berdasarkan ID
 export const getFishExpertById = async (req, res) => {
   try {
-    const fishExpert = await FishExpert.findByPk(req.params.id);
-    if (!fishExpert) {
-      return res.status(404).json({ message: 'Fish expert tidak ditemukan' });
+    const expert = await FishExperts.findByPk(req.params.id);
+    if (!expert) {
+      return res.status(404).json({ message: "Fish Expert tidak ditemukan" });
     }
-    res.status(200).json(fishExpert);
+    res.status(200).json(expert);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data fish expert', error });
+    res.status(500).json({ message: "Gagal mengambil data Fish Expert", error });
   }
 };
 
-// Fungsi untuk menambahkan Fish Expert baru
+// Menambahkan Fish Expert baru
 export const createFishExpert = async (req, res) => {
   try {
-    const { name, expertise, experience_years, contact_info } = req.body;
-    const newFishExpert = await FishExpert.create({ name, expertise, experience_years, contact_info });
-    res.status(201).json({ message: 'Fish expert berhasil ditambahkan', newFishExpert });
+    const { name, email, password, phone_number, specialization, experience } = req.body;
+
+    const newExpert = await FishExperts.create({
+      name,
+      email,
+      password, // Idealnya password dienkripsi sebelum disimpan
+      phone_number,
+      specialization,
+      experience,
+    });
+
+    res.status(201).json({
+      message: "Fish Expert berhasil ditambahkan",
+      data: newExpert,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menambahkan fish expert', error });
+    res.status(500).json({ message: "Gagal menambahkan Fish Expert", error });
   }
 };
 
-// Fungsi untuk memperbarui data Fish Expert
+// Memperbarui data Fish Expert berdasarkan ID
 export const updateFishExpert = async (req, res) => {
   try {
-    const fishExpert = await FishExpert.findByPk(req.params.id);
-    if (!fishExpert) {
-      return res.status(404).json({ message: 'Fish expert tidak ditemukan' });
+    const { id } = req.params;
+    const { name, email, password, phone_number, specialization, experience } = req.body;
+
+    const expert = await FishExperts.findByPk(id);
+    if (!expert) {
+      return res.status(404).json({ message: "Fish Expert tidak ditemukan" });
     }
 
-    const { name, expertise, experience_years, contact_info } = req.body;
-    await fishExpert.update({ name, expertise, experience_years, contact_info });
+    await expert.update({
+      name,
+      email,
+      password, // Idealnya password dienkripsi sebelum disimpan
+      phone_number,
+      specialization,
+      experience,
+    });
 
-    res.status(200).json({ message: 'Fish expert berhasil diperbarui', fishExpert });
+    res.status(200).json({
+      message: "Fish Expert berhasil diperbarui",
+      data: expert,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal memperbarui fish expert', error });
+    res.status(500).json({ message: "Gagal memperbarui Fish Expert", error });
   }
 };
 
-// Fungsi untuk menghapus Fish Expert
+// Menghapus Fish Expert berdasarkan ID
 export const deleteFishExpert = async (req, res) => {
   try {
-    const fishExpert = await FishExpert.findByPk(req.params.id);
-    if (!fishExpert) {
-      return res.status(404).json({ message: 'Fish expert tidak ditemukan' });
+    const { id } = req.params;
+
+    const expert = await FishExperts.findByPk(id);
+    if (!expert) {
+      return res.status(404).json({ message: "Fish Expert tidak ditemukan" });
     }
 
-    await fishExpert.destroy();
-    res.status(200).json({ message: 'Fish expert berhasil dihapus' });
+    await expert.destroy();
+    res.status(200).json({ message: "Fish Expert berhasil dihapus" });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus fish expert', error });
+    res.status(500).json({ message: "Gagal menghapus Fish Expert", error });
   }
 };

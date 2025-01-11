@@ -1,90 +1,207 @@
 import UserConsultation from "../models/UserConsultationModel.js";
+import { validationResult } from "express-validator"; // Untuk validasi input
+import db from "../config/Database.js";
+import jwt from "jsonwebtoken"; 
 
 // Fungsi untuk mendapatkan semua data konsultasi
 export const getAllUserConsultations = async (req, res) => {
   try {
-    const consultations = await UserConsultation.findAll();
-    res.status(200).json(consultations);
+    const consultations = await UserConsultation.findAll({
+      attributes: [
+        "user_consultation_id",
+        "user_id",
+        "fish_type_id",
+        "fish_age",
+        "fish_length",
+        "consultation_topic",
+        "fish_image",
+        "complaint",
+        "consultation_status",
+      ],
+    });
+
+    if (consultations.length === 0) {
+      return res.status(404).json({ message: "Belum ada data konsultasi." });
+    }
+
+    res.status(200).json({ data: consultations });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data konsultasi', error });
+    res.status(500).json({ message: "Gagal mengambil data konsultasi.", error: error.message });
   }
 };
+
 
 // Fungsi untuk mendapatkan data konsultasi berdasarkan ID
 export const getUserConsultationById = async (req, res) => {
   try {
-    const consultation = await UserConsultation.findByPk(req.params.id);
+    const consultation = await UserConsultation.findByPk(req.params.id, {
+      attributes: { exclude: ["createdAt", "updatedAt"] },
+    });
+
     if (!consultation) {
-      return res.status(404).json({ message: 'Konsultasi tidak ditemukan' });
+      return res.status(404).json({ message: "Konsultasi tidak ditemukan." });
     }
-    res.status(200).json(consultation);
+
+    res.status(200).json({ data: consultation });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data konsultasi', error });
+    res.status(500).json({ message: "Gagal mengambil data konsultasi.", error: error.message });
   }
 };
 
+export const getUserConsultationHistory = async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "Token tidak ditemukan." });
+  }
+
+  try {
+    // Decode token
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded Token:", decodedToken); // Debugging log
+    const userId = decodedToken.id; // Ambil `id` dari token
+
+    if (!userId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "User ID tidak ditemukan dalam token." 
+      });
+    }
+
+    console.log("User ID:", userId); // Debug log
+
+    // Query ke database
+    const consultations = await UserConsultation.findAll({
+      where: { user_id: userId }, // Filter berdasarkan user_id
+      attributes: [
+        "user_consultation_id",
+        "fish_type_id",
+        "fish_age",
+        "fish_length",
+        "consultation_topic",
+        "fish_image",
+        "complaint",
+        "consultation_status",
+        "created_at",
+      ],
+      order: [["created_at", "DESC"]],
+    });
+
+    if (consultations.length === 0) {
+      return res.status(404).json({ message: "Belum ada riwayat konsultasi." });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: consultations,
+    });
+  } catch (error) {
+    console.error("Error saat mengambil riwayat konsultasi:", error.message); // Debug log
+    res.status(500).json({
+      success: false,
+      message: "Gagal mengambil riwayat konsultasi.",
+      error: error.message,
+    });
+  }
+};
+
+
 // Fungsi untuk menambahkan konsultasi baru
 export const createUserConsultation = async (req, res) => {
+  // Validasi input dari client
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ 
+      message: "Input tidak valid.", 
+      errors: errors.array() 
+    });
+  }
+
+  const {
+    user_id,
+    fish_type_id,
+    fish_age,
+    fish_length,
+    consultation_topic,
+    fish_image,
+    complaint,
+    consultation_status,
+  } = req.body;
+
+  // Log data yang diterima dari client
+  console.log('Received Data:', req.body);
+
+  // Membuka transaksi menggunakan instance `db`
+  const transaction = await db.transaction();
+
   try {
-    const {
-      user_id,
-      fish_type_id,
-      fish_age,
-      fish_length,
-      consultation_topic,
-      fish_image,
-      complaint,
-      consultation_status
-    } = req.body;
+    // Membuat data konsultasi baru
+    const newConsultation = await UserConsultation.create(
+      {
+        user_id,
+        fish_type_id,
+        fish_age,
+        fish_length,
+        consultation_topic,
+        fish_image,
+        complaint,
+        consultation_status,
+      },
+      { transaction } // Operasi dalam transaksi
+    );
 
-    // Membuat data baru di tabel UserConsultation
-    const newConsultation = await UserConsultation.create({
-      user_id,
-      fish_type_id,
-      fish_age,
-      fish_length,
-      consultation_topic,
-      fish_image,
-      complaint,
-      consultation_status
-    });
+    // Commit transaksi jika berhasil
+    await transaction.commit();
 
-    // Mengirim respons jika berhasil
     res.status(201).json({
-      message: 'Konsultasi berhasil ditambahkan',
-      data: newConsultation
+      message: "Konsultasi berhasil ditambahkan.",
+      data: newConsultation,
     });
-
   } catch (error) {
-    // Mengirim respons jika terjadi error
+    // Rollback transaksi jika ada error
+    await transaction.rollback();
     res.status(500).json({
-      message: 'Gagal menambahkan konsultasi',
-      error: error.message
+      message: "Gagal menambahkan konsultasi.",
+      error: error.message,
     });
+  }
+};
+
+
+// Fungsi untuk memperbarui data konsultasi berdasarkan ID
+export const updateUserConsultation = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const consultation = await UserConsultation.findByPk(id);
+
+    if (!consultation) {
+      return res.status(404).json({ message: "Konsultasi tidak ditemukan." });
+    }
+
+    const updatedConsultation = await consultation.update(req.body);
+    res.status(200).json({
+      message: "Konsultasi berhasil diperbarui.",
+      data: updatedConsultation,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Gagal memperbarui konsultasi.", error: error.message });
   }
 };
 
 // Fungsi untuk menghapus konsultasi berdasarkan ID
 export const deleteUserConsultation = async (req, res) => {
-  try {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    // Mencari data konsultasi berdasarkan ID
+  try {
     const consultation = await UserConsultation.findByPk(id);
     if (!consultation) {
-      return res.status(404).json({ message: 'Konsultasi tidak ditemukan' });
+      return res.status(404).json({ message: "Konsultasi tidak ditemukan." });
     }
 
-    // Menghapus data konsultasi
     await consultation.destroy();
-
-    // Mengirim respons jika berhasil dihapus
-    res.status(200).json({ message: 'Konsultasi berhasil dihapus' });
+    res.status(200).json({ message: "Konsultasi berhasil dihapus." });
   } catch (error) {
-    // Mengirim respons jika terjadi error
-    res.status(500).json({
-      message: 'Gagal menghapus konsultasi',
-      error: error.message
-    });
+    res.status(500).json({ message: "Gagal menghapus konsultasi.", error: error.message });
   }
 };

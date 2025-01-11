@@ -25,7 +25,7 @@ export default function Home() {
             Solusi Cerdas Untuk Kesehatan Ikan Anda
           </h1>
           <h2 className="text-lg mb-6 text-[#2C2C2C] text-left">
-            Konsultasi dengan Ahli Ikan & Deteksi Penyakit Secara Instan Melalui Gambar
+            Konsultasi dengan Tenaga Ahli Ikan & Deteksi Penyakit Secara Instan Melalui Gambar
           </h2>
         </div>
 
@@ -80,7 +80,10 @@ export default function Home() {
 
         {/* Keterangan */}
         <p className="text-black mt-24 max-w-3xl mx-auto text-justify font-lato">
-          Dokter Ikan adalah solusi digital inovatif untuk pemilik dan peternak ikan, memanfaatkan teknologi AI untuk deteksi spesies dan penyakit ikan. Aplikasi ini memudahkan pengguna dalam mendiagnosis masalah kesehatan ikan hanya dengan mengunggah foto, serta menyediakan akses cepat ke obat yang direkomendasikan. Dengan integrasi fitur konsultasi online dengan dokter spesialis, pengguna juga dapat langsung mendapatkan saran profesional tanpa harus keluar rumah.
+          Dokter Ikan adalah solusi digital inovatif untuk pemilik dan peternak ikan, memanfaatkan teknologi AI untuk deteksi spesies 
+          dan penyakit ikan. Aplikasi ini memudahkan pengguna dalam mendiagnosis masalah kesehatan ikan hanya dengan mengunggah foto, 
+          serta menyediakan akses cepat ke obat yang direkomendasikan. Dengan integrasi fitur konsultasi online dengan tenaga ahli ikan, 
+          pengguna juga dapat langsung mendapatkan saran profesional tanpa harus keluar rumah.
         </p>
 
       </main>

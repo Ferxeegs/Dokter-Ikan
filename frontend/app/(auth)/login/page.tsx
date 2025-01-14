@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import Head from 'next/head';
 import { useState } from 'react';
@@ -44,11 +44,22 @@ export default function Login() {
       if (response.ok) {
         const result = await response.json();
         saveToken(result.token); // Simpan token di localStorage
+
         console.log('Login successful:', result);
-        toast.success('Login successful! Redirecting to the homepage.');
-        setTimeout(() => {
-          router.push('/'); // Arahkan ke halaman utama setelah login berhasil
-        }, 2000);
+        toast.success('Login successful! Redirecting...');
+
+        // Arahkan berdasarkan peran
+        if (result.user.role === 'user') {
+          setTimeout(() => {
+            router.push('/'); // Halaman home untuk pengguna
+          }, 2000);
+        } else if (result.user.role === 'expert') {
+          setTimeout(() => {
+            router.push('/expertpage'); // Halaman untuk expert
+          }, 2000);
+        } else {
+          toast.error('Unknown role. Please contact support.');
+        }
       } else {
         const result = await response.json();
         // Menampilkan notifikasi error dengan pesan dari server
@@ -76,16 +87,35 @@ export default function Login() {
         <meta name="description" content="Login Page" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <section className="bg-gray-50 dark:bg-gray-900">
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-          <div className="relative w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+  
+      <section
+        className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center relative"
+        style={{
+          backgroundImage: "url('/homebg.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top',
+        }}
+      >
+        {/* Lapisan transparan hanya untuk latar belakang */}
+        <div
+          className="absolute inset-0 bg-white opacity-20"
+          style={{ zIndex: 0 }}
+        />
+        
+        {/* Konten lainnya */}
+        <div className="relative z-10 flex flex-col items-center justify-center px-6 py-8 mx-auto w-full md:h-screen lg:py-0">
+          <div
+            className="relative w-full bg-white rounded-lg shadow max-w-md xl:p-0"
+            style={{
+              backgroundColor: '#FFFFFF', // Menambahkan warna putih eksplisit
+            }}
+          >
             {/* Logo */}
-            <div className="flex items-center px-4 py-2">
+            <div className="flex items-center px-3 py-3 bg-white">
               <img
                 src="/icon512.png"
                 alt="Dokter Ikan Logo"
-                className="w-8 h-8"
+                className="w-10 h-10"
               />
               <img
                 src="/icondokterikan.png"
@@ -93,7 +123,7 @@ export default function Login() {
                 className="w-15 h-6"
               />
             </div>
-
+  
             {/* Tombol silang */}
             <button
               onClick={handleBackToHome}
@@ -115,16 +145,16 @@ export default function Login() {
                 />
               </svg>
             </button>
-
+  
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-              <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+              <h1 className="text-lg font-bold leading-tight tracking-tight text-gray-900 md:text-lg">
                 Sign in to your account
               </h1>
               <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                 <div>
                   <label
                     htmlFor="email"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    className="block mb-2 text-sm font-medium text-gray-900"
                   >
                     Your email
                   </label>
@@ -134,7 +164,7 @@ export default function Login() {
                     id="email"
                     value={email}
                     onChange={handleChange}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     placeholder="name@company.com"
                     required
                   />
@@ -142,7 +172,7 @@ export default function Login() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    className="block mb-2 text-sm font-medium text-gray-900"
                   >
                     Password
                   </label>
@@ -153,7 +183,7 @@ export default function Login() {
                     value={password}
                     onChange={handleChange}
                     placeholder="••••••••"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     required
                   />
                 </div>
@@ -164,37 +194,31 @@ export default function Login() {
                         id="remember"
                         aria-describedby="remember"
                         type="checkbox"
-                        className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
+                        className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300"
                       />
                     </div>
                     <div className="ml-3 text-sm">
-                      <label
-                        htmlFor="remember"
-                        className="text-gray-500 dark:text-gray-300"
-                      >
+                      <label htmlFor="remember" className="text-gray-500">
                         Remember me
                       </label>
                     </div>
                   </div>
                   <a
                     href="#"
-                    className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500"
+                    className="text-sm font-medium text-blue-600 hover:underline"
                   >
                     Forgot password?
                   </a>
                 </div>
                 <button
                   type="submit"
-                  className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 >
                   Sign in
                 </button>
-                <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+                <p className="text-sm font-light text-gray-500">
                   Don’t have an account yet?{' '}
-                  <a
-                    href="/register"
-                    className="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                  >
+                  <a href="/register" className="font-medium text-blue-600 hover:underline">
                     Sign up
                   </a>
                 </p>
@@ -203,11 +227,8 @@ export default function Login() {
           </div>
         </div>
       </section>
-
-      <ToastContainer
-        autoClose={2000}  // Mempercepat notifikasi untuk otomatis hilang dalam 2 detik
-        hideProgressBar={false}
-      /> {/* Menambahkan ToastContainer */}
+      <ToastContainer autoClose={2000} hideProgressBar={false} /> {/* Menambahkan ToastContainer */}
     </div>
   );
+  
 }

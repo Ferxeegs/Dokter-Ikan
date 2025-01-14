@@ -69,12 +69,31 @@ export default function Register() {
         <meta name="description" content="Register Page" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <section className="bg-gray-50 dark:bg-gray-900">
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-          <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+  
+      <section
+        className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center relative"
+        style={{
+          backgroundImage: "url('/homebg.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top',
+        }}
+      >
+        {/* Lapisan transparan hanya untuk latar belakang */}
+        <div
+          className="absolute inset-0 bg-white opacity-20"
+          style={{ zIndex: 0 }}
+        />
+  
+        {/* Konten lainnya */}
+        <div className="relative z-10 flex flex-col items-center justify-center px-6 py-8 mx-auto w-full md:h-screen lg:py-0">
+          <div
+            className="relative w-full bg-white rounded-lg shadow max-w-md xl:p-0"
+            style={{
+              backgroundColor: '#FFFFFF', // Menambahkan warna putih eksplisit
+            }}
+          >
             {/* Logo */}
-            <div className="flex items-center px-4 py-2">
+            <div className="flex items-center px-4 py-2 bg-white">
               <img
                 src="/icon512.png"
                 alt="Dokter Ikan Logo"
@@ -83,19 +102,19 @@ export default function Register() {
               <img
                 src="/icondokterikan.png"
                 alt="Dokter Ikan Text Logo"
-                className="w-15 h-6"
+                className="w-15 h-6 ml-2"
               />
             </div>
-
+  
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-              <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+              <h1 className="text-lg font-bold leading-tight tracking-tight text-gray-900 md:text-lg">
                 Sign up for an account
               </h1>
               <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                 <div>
                   <label
                     htmlFor="name"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    className="block mb-2 text-sm font-medium text-gray-900"
                   >
                     Your Name
                   </label>
@@ -105,7 +124,7 @@ export default function Register() {
                     id="name"
                     value={name}
                     onChange={handleChange}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     placeholder="Your full name"
                     required
                   />
@@ -113,7 +132,7 @@ export default function Register() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    className="block mb-2 text-sm font-medium text-gray-900"
                   >
                     Your Email
                   </label>
@@ -123,7 +142,7 @@ export default function Register() {
                     id="email"
                     value={email}
                     onChange={handleChange}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     placeholder="name@company.com"
                     required
                   />
@@ -131,7 +150,7 @@ export default function Register() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    className="block mb-2 text-sm font-medium text-gray-900"
                   >
                     Password
                   </label>
@@ -142,47 +161,21 @@ export default function Register() {
                     value={password}
                     onChange={handleChange}
                     placeholder="••••••••"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     required
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-start">
-                    <div className="flex items-center h-5">
-                      <input
-                        id="remember"
-                        aria-describedby="remember"
-                        type="checkbox"
-                        className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label
-                        htmlFor="remember"
-                        className="text-gray-500 dark:text-gray-300"
-                      >
-                        Remember me
-                      </label>
-                    </div>
-                  </div>
-                  <a
-                    href="#"
-                    className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500"
-                  >
-                    Forgot password?
-                  </a>
-                </div>
                 <button
                   type="submit"
-                  className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 >
                   Sign up
                 </button>
-                <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+                <p className="text-sm font-light text-gray-500">
                   Already have an account?{' '}
                   <a
                     href="/login"
-                    className="font-medium text-primary-600 hover:underline dark:text-primary-500"
+                    className="font-medium text-blue-600 hover:underline"
                   >
                     Sign in
                   </a>
@@ -192,10 +185,7 @@ export default function Register() {
           </div>
         </div>
       </section>
-      <ToastContainer
-        autoClose={2000}  // Mempercepat notifikasi untuk otomatis hilang dalam 1,5 detik
-        hideProgressBar={false}
-      /> {/* Menambahkan ToastContainer */}
+      <ToastContainer autoClose={2000} hideProgressBar={false} />
     </div>
   );
 }

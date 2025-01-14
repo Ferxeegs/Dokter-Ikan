@@ -1,33 +1,42 @@
 import bcrypt from 'bcryptjs';
 import User from "../models/UserModel.js";
+import FishExperts from "../models/FishExpertsModel.js";
 import jwt from 'jsonwebtoken';
-// const User = require('../models/User.js'); // Import model User
 
-// Fungsi untuk mendapatkan semua pengguna
-// exports.getUsers = (req, res) => {
+// Fungsi login pengguna
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Mencari pengguna berdasarkan email
-    const user = await User.findOne({ where: { email } });
-    
+    // Mencari pengguna di tabel User terlebih dahulu
+    let user = await User.findOne({ where: { email } });
+    let role = 'user'; // Default role
+    let userId = null; // Variabel untuk menyimpan ID pengguna
+
     if (!user) {
-      // Jika pengguna tidak ditemukan
-      return res.status(404).json({ message: 'Email atau password salah' });
+      // Jika tidak ditemukan di tabel User, cari di tabel FishExpert
+      user = await FishExperts.findOne({ where: { email } });
+      role = 'expert'; // Ubah role jika ditemukan di tabel FishExpert
+
+      if (!user) {
+        // Jika tidak ditemukan di kedua tabel
+        return res.status(404).json({ message: 'Email atau password salah' });
+      }
+
+      userId = user.fishExperts_id; // Ambil ID dari tabel FishExperts
+    } else {
+      userId = user.user_id; // Ambil ID dari tabel User
     }
 
-    // Memverifikasi apakah password cocok dengan yang ada di database
+    // Memverifikasi apakah password cocok
     const isMatch = await bcrypt.compare(password, user.password);
-    
     if (!isMatch) {
-      // Jika password tidak cocok
       return res.status(400).json({ message: 'Email atau password salah' });
     }
 
-    // Membuat token JWT (untuk autentikasi pengguna di frontend)
+    // Membuat token JWT
     const token = jwt.sign(
-      { id: user.user_id, name: user.name, email: user.email },
+      { id: userId, name: user.name, email: user.email, role },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -37,10 +46,10 @@ export const loginUser = async (req, res) => {
       message: 'Login berhasil',
       token,
       user: {
-        id: user.id,
+        id: userId, // Gunakan ID yang sesuai (user_id atau fishExperts_id)
         name: user.name,
         email: user.email,
-        role: user.role,
+        role,
       },
     });
   } catch (error) {
@@ -48,6 +57,8 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: 'Terjadi kesalahan saat login', error: error.message });
   }
 };
+
+
 // }
 export const getAllUsers = async (req, res) => {
   try {
@@ -149,16 +160,38 @@ export const deleteUser = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    console.log('User ID from token:', req.user.id); // Log ID pengguna dari token
-    const user = await User.findByPk(req.user.id);
+    const { id: userId, role } = req.user; // Ambil ID dan role dari token
+    console.log('User ID from token:', userId);
+    console.log('Role from token:', role);
 
-    if (!user) {
-      return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
+    if (role === 'expert') {
+      // Jika role adalah 'expert', cari di tabel FishExperts
+      console.log('Role is expert, looking in fishexperts...');
+      const fishExpert = await FishExperts.findByPk(userId); // Mencari di tabel FishExperts
+      if (!fishExpert) {
+        return res.status(404).json({ message: 'Expert tidak ditemukan di fishexperts' });
+      }
+      return res.status(200).json({
+        id: fishExpert.fishExperts_id,
+        name: fishExpert.name,
+        email: fishExpert.email,
+        role: 'expert',
+      });
     }
 
-    res.status(200).json(user); // Mengirimkan data pengguna
+    // Jika role adalah 'user', cari di tabel Users
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Pengguna tidak ditemukan di users' });
+    }
+    return res.status(200).json({
+      id: user.user_id,
+      name: user.name,
+      email: user.email,
+      role: 'user',
+    });
   } catch (error) {
-    console.error('Error in getMe:', error); // Log jika ada kesalahan di server
+    console.error('Error in getMe:', error);
     res.status(500).json({ message: 'Gagal mengambil data pengguna', error: error.message });
   }
 };

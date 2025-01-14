@@ -1,4 +1,5 @@
 import FishExperts from "../models/FishExpertsModel.js";
+import bcrypt from 'bcryptjs';
 
 // Mendapatkan semua data Fish Experts
 export const getAllFishExperts = async (req, res) => {
@@ -28,10 +29,20 @@ export const createFishExpert = async (req, res) => {
   try {
     const { name, email, password, phone_number, specialization, experience } = req.body;
 
+    // Cek apakah email sudah terdaftar
+    const existingExpert = await FishExperts.findOne({ where: { email } });
+    if (existingExpert) {
+      return res.status(400).json({ message: "Email sudah terdaftar" });
+    }
+
+    // Enkripsi password sebelum disimpan ke database
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 adalah jumlah salt rounds
+
+    // Membuat entri baru di tabel FishExperts
     const newExpert = await FishExperts.create({
       name,
       email,
-      password, // Idealnya password dienkripsi sebelum disimpan
+      password: hashedPassword, // Simpan password yang sudah dienkripsi
       phone_number,
       specialization,
       experience,
@@ -39,10 +50,18 @@ export const createFishExpert = async (req, res) => {
 
     res.status(201).json({
       message: "Fish Expert berhasil ditambahkan",
-      data: newExpert,
+      data: {
+        id: newExpert.fishExperts_id,
+        name: newExpert.name,
+        email: newExpert.email,
+        phone_number: newExpert.phone_number,
+        specialization: newExpert.specialization,
+        experience: newExpert.experience,
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: "Gagal menambahkan Fish Expert", error });
+    console.error(error);
+    res.status(500).json({ message: "Gagal menambahkan Fish Expert", error: error.message });
   }
 };
 

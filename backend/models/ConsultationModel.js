@@ -33,7 +33,6 @@ const Consultation = db.define('Consultation', {
   },
   fishExpert_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
     references: {
       model: FishExpert,
       key: 'fishExpert_id',
@@ -41,7 +40,6 @@ const Consultation = db.define('Consultation', {
   },
   fish_expert_answer_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
     references: {
       model: FishExpertAnswer,
       key: 'fish_expert_answer_id',
@@ -49,7 +47,6 @@ const Consultation = db.define('Consultation', {
   },
   consultation_status: {
     type: DataTypes.STRING,
-    allowNull: false,
   },
 }, {
   tableName: 'consultation',

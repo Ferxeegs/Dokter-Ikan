@@ -108,7 +108,6 @@ export const getUserConsultationHistory = async (req, res) => {
 
 // Fungsi untuk menambahkan konsultasi baru
 export const createUserConsultation = async (req, res) => {
-  // Validasi input dari client
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ 
@@ -128,14 +127,11 @@ export const createUserConsultation = async (req, res) => {
     consultation_status,
   } = req.body;
 
-  // Log data yang diterima dari client
-  console.log('Received Data:', req.body);
+  console.log("Received Data from Client:", req.body);
 
-  // Membuka transaksi menggunakan instance `db`
   const transaction = await db.transaction();
 
   try {
-    // Membuat data konsultasi baru
     const newConsultation = await UserConsultation.create(
       {
         user_id,
@@ -147,25 +143,34 @@ export const createUserConsultation = async (req, res) => {
         complaint,
         consultation_status,
       },
-      { transaction } // Operasi dalam transaksi
+      { transaction }
     );
 
-    // Commit transaksi jika berhasil
+    console.log("newConsultation Data Values:", newConsultation.dataValues);
+
     await transaction.commit();
+
+    const responseData = {
+      id: newConsultation.dataValues.user_consultation_id,
+      user_consultation_id: newConsultation.dataValues.user_consultation_id,
+    };
+
+    console.log("Respons yang Dikembalikan ke Frontend:", responseData);
 
     res.status(201).json({
       message: "Konsultasi berhasil ditambahkan.",
-      data: newConsultation,
+      data: responseData,
     });
   } catch (error) {
-    // Rollback transaksi jika ada error
     await transaction.rollback();
+    console.error("Error saat menyimpan konsultasi:", error);
     res.status(500).json({
       message: "Gagal menambahkan konsultasi.",
       error: error.message,
     });
   }
 };
+
 
 
 // Fungsi untuk memperbarui data konsultasi berdasarkan ID

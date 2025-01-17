@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from 'react';
 import Navbar from '../../components/navbar';
@@ -10,7 +10,6 @@ import DetailResep from '@/app/components/detail-resep';
 import Complaint from '@/app/components/complaint';
 import Answer from '@/app/components/Answer';
 import jwt_decode from 'jwt-decode';
-
 
 type FishType = {
   id: number;
@@ -30,7 +29,6 @@ export default function UserPost() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Status dropdown
   const [fishTypeId, setFishTypeId] = useState<number | null>(null);
 
-  // Fungsi untuk mendekode token dan mendapatkan user_id
   const getUserIdFromToken = (): number | null => {
     const token = localStorage.getItem('token');
     console.log('Token dari localStorage:', token); // Debugging token
@@ -49,28 +47,21 @@ export default function UserPost() {
       return null;
     }
   };
-  
 
-  // Mendapatkan userId dari token saat komponen pertama kali dimuat
   useEffect(() => {
     const userId = getUserIdFromToken();
     fetchFishTypes();  // Gunakan fungsi
     if (userId) {
       setUserId(userId);
-      // Hanya fetch data jika userId valid
     } else {
       console.warn('Pengguna tidak terautentikasi.');
     }
   }, []);
-  
 
-  // Fetch fish types from API
   const fetchFishTypes = async () => {
     try {
       const response = await fetch('http://localhost:9000/fish-types');
       const data = await response.json();
-  
-      // Transformasi data agar fish_type_id dan name disertakan
       const transformedData = data.map((fish: any) => ({
         id: fish.fish_type_id, // Ubah fish_type_id ke id
         name: fish.name, // Tambahkan properti name
@@ -80,70 +71,87 @@ export default function UserPost() {
       console.error('Error fetching fish types:', error);
     }
   };
-  
 
   const handleSubmit = async () => {
-    const userId = getUserIdFromToken(); // Mendapatkan userId dari token
+    const userId = getUserIdFromToken();
   
     if (!userId) {
-      setMessage('Pengguna tidak terautentikasi.');
-      console.error("User ID not found from token");
+      setMessage("Pengguna tidak terautentikasi.");
       return;
     }
   
-    // Validasi input
-    console.log("Judul:", judul);
-    console.log("Jenis Ikan:", fishTypeId);
-    console.log("Berat:", berat);
-    console.log("Panjang:", panjang);
-    console.log("Description:", inputText);
-  
-    if (!judul || !fishTypeId || !berat || !panjang || !inputText) {
-      console.warn('Invalid data:', { judul, fishTypeId, berat, panjang, inputText });
-      setMessage('Harap isi semua data dengan benar.');
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setMessage("Token autentikasi tidak ditemukan.");
       return;
     }
   
     const requestData = {
-      user_id: userId, // INTEGER
-      fish_type_id: fishTypeId, // INTEGER
-      fish_age: String(berat), // STRING
-      fish_length: String(panjang), // STRING
-      consultation_topic: judul, // TEXT
-      fish_image: "https://example.com/images/fish.jpg", // STRING (opsional)
-      complaint: inputText, // TEXT
-      consultation_status: "Pending", // STRING
+      user_id: userId,
+      fish_type_id: fishTypeId,
+      fish_age: String(berat),
+      fish_length: String(panjang),
+      consultation_topic: judul,
+      fish_image: "https://example.com/images/fish.jpg",
+      complaint: inputText,
+      consultation_status: "Pending",
     };
   
-    console.log('Request Data:', requestData); // Log data yang dikirim ke server
-  
     try {
-      const response = await fetch('http://localhost:9000/user-consultations', {
-        method: 'POST',
+      const response = await fetch("http://localhost:9000/user-consultations", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(requestData),
       });
   
-      const data = await response.json();
+      const responseData = await response.json();
+      console.log("Respons dari /user-consultations:", responseData);
   
       if (response.ok) {
-        setMessage('Konsultasi berhasil ditambahkan');
-        console.log('Server Response:', data);
+        const userConsultationId = responseData.data?.user_consultation_id || responseData.data?.id;
+  
+        if (!userConsultationId) {
+          console.error("user_consultation_id tidak ditemukan dalam respons:", responseData);
+          throw new Error("user_consultation_id not found in response");
+        }
+  
+        const consultationRequest = {
+          user_id: userId,
+          user_consultation_id: userConsultationId,
+        };
+  
+        const consultationResponse = await fetch("http://localhost:9000/consultations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(consultationRequest),
+        });
+  
+        const consultationResponseData = await consultationResponse.json();
+        console.log("Respons dari /consultations:", consultationResponseData);
+  
+        if (!consultationResponse.ok) {
+          console.error("Error dari konsultasi API:", consultationResponseData);
+          throw new Error("Gagal menambahkan data ke tabel consultations");
+        }
+  
+        setMessage("Konsultasi berhasil ditambahkan");
       } else {
-        console.error('Server Response:', data);
-        setMessage(data.message || 'Terjadi kesalahan. Coba lagi');
+        console.error("Error dari backend:", responseData);
+        setMessage(responseData.message || "Terjadi kesalahan pada backend");
       }
     } catch (error) {
-      console.error('Error:', error);
-      setMessage('Terjadi kesalahan. Coba lagi');
+      console.error("Error saat mengirim data:", error);
+      setMessage("Terjadi kesalahan saat mengirim data");
     }
   };
   
   
-
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };

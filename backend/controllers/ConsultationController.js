@@ -44,24 +44,46 @@ export const getConsultationById = async (req, res) => {
 // Fungsi untuk membuat konsultasi baru
 export const createConsultation = async (req, res) => {
   try {
-    const { user_id, user_consultation_id, fishExpert_id, fish_expert_answer_id, consultation_status } = req.body;
+    const { 
+      user_id, 
+      user_consultation_id, 
+      fishExpert_id = null, 
+      fish_expert_answer_id = null, 
+      consultation_status = "Pending" 
+    } = req.body;
+
+    console.log("Received Data in createConsultation:", req.body);
+
+    if (!user_id || !user_consultation_id) {
+      return res.status(400).json({
+        message: "user_id dan user_consultation_id wajib diisi",
+      });
+    }
 
     const newConsultation = await Consultation.create({
       user_id,
       user_consultation_id,
       fishExpert_id,
       fish_expert_answer_id,
-      consultation_status
+      consultation_status,
     });
+
+    console.log("Data Disimpan ke Tabel Consultations:", newConsultation);
 
     res.status(201).json({
       message: 'Konsultasi berhasil ditambahkan',
-      data: newConsultation
+      data: newConsultation,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menambahkan konsultasi', error });
+    console.error('Error creating consultation:', error);
+    res.status(500).json({ 
+      message: 'Gagal menambahkan konsultasi', 
+      error: error.message 
+    });
   }
 };
+
+
 
 // Fungsi untuk memperbarui konsultasi berdasarkan ID
 export const updateConsultation = async (req, res) => {

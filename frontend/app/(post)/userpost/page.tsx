@@ -8,7 +8,7 @@ import UploadVideoButton from '@/app/components/upload-video';
 import UploadFileButton from '@/app/components/upload-file';
 import DetailResep from '@/app/components/detail-resep';
 import Complaint from '@/app/components/complaint';
-import Answer from '@/app/components/Answer';
+import Answer from '@/app/components/answer';
 import jwt_decode from 'jwt-decode';
 
 type FishType = {

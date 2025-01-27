@@ -3,6 +3,8 @@ import User from '../models/UserModel.js';
 import UserConsultation from '../models/UserConsultationModel.js';
 import FishExpert from '../models/FishExpertsModel.js';
 import FishExpertAnswer from '../models/FishExpertAnswerModel.js';
+import jwt from "jsonwebtoken"; 
+
 
 // Fungsi untuk mendapatkan semua konsultasi
 export const getAllConsultations = async (req, res) => {
@@ -24,22 +26,30 @@ export const getAllConsultations = async (req, res) => {
 // Fungsi untuk mendapatkan konsultasi berdasarkan ID
 export const getConsultationById = async (req, res) => {
   try {
+    // Ambil konsultasi berdasarkan ID dari parameter
     const consultation = await Consultation.findByPk(req.params.id, {
       include: [
-        { model: User },
-        { model: UserConsultation },
-        { model: FishExpert },
-        { model: FishExpertAnswer }
+        { model: User, attributes: ['id', 'name', 'email'] }, // Pilih atribut spesifik untuk efisiensi
+        { model: UserConsultation, attributes: ['id', 'consultation_topic', 'complaint'] },
+        { model: FishExpert, attributes: ['id', 'name', 'specialization'] },
+        { model: FishExpertAnswer, attributes: ['id', 'answer', 'createdAt'] }
       ]
     });
+
+    // Jika data tidak ditemukan
     if (!consultation) {
       return res.status(404).json({ message: 'Konsultasi tidak ditemukan' });
     }
-    res.status(200).json(consultation);
+
+    // Berhasil mengambil data
+    return res.status(200).json(consultation);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data konsultasi', error });
+    // Tangani error
+    console.error('Error fetching consultation data:', error);
+    return res.status(500).json({ message: 'Gagal mengambil data konsultasi', error: error.message });
   }
 };
+
 
 // Fungsi untuk membuat konsultasi baru
 export const createConsultation = async (req, res) => {
@@ -123,3 +133,83 @@ export const deleteConsultation = async (req, res) => {
     res.status(500).json({ message: 'Gagal menghapus konsultasi', error });
   }
 };
+
+
+export const getConsultationHistory = async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "Token tidak ditemukan." });
+  }
+
+  try {
+    // Decode token
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decodedToken.id;
+
+    if (!userId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "User ID tidak ditemukan dalam token." 
+      });
+    }
+
+    console.log("User ID:", userId); // Debug log
+
+    // Query ke database untuk mendapatkan riwayat konsultasi
+    const consultations = await Consultation.findAll({
+      where: { user_id: userId }, // Filter berdasarkan user_id
+      attributes: [
+        "consultation_id",
+        "user_consultation_id",
+        "fishExpert_id",
+        "fish_expert_answer_id",
+        "consultation_status",
+      ],
+      include: [
+        {
+          model: UserConsultation,
+          attributes: [
+            "fish_type_id",
+            "fish_age",
+            "fish_length",
+            "consultation_topic",
+            "fish_image",
+            "complaint",
+            "created_at",
+          ],
+        },
+        {
+          model: FishExpert,
+          attributes: ["name", "specialization"],
+        },
+        {
+          model: FishExpertAnswer,
+          attributes: ["answer", "created_at"],
+        },
+      ],
+      order: [["consultation_id", "DESC"]],
+      raw: true,
+    });
+
+    if (consultations.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Belum ada riwayat konsultasi." 
+      });
+    }
+    console.log("Consultations Data:", consultations);
+    res.status(200).json({
+      success: true,
+      data: consultations,
+    });
+  } catch (error) {
+    console.error("Error saat mengambil riwayat konsultasi:", error.message); // Debug log
+    res.status(500).json({
+      success: false,
+      message: "Gagal mengambil riwayat konsultasi.",
+      error: error.message,
+    });
+  }
+};
+

@@ -34,19 +34,40 @@ export const getAllUserConsultations = async (req, res) => {
 // Fungsi untuk mendapatkan data konsultasi berdasarkan ID
 export const getUserConsultationById = async (req, res) => {
   try {
-    const consultation = await UserConsultation.findByPk(req.params.id, {
+    const { id } = req.params;
+
+    // Validasi apakah ID diberikan
+    if (!id) {
+      return res.status(400).json({ message: "ID konsultasi diperlukan." });
+    }
+
+    // Mencari data konsultasi berdasarkan ID
+    const consultation = await UserConsultation.findByPk(id, {
       attributes: { exclude: ["createdAt", "updatedAt"] },
     });
 
+    // Jika data tidak ditemukan
     if (!consultation) {
       return res.status(404).json({ message: "Konsultasi tidak ditemukan." });
     }
 
-    res.status(200).json({ data: consultation });
+    // Jika berhasil ditemukan
+    return res.status(200).json({
+      success: true,
+      message: "Data konsultasi berhasil diambil.",
+      data: consultation,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Gagal mengambil data konsultasi.", error: error.message });
+    // Menangani error internal server
+    console.error("Error fetching consultation:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan saat mengambil data konsultasi.",
+      error: error.message,
+    });
   }
 };
+
 
 export const getUserConsultationHistory = async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];

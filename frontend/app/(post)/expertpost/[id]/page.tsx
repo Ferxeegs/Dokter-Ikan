@@ -181,14 +181,17 @@ export default function ExpertPost() {
 
         <ModalObat isOpen={isModalOpen} toggleModal={toggleModal} consultationId={id} />
 
-        <div className="flex items-center w-full h-32 p-4 border-2 border-[#0795D2] rounded-lg shadow-md mt-6">
+        <div className="flex items-center justify-center w-full max-w-5xl h-32 p-4 border-2 border-[#0795D2] rounded-lg shadow-md mt-6 mx-auto">
           <img src="profil.png" alt="Foto Profil" className="w-12 h-12 rounded-full ml-8 mr-4" />
-          <textarea
-            className="flex-1 h-full p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
-            placeholder="Masukkan jawaban dari keluhan yang diberikan klien..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-          />
+          
+          <div className="flex-1 flex items-center justify-center">
+            <textarea
+              className="w-full h-full p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
+              placeholder="Masukkan jawaban dari keluhan yang diberikan klien..."
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="flex gap-12 justify-center mt-6 mx-6 font-sans">

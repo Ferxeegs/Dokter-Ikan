@@ -6,7 +6,6 @@ import Footer from '../../components/footer';
 import UploadFotoButton from '@/app/components/upload-foto';
 import UploadVideoButton from '@/app/components/upload-video';
 import UploadFileButton from '@/app/components/upload-file';
-import DetailResep from '@/app/components/detail-resep';
 import Complaint from '@/app/components/complaint';
 import Answer from '@/app/components/answer';
 import jwt_decode from 'jwt-decode';
@@ -214,7 +213,7 @@ export default function UserPost() {
       </main>
 
       <div className="mt-8 flex justify-center">
-        <div className="w-[80%] p-4">
+        <div className="w-full max-w-5xl p-4"> {/* Lebarkan container */}
           <input
             type="text"
             className="w-full p-4 mb-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
@@ -224,14 +223,14 @@ export default function UserPost() {
           />
 
           <div className="flex space-x-4 mb-4">
-            <div className="relative">
+            <div className="relative w-1/3"> {/* Semua input dalam flex-1 agar ukurannya sama */}
               <input
                 type="text"
-                className="flex-1 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
+                className="w-full p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
                 placeholder="Jenis Ikan"
                 value={jenisIkan}
                 onClick={handleJenisIkanClick}
-                onChange={(e) => setJenisIkan(e.target.value)} // Still allow typing in the input
+                onChange={(e) => setJenisIkan(e.target.value)}
               />
               {isDropdownOpen && fishtypes.length > 0 && (
                 <div className="absolute left-0 w-full text-black bg-white shadow-lg border-2 border-[#0795D2] rounded-lg z-50 mt-1 max-h-60 overflow-y-auto">
@@ -250,14 +249,14 @@ export default function UserPost() {
 
             <input
               type="number"
-              className="w-[30%] p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
+              className="w-1/3 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
               placeholder="Panjang ikan (cm)"
               value={panjang}
               onChange={(e) => setPanjang(e.target.value)}
             />
             <input
               type="number"
-              className="w-[30%] p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
+              className="w-1/3 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
               placeholder="Umur ikan (bulan)"
               value={berat}
               onChange={(e) => setBerat(e.target.value)}
@@ -265,16 +264,18 @@ export default function UserPost() {
           </div>
 
           <div className="flex items-center w-full h-32 p-4 border-2 border-[#0795D2] rounded-lg shadow-md">
-            <img src="profil.png" alt="Foto Profil" className="w-12 h-12 rounded-full ml-8 mr-4" />
+            <img src="ic_profile.png" alt="Foto Profil" className="w-12 h-12 rounded-full ml-4 mr-4" />
             <textarea
               className="flex-1 h-full p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
-              placeholder="Masukkan jawaban dari keluhan yang diberikan klien..."
+              placeholder="Masukkan keluhan yang ingin anda sampaikan..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
             />
           </div>
         </div>
       </div>
+
+
 
       <div className="flex gap-12 justify-center mt-6 mx-6 font-sans">
         <UploadFotoButton />

@@ -24,7 +24,7 @@ const FishExpertAnswer = db.define('FishExpertAnswer', {
   },
   consultation_status: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   }
 }, {
   tableName: 'fishexpertanswer',  // Nama tabel di database

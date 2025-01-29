@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import jwt_decode from "jwt-decode";
 
 // Menambahkan tipe untuk data konsultasi yang mencakup hasil join dari beberapa tabel
@@ -37,6 +38,7 @@ interface UserFromToken {
 export default function CardRiwayat() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [userName, setUserName] = useState<string>("");
+  const router = useRouter(); // Tambahkan useRouter
 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
@@ -147,6 +149,10 @@ export default function CardRiwayat() {
     }
   };
 
+  const handleCardClick = (consultationId: number) => {
+    router.push(`/consultation/${consultationId}`); // Navigasi ke halaman detail konsultasi
+  };
+
   return (
     <div className="flex flex-wrap justify-center gap-4 mt-20">
       {consultations.length === 0 ? (
@@ -154,19 +160,19 @@ export default function CardRiwayat() {
       ) : (
         consultations.map((consultation) => {
           const {
+            consultation_id,
             complaint,
             created_at,
             consultation_topic,
             fish_image,
             consultation_status,
-            fish_expert_name,
-            fish_expert_answer,
           } = consultation;
 
           return (
             <button
               key={consultation.user_consultation_id}
               className="flex flex-col bg-white border-blue-300 border-4 text-white px-8 py-10 rounded-3xl shadow-lg hover:shadow-2xl transition w-5/12"
+              onClick={() => handleCardClick(consultation_id)} // Tambahkan event onClick
             >
               <div className="flex flex-row">
                 <img

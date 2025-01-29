@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 import db from '../config/Database.js';
-import MedicalPrescription from './MedicalPrescriptionModel.js'; // Asosiasi ke resep medis
+import Prescription from './PrescriptionModel.js'; // Asosiasi ke resep medis
 import User from './UserModel.js'; // Asosiasi ke pengguna
 
 const { DataTypes } = Sequelize;
@@ -15,7 +15,7 @@ const Payment = db.define('Payment', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: MedicalPrescription,
+      model: Prescription,
       key: 'prescription_id'
     }
   },
@@ -49,7 +49,7 @@ const Payment = db.define('Payment', {
 });
 
 // Relasi dengan MedicalPrescription dan User
-Payment.belongsTo(MedicalPrescription, { foreignKey: 'medical_prescription_id' });
+Payment.belongsTo(Prescription, { foreignKey: 'prescription_id' });
 Payment.belongsTo(User, { foreignKey: 'user_id' });
 
 export default Payment;

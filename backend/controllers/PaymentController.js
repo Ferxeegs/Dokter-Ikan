@@ -1,5 +1,5 @@
 import Payment from '../models/PaymentModel.js';
-import MedicalPrescription from '../models/MedicalPrescriptionModel.js';
+import Prescription from '../models/PrescriptionModel.js';
 import User from '../models/UserModel.js';
 
 // Fungsi untuk mendapatkan semua data pembayaran
@@ -7,7 +7,7 @@ export const getAllPayments = async (req, res) => {
   try {
     const payments = await Payment.findAll({
       include: [
-        { model: MedicalPrescription },
+        { model: Prescription },
         { model: User }
       ]
     });
@@ -22,7 +22,7 @@ export const getPaymentById = async (req, res) => {
   try {
     const payment = await Payment.findByPk(req.params.id, {
       include: [
-        { model: MedicalPrescription },
+        { model: Prescription },
         { model: User }
       ]
     });

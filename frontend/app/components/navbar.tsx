@@ -56,10 +56,12 @@ export default function Navbar() {
 
   return (
     <nav className="flex items-center justify-between bg-white text-black font-bold p-4 sticky top-0 z-10">
+      <Link href="/">
       <div className="flex items-center">
         <Image src="/icon512.png" alt="Home Icon" width={64} height={96} />
         <Image src="/icondokterikan.png" alt="Extra Icon" width={164} height={164} />
       </div>
+      </Link>
 
       <div className="flex space-x-14 text-1xl font-semibold font-sans ml-40 -mr-8">
         <Link href="/">

@@ -27,7 +27,7 @@ export default function Riwayat() {
         </div>
 
         {/* Menampilkan Komponen CardRiwayat yang sudah diintegrasikan dengan data dari API */}
-        <div className="flex justify-center gap-4 mt-20">
+        <div className="flex justify-center gap-4">
           <CardRiwayat />
         </div>
       </main>

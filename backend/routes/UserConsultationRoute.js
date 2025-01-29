@@ -3,7 +3,6 @@ import {
     getAllUserConsultations, 
     getUserConsultationById, 
     createUserConsultation,
-    deleteUserConsultation,
     getUserConsultationHistory, 
     
 } from '../controllers/UserConsultationController.js';
@@ -15,7 +14,6 @@ const router = express.Router();
 router.get('/user-consultations', authenticate, getAllUserConsultations);
 router.get('/user-consultations/:id', getUserConsultationById);
 router.post('/user-consultations', authenticate, validateConsultation, createUserConsultation);
-router.delete('/user-consultations', deleteUserConsultation);
-router.get('/user-consultation',authenticate,getUserConsultationHistory);``
+router.get('/user-consultation',authenticate,getUserConsultationHistory);
 
 export default router;

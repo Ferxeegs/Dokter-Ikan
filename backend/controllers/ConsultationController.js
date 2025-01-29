@@ -125,23 +125,6 @@ export const updateConsultation = async (req, res) => {
   }
 };
 
-
-// Fungsi untuk menghapus konsultasi berdasarkan ID
-export const deleteConsultation = async (req, res) => {
-  try {
-    const consultation = await Consultation.findByPk(req.params.id);
-    if (!consultation) {
-      return res.status(404).json({ message: 'Konsultasi tidak ditemukan' });
-    }
-
-    await consultation.destroy();
-    res.status(200).json({ message: 'Konsultasi berhasil dihapus' });
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus konsultasi', error });
-  }
-};
-
-
 export const getConsultationHistory = async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
 

@@ -143,20 +143,6 @@ export const updateUser = async (req, res) => {
 };
 
 
-// Fungsi untuk menghapus pengguna
-export const deleteUser = async (req, res) => {
-  try {
-    const user = await User.findByPk(req.params.id);
-    if (!user) {
-      return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
-    }
-
-    await user.destroy();
-    res.status(200).json({ message: 'Pengguna berhasil dihapus' });
-  } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus pengguna', error });
-  }
-};
 
 export const getMe = async (req, res) => {
   try {

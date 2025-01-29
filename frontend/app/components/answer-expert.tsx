@@ -19,17 +19,6 @@ const Answer: React.FC<AnswerProps> = ({ answer, name, specialization, toggleMod
         {answer || 'Jawaban akan muncul di sini setelah tenaga ahli memberikan respons.'}
       </p>
 
-      {/* Button untuk melihat detail resep */}
-      <button
-        className="absolute bottom-4 right-4 px-4 py-2 rounded-2xl text-xs font-bold"
-        style={{
-          backgroundColor: 'rgba(105, 203, 244, 0.3)',
-          color: 'black',
-        }}
-        onClick={toggleModal}
-      >
-        Lihat Detail Resep
-      </button>
 
       {/* Foto Profil dan Informasi Tenaga Ahli */}
       <div className="absolute bottom-4 left-4 flex items-center space-x-2">

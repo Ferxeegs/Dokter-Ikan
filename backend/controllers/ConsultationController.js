@@ -3,7 +3,7 @@ import User from '../models/UserModel.js';
 import UserConsultation from '../models/UserConsultationModel.js';
 import FishExpert from '../models/FishExpertsModel.js';
 import FishExpertAnswer from '../models/FishExpertAnswerModel.js';
-import jwt from "jsonwebtoken"; 
+import jwt from "jsonwebtoken";
 
 
 // Fungsi untuk mendapatkan semua konsultasi
@@ -103,21 +103,28 @@ export const updateConsultation = async (req, res) => {
       return res.status(404).json({ message: 'Konsultasi tidak ditemukan' });
     }
 
-    const { user_id, user_consultation_id, fishExpert_id, fish_expert_answer_id, consultation_status } = req.body;
+    const { fish_expert_answer_id, consultation_status } = req.body;
 
+    // Log data yang diterima
+    console.log('Received fish_expert_answer_id:', fish_expert_answer_id);
+    console.log('Received consultation_status:', consultation_status);
+
+    // Perbarui hanya kolom yang dibutuhkan
     await consultation.update({
-      user_id,
-      user_consultation_id,
-      fishExpert_id,
       fish_expert_answer_id,
-      consultation_status
+      consultation_status,
     });
+
+    // Log data setelah diupdate
+    console.log('Updated consultation:', consultation);
 
     res.status(200).json({ message: 'Konsultasi berhasil diperbarui', consultation });
   } catch (error) {
+    console.error('Error updating consultation:', error);
     res.status(500).json({ message: 'Gagal memperbarui konsultasi', error });
   }
 };
+
 
 // Fungsi untuk menghapus konsultasi berdasarkan ID
 export const deleteConsultation = async (req, res) => {
@@ -212,4 +219,62 @@ export const getConsultationHistory = async (req, res) => {
     });
   }
 };
+
+export const getConsultation = async (req, res) => {
+  const { id } = req.params;
+  console.log('ID konsultasi:', id);
+
+  try {
+    const consultation = await Consultation.findOne({
+      where: { consultation_id: id },
+      include: [
+        {
+          model: User,
+          attributes: ['user_id', 'name', 'email'],
+        },
+        {
+          model: UserConsultation,
+          attributes: ['user_consultation_id', 'complaint', 'consultation_topic'],  // Menambahkan topik konsultasi
+        },
+        {
+          model: FishExpert,
+          attributes: ['fishExperts_id', 'name', 'specialization'],  // Menambahkan specialization
+        },
+        {
+          model: FishExpertAnswer,
+          attributes: ['fish_expert_answer_id', 'answer'],
+        },
+      ],
+    });
+
+    console.log('Consultation data:', JSON.stringify(consultation, null, 2)); // Log struktur data
+
+    if (!consultation) {
+      return res.status(404).json({ error: 'Konsultasi tidak ditemukan' });
+    }
+
+    const complaint = consultation.UserConsultation ? consultation.UserConsultation.complaint : 'Tidak ada keluhan';
+    const answer = consultation.FishExpertAnswer ? consultation.FishExpertAnswer.answer : 'Belum ada jawaban dari ahli ikan';
+    const consultationTopic = consultation.UserConsultation ? consultation.UserConsultation.consultation_topic : 'Tidak ada topik konsultasi'; // Menambahkan topik konsultasi
+
+    // Menambahkan name dan specialization dari FishExpert
+    const fishExpert = consultation.FishExpert || {};
+    const fishExpertName = fishExpert.name || 'Tidak ada nama ahli ikan';
+    const fishExpertSpecialization = fishExpert.specialization || 'Tidak ada spesialisasi';
+
+    res.json({
+      title: consultationTopic,
+      description: complaint,
+      answer: answer,  // Menambahkan topik konsultasi
+      fish_expert_name: fishExpertName,       // Menambahkan nama ahli ikan
+      fish_expert_specialization: fishExpertSpecialization,  // Menambahkan spesialisasi ahli ikan
+    });
+  } catch (error) {
+    console.error('Error:', error.message, error.stack); // Log error lebih detail
+    res.status(500).json({ error: 'Terjadi kesalahan pada server' });
+  }
+};
+
+
+
 

@@ -1,137 +1,128 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import Navbar from '@/app/components/navbar';
+import Footer from '@/app/components/footer';
+import Complaint from '@/app/components/complaint';
+import Answer from '@/app/components/answer';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation'; // Menggunakan useParams dari next/navigation
+import DetailResep from '@/app/components/detail-resep';
 
-// Tipe data untuk response API
-interface ConsultationDetail {
-  consultation_id: number;
-  user_id: number;
-  user_consultation_id: number;
-  fishExpert_id: number;
-  fish_expert_answer_id: number;
-  consultation_status: string;
-  User: {
-    user_id: number;
-    name: string;
-    email: string;
-    address: string;
-    role: string;
-  };
-  UserConsultation: {
-    user_consultation_id: number;
-    fish_type_id: number;
-    fish_age: string;
-    fish_length: string;
-    consultation_topic: string;
-    fish_image: string | null;
-    complaint: string;
-    consultation_status: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  FishExpert: {
-    fishExperts_id: number;
-    name: string;
-    phone_number: string;
-    specialization: string;
-    experience: string;
-  };
-  FishExpertAnswer: {
-    fish_expert_answer_id: number;
-    answer: string;
-    consultation_status: string;
-  };
-}
+export default function Consultation() {
+  const { id } = useParams(); // Mengambil parameter ID dari URL
+  
+  // Pastikan id adalah string, bukan array atau undefined
+  const consultationId = Array.isArray(id) ? id[0] : id;
 
-export default function ConsultationDetail({ params }: { params: { id: string } }) {
-  const [consultationDetail, setConsultationDetail] = useState<ConsultationDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const router = useRouter();
-
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-  useEffect(() => {
-    if (!params.id) {
-      console.error("Consultation ID not found.");
-      return;
-    }
-
-    if (!token) {
-      console.error("Token not found. Redirecting to login.");
-      router.push("/login");
-      return;
-    }
-
-    fetchConsultationDetail(params.id);
-  }, [params.id, token]);
-
-  const fetchConsultationDetail = async (id: string) => {
-    try {
-      const response = await fetch(`http://localhost:9000/consultation/${id}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setConsultationDetail(data);
-      } else {
-        console.error("Error fetching consultation detail:", data.message);
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return <p>Loading...</p>;
+  // Cek jika consultationId tidak ada
+  if (!consultationId) {
+    return (
+      <div className="flex flex-col min-h-screen justify-center items-center">
+        <p className="text-xl font-semibold text-red-600">Consultation ID tidak ditemukan.</p>
+      </div>
+    );
   }
 
-  if (!consultationDetail) {
-    return <p>Consultation detail not found.</p>;
+  const [data, setData] = useState<{
+    title: string;
+    description: string;
+    answer: string;
+    fish_expert_name: string;
+    fish_expert_specialization: string;
+  } | null>(null);
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:9000/consultations/${consultationId}`);
+        if (!response.ok) {
+          throw new Error('Gagal memuat data');
+        }
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [consultationId]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-screen justify-center items-center">
+        <p className="text-xl font-semibold text-gray-600">Memuat data...</p>
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex flex-col min-h-screen justify-center items-center">
+        <p className="text-xl font-semibold text-red-600">Terjadi kesalahan saat memuat data.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold mb-4">Detail Konsultasi</h1>
-      <div className="bg-white shadow-md rounded-lg p-6">
-        {/* Informasi Topik dan Keluhan */}
-        <h2 className="text-xl font-semibold">{consultationDetail.UserConsultation.consultation_topic}</h2>
-        <p className="text-gray-600 mt-2">
-          <strong>Keluhan:</strong> {consultationDetail.UserConsultation.complaint}
-        </p>
-        {/* Informasi User */}
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Informasi User</h3>
-          <p><strong>Nama:</strong> {consultationDetail.User.name}</p>
-          <p><strong>Email:</strong> {consultationDetail.User.email}</p>
-          <p><strong>Alamat:</strong> {consultationDetail.User.address}</p>
+    <div
+      className="flex flex-col min-h-screen"
+      style={{
+        backgroundColor: 'white',
+        backgroundImage:
+          'linear-gradient(to top, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 1) 100%), linear-gradient(to bottom, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 1) 80%), url("/bgpost.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Navbar */}
+      <Navbar />
+
+      {/* Main Content */}
+      <main className="flex-1">
+        {/* Judul dan Sub-Judul */}
+        <div className="ml-6 mt-32 font-sans">
+          <h1 className="text-2xl font-bold mb-2 text-[#1A83FB] text-center">
+            Konsultasi Masalah Ikan Anda
+          </h1>
+          <h2 className="text-base mb-6 font-semibold text-[#2C2C2C] text-center">
+            Masukkan keluhan Anda dan dapatkan solusi dari tenaga ahli.
+          </h2>
         </div>
-        {/* Informasi Dokter */}
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Informasi Dokter</h3>
-          <p><strong>Nama:</strong> {consultationDetail.FishExpert.name}</p>
-          <p><strong>Spesialisasi:</strong> {consultationDetail.FishExpert.specialization}</p>
-          <p><strong>Pengalaman:</strong> {consultationDetail.FishExpert.experience}</p>
-          <p><strong>No. HP:</strong> {consultationDetail.FishExpert.phone_number}</p>
+
+        {/* Dua Kotak: Complaint dan Answer */}
+        <div className="flex flex-col md:flex-row justify-center gap-8 mt-20 mx-6 font-sans">
+          <Complaint title={data.title} description={data.description} />
+
+          <Answer
+            toggleModal={toggleModal}
+            answer={data.answer}
+            name={data.fish_expert_name}
+            specialization={data.fish_expert_specialization}
+          />
         </div>
-        {/* Jawaban Dokter */}
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Jawaban Dokter</h3>
-          <p>{consultationDetail.FishExpertAnswer.answer}</p>
-        </div>
-        {/* Status Konsultasi */}
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Status Konsultasi</h3>
-          <p>{consultationDetail.consultation_status}</p>
-        </div>
-      </div>
+      </main>
+
+      {/* Modal Placeholder */}
+      {isModalOpen && (
+        <DetailResep
+          isOpen={isModalOpen}
+          toggleModal={toggleModal}
+          consultationId={consultationId} // Pass the consultationId as string
+        />
+      )}
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

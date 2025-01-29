@@ -26,11 +26,22 @@ export const getFishExpertAnswerById = async (req, res) => {
 // Fungsi untuk menambahkan jawaban baru
 export const createFishExpertAnswer = async (req, res) => {
   try {
-    const { fishExpert_id, answer, timestamp, consultation_status } = req.body;
-    const newAnswer = await FishExpertAnswer.create({ fishExpert_id, answer, timestamp, consultation_status });
-    res.status(201).json({ message: 'Jawaban berhasil ditambahkan', newAnswer });
+    const { fishExpert_id, answer, timestamp } = req.body;
+
+    if (!fishExpert_id || !answer || !timestamp) {
+      return res.status(400).json({ message: 'Data tidak lengkap' });
+    }
+
+    const newAnswer = await FishExpertAnswer.create({
+      fishExpert_id,
+      answer,
+      timestamp,
+    });
+
+    res.status(201).json({ message: 'Jawaban berhasil dibuat', newAnswer });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menambahkan jawaban', error });
+    console.error('Error backend:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan pada server', error });
   }
 };
 

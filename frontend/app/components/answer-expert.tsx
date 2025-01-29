@@ -9,7 +9,7 @@ interface AnswerProps {
 
 const Answer: React.FC<AnswerProps> = ({ answer, name, specialization, toggleModal }) => {
   return (
-    <div className="bg-white shadow-lg rounded-2xl p-6 w-full md:w-[40%] h-56 border-4 border-[#1A83FB] overflow-y-auto relative">
+    <div className="bg-white shadow-lg rounded-2xl p-6 w-full md:w-[40%] h-72 border-4 border-[#1A83FB] overflow-y-auto relative">
       <h3 className="text-xl font-bold text-black mb-4 text-center">
         Jawaban Tenaga Ahli
       </h3>

@@ -4,7 +4,6 @@ import {
   getMedicineById,
   createMedicine,
   updateMedicine,
-  deleteMedicine
 } from "../controllers/MedicineController.js";
 
 const router = express.Router();
@@ -14,6 +13,5 @@ router.get('/medicines', getAllMedicines);             // Mendapatkan semua data
 router.get('/medicines/:id', getMedicineById);         // Mendapatkan data obat berdasarkan ID
 router.post('/medicines', createMedicine);             // Menambahkan obat baru
 router.put('/medicines/:id', updateMedicine);          // Memperbarui data obat berdasarkan ID
-router.delete('/medicines/:id', deleteMedicine);       // Menghapus data obat berdasarkan ID
 
 export default router;

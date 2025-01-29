@@ -4,7 +4,6 @@ import {
   getUserById,
   createUser,
   updateUser,
-  deleteUser,
   loginUser,
   getMe,
 } from "../controllers/UserController.js";
@@ -20,7 +19,6 @@ router.post('/login', loginUser); // Login pengguna
 router.get('/users', authenticate, getAllUsers); // Mendapatkan semua pengguna (diperlukan autentikasi)
 router.get('/users/:id', authenticate, getUserById); // Mendapatkan pengguna berdasarkan ID (diperlukan autentikasi)
 router.put('/users/:id', authenticate, updateUser); // Memperbarui pengguna berdasarkan ID (diperlukan autentikasi)
-router.delete('/users/:id', authenticate, deleteUser); // Menghapus pengguna berdasarkan ID (diperlukan autentikasi)
 router.get('/me', authenticate, getMe);
 
 

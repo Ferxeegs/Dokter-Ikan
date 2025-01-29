@@ -154,7 +154,7 @@ export default function CardRiwayat() {
   };
 
   return (
-    <div className="flex w-full justify-center my-16">
+    <div className="flex flex-wrap w-full justify-center my-16">
       {consultations.length === 0 ? (
         <p className="text-center">Tidak ada riwayat konsultasi yang ditemukan.</p>
       ) : (
@@ -171,7 +171,7 @@ export default function CardRiwayat() {
           return (
             <button
               key={consultation.user_consultation_id}
-              className="overflow-hidden flex flex-col w-full bg-white border-blue-400 border-2 text-white px-8 py-10 rounded-xl shadow-lg hover:shadow-2xl transition mx-2 max-w-md"
+              className="overflow-hidden flex flex-col w-full bg-white border-blue-400 border-2 text-white px-8 py-10 rounded-xl shadow-lg hover:shadow-2xl transition mx-2 my-2 max-w-md"
               onClick={() => handleCardClick(consultation_id)} // Tambahkan event onClick
             >
               <div className="flex flex-row">
@@ -192,7 +192,7 @@ export default function CardRiwayat() {
                 </span>
               </div>
               <div className=" text-wrap max-w-60 break-words text-right text-black font-bold mt-4 ml-20">
-                <h1 className="text-lg ">{consultation_topic}</h1>
+                <h1 className="text-lg flex right-0 border-black border-solid ">{consultation_topic}</h1>
                 <p className=" text-justify text-sm font-thin text-black mt-1 ">
                   {complaint ? complaint.substring(0, 100) : "Keluhan tidak tersedia"}...
                 </p>

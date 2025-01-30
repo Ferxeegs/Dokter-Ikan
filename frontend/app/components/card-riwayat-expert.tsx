@@ -62,7 +62,7 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({
 
   return (
     <button
-      className="flex flex-col bg-white border-4 border-blue-300 text-white px-8 py-10 rounded-3xl shadow-lg hover:shadow-2xl transition w-5/12"
+      className="overflow-hidden flex flex-col w-full bg-white border-blue-400 border-2 text-white px-8 py-10 rounded-xl shadow-lg hover:shadow-2xl transition mx-2 my-2 max-w-md"
       onClick={handleClick} // Gunakan handleClick untuk navigasi
     >
       {/* Header Card */}
@@ -87,12 +87,11 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({
       </div>
 
       {/* Body Card */}
-      <div className="text-right text-black font-bold mt-4 ml-20">
+      <div className=" text-wrap max-w-60 break-words text-right text-black font-bold mt-4 ml-20">
         <h1 className="text-lg">{consultationTopic}</h1>
         <p className="text-justify text-sm font-thin text-black mt-1">
           {complaint.substring(0, 100)}...
         </p>
-        <p className="font-thin text-xs mt-3 text-blue-400">Selengkapnya...</p>
       </div>
     </button>
   );

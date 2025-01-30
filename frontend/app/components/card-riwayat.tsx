@@ -192,7 +192,7 @@ export default function CardRiwayat() {
                 </span>
               </div>
               <div className=" text-wrap max-w-60 break-words text-right text-black font-bold mt-4 ml-20">
-                <h1 className="text-lg flex right-0 border-black border-solid ">{consultation_topic}</h1>
+                <h1 className="text-lg flex">{consultation_topic}</h1>
                 <p className=" text-justify text-sm font-thin text-black mt-1 ">
                   {complaint ? complaint.substring(0, 100) : "Keluhan tidak tersedia"}...
                 </p>

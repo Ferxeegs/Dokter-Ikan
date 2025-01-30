@@ -133,7 +133,7 @@ export default function DashboardExpert() {
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-4 mt-20">
+        <div className="flex justify-center gap-4 flex-wrap my-10">
           {consultations.length === 0 ? (
             <p className="text-center">Tidak ada riwayat konsultasi yang ditemukan.</p>
           ) : (

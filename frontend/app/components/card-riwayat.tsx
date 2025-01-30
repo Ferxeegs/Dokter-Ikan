@@ -154,7 +154,7 @@ export default function CardRiwayat() {
   };
 
   return (
-    <div className="flex flex-wrap justify-center gap-4 mt-20">
+    <div className="flex flex-wrap w-full justify-center my-16">
       {consultations.length === 0 ? (
         <p className="text-center">Tidak ada riwayat konsultasi yang ditemukan.</p>
       ) : (
@@ -171,7 +171,7 @@ export default function CardRiwayat() {
           return (
             <button
               key={consultation.user_consultation_id}
-              className="flex flex-col bg-white border-blue-300 border-4 text-white px-8 py-10 rounded-3xl shadow-lg hover:shadow-2xl transition w-5/12"
+              className="overflow-hidden flex flex-col w-full bg-white border-blue-400 border-2 text-white px-8 py-10 rounded-xl shadow-lg hover:shadow-2xl transition mx-2 my-2 max-w-md"
               onClick={() => handleCardClick(consultation_id)} // Tambahkan event onClick
             >
               <div className="flex flex-row">
@@ -191,12 +191,11 @@ export default function CardRiwayat() {
                   {consultation_status}
                 </span>
               </div>
-              <div className="text-right text-black font-bold mt-4 ml-20">
-                <h1 className="text-lg">{consultation_topic}</h1>
-                <p className="text-justify text-sm font-thin text-black mt-1">
+              <div className=" text-wrap max-w-60 break-words text-right text-black font-bold mt-4 ml-20">
+                <h1 className="text-lg flex">{consultation_topic}</h1>
+                <p className=" text-justify text-sm font-thin text-black mt-1 ">
                   {complaint ? complaint.substring(0, 100) : "Keluhan tidak tersedia"}...
                 </p>
-                <p className="font-thin text-xs mt-3 text-blue-400">Selengkapnya...</p>
               </div>
             </button>
           );

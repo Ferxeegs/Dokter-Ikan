@@ -24,7 +24,7 @@ export default function UploadVideoButton() {
         className="bg-white text-[#69CBF4] px-6 py-2 rounded-lg hover:bg-[#f0f0f0] transition text-sm font-semibold w-full md:w-auto border-2 border-[#69CBF4] flex items-center justify-center space-x-2"
         onClick={handleButtonClick}
       >
-        <img src="/video.png" alt="Video" className="w-4 h-4" />
+        <img src="/images/icon/ic_video.png" alt="Video" className="w-4 h-4" />
         <span>Video</span>
       </button>
 

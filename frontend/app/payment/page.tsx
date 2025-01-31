@@ -1,7 +1,7 @@
 
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
-import CardPayment from "../components/card-payment";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
+import CardPayment from "../components/payments/CardPayment";
 
 
 export default function Payment() {

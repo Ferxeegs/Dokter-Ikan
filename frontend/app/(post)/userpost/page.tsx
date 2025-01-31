@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Navbar from '../../components/navbar';
-import Footer from '../../components/footer';
-import UploadFotoButton from '@/app/components/upload-foto';
-import UploadVideoButton from '@/app/components/upload-video';
-import UploadFileButton from '@/app/components/upload-file';
-import Complaint from '@/app/components/complaint';
-import Answer from '@/app/components/answer';
+import Navbar from '../../components/layout/Navbar';
+import Footer from '../../components/layout/Footer';
+import UploadFotoButton from '@/app/components/uploads/UploadFoto';
+import UploadVideoButton from '@/app/components/uploads/UploadVideo';
+import UploadFileButton from '@/app/components/uploads/UploadFile';
+import Complaint from '@/app/components/complaints/Complaint';
+import Answer from '@/app/components/answers/Answer';
 import jwt_decode from 'jwt-decode';
 
 type FishType = {
@@ -264,7 +264,7 @@ export default function UserPost() {
           </div>
 
           <div className="flex items-center w-full h-32 p-4 border-2 border-[#0795D2] rounded-lg shadow-md">
-            <img src="ic_profile.png" alt="Foto Profil" className="w-12 h-12 rounded-full ml-4 mr-4" />
+            <img src="/images/icon/ic_profile.png" alt="Foto Profil" className="w-12 h-12 rounded-full ml-4 mr-4" />
             <textarea
               className="flex-1 h-full p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
               placeholder="Masukkan keluhan yang ingin anda sampaikan..."
@@ -275,8 +275,6 @@ export default function UserPost() {
         </div>
       </div>
 
-
-
       <div className="flex gap-12 justify-center mt-6 mx-6 font-sans">
         <UploadFotoButton />
         <UploadVideoButton />
@@ -285,7 +283,7 @@ export default function UserPost() {
           onClick={handleSubmit}
           className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
         >
-          <img src="send.png" alt="Kirim" className="w-4 h-4" />
+          <img src="/images/icon/ic_send.png" alt="Kirim" className="w-4 h-4" />
           <span>Kirim</span>
         </button>
       </div>

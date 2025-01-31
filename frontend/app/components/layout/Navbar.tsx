@@ -91,7 +91,7 @@ export default function Navbar() {
       {user ? (
         <div className="flex items-center space-x-4 mr-8">
           <Image
-            src="/ic_profile.png"
+            src="/images/icon/ic_profile.png"
             alt="User Icon"
             width={30}
             height={30}

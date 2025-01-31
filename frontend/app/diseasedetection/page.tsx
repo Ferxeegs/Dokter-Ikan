@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react';
-import Navbar from './../components/navbar';
-import Footer from './../components/footer';
+import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 
 export default function DiseaseDetection() {
   const [showSpecies, setShowSpecies] = useState(false);  // State to toggle species list visibility

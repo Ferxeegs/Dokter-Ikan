@@ -1,12 +1,12 @@
 'use client';
 
-import Navbar from '@/app/components/navbar';
-import Footer from '@/app/components/footer';
-import Complaint from '@/app/components/complaint';
-import Answer from '@/app/components/answer';
+import Navbar from '@/app/components/layout/Navbar';
+import Footer from '@/app/components/layout/Footer';
+import Complaint from '@/app/components/complaints/Complaint';
+import Answer from '@/app/components/answers/Answer';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation'; // Menggunakan useParams dari next/navigation
-import DetailResep from '@/app/components/detail-resep';
+import DetailResep from '@/app/components/prescriptions/DetailResep';
 
 export default function Consultation() {
   const { id } = useParams(); // Mengambil parameter ID dari URL

@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 import jwtDecode from "jwt-decode"; // Untuk mendekode token JWT
-import ConsultationCard from "../components/card-riwayat-expert"; // Import komponen
+import ConsultationCard from "../components/history/CardRiwayatExpert"; // Import komponen
 
 interface DecodedToken {
   id: number;

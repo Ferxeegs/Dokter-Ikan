@@ -1,6 +1,6 @@
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
-import CardRiwayat from "../components/card-riwayat";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
+import CardRiwayat from "../components/history/CardRiwayat";
 
 export default function Riwayat() {
   return (

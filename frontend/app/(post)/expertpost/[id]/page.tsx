@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import jwtDecode from 'jwt-decode';
-import Navbar from '../../../components/navbar';
-import Footer from '../../../components/footer';
-import Complaint from '@/app/components/complaint';
-import Answer from '@/app/components/answer-expert';
-import UploadFotoButton from '@/app/components/upload-foto';
-import UploadVideoButton from '@/app/components/upload-video';
-import UploadFileButton from '@/app/components/upload-file';
-import ModalObat from '@/app/components/modalmedicine';
+import Navbar from '../../../components/layout/Navbar';
+import Footer from '../../../components/layout/Footer';
+import Complaint from '@/app/components/complaints/Complaint';
+import Answer from '@/app/components/answers/AnswerExpert';
+import UploadFotoButton from '@/app/components/uploads/UploadFoto';
+import UploadVideoButton from '@/app/components/uploads/UploadVideo';
+import UploadFileButton from '@/app/components/uploads/UploadFile';
+import ModalObat from '@/app/components/modals/ModalMedicine';
 import { useParams } from 'next/navigation';
 
 type Params = {
@@ -202,7 +202,7 @@ export default function ExpertPost() {
             onClick={handleSubmit}
             className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
           >
-            <img src="../send.png" alt="Kirim" className="w-4 h-4" />
+            <img src="/images/icon/ic_send.png" alt="Kirim" className="w-4 h-4" />
             <span>Kirim</span>
           </button>
         </div>

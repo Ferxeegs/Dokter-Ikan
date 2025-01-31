@@ -1,7 +1,7 @@
 'use client';
 
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
+import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 import { useRef } from "react";
 
 export default function FishDetection() {

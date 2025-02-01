@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 interface User {
   name: string;
@@ -18,7 +19,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
       console.log('Token yang digunakan:', token); // Tambahkan log untuk melihat token
       if (token) {
         try {
@@ -45,12 +46,12 @@ export default function Navbar() {
     fetchUserData();
   }, []);
   
-
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    Cookies.remove('token'); // Hapus token dari cookies
     setUser(null);
     router.push('/login');
   };
+  
 
   return (
     <nav className="flex items-center justify-between bg-white text-black font-bold p-4 sticky top-0 z-10">

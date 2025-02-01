@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import jwt_decode from "jwt-decode";
+import Cookies from "js-cookie"; // Import js-cookie
 
 // Menambahkan tipe untuk data konsultasi yang mencakup hasil join dari beberapa tabel
 interface Consultation {
@@ -38,11 +39,12 @@ interface UserFromToken {
 export default function CardRiwayat() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [userName, setUserName] = useState<string>("");
-  const router = useRouter(); // Tambahkan useRouter
+  const router = useRouter();
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  // Ambil token dari cookies
+  const token = Cookies.get("token");
 
-  const getUserFromToken = (token: string | null): UserFromToken | null => {
+  const getUserFromToken = (token: string | undefined): UserFromToken | null => {
     if (token) {
       try {
         const decodedToken: UserFromToken = jwt_decode(token);
@@ -150,7 +152,7 @@ export default function CardRiwayat() {
   };
 
   const handleCardClick = (consultationId: number) => {
-    router.push(`/consultation/${consultationId}`); // Navigasi ke halaman detail konsultasi
+    router.push(`/consultation/${consultationId}`);
   };
 
   return (

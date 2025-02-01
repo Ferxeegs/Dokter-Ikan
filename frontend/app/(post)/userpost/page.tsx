@@ -9,6 +9,7 @@ import UploadFileButton from '@/app/components/uploads/UploadFile';
 import Complaint from '@/app/components/complaints/Complaint';
 import Answer from '@/app/components/answers/Answer';
 import jwt_decode from 'jwt-decode';
+import Cookies from 'js-cookie';
 
 type FishType = {
   id: number;
@@ -36,7 +37,7 @@ export default function UserPost() {
   } | null>(null);
 
   const getUserIdFromToken = (): number | null => {
-    const token = localStorage.getItem('token');
+    const token = Cookies.get('token');
     console.log('Token dari localStorage:', token); // Debugging token
     
     if (!token) {

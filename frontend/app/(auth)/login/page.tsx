@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast, ToastContainer } from 'react-toastify'; // Import notifikasi
 import 'react-toastify/dist/ReactToastify.css'; // Gaya notifikasi
+import Cookies from 'js-cookie';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -18,9 +19,9 @@ export default function Login() {
     else if (name === 'password') setPassword(value);
   };
 
-  // Fungsi untuk menyimpan token
+  // Fungsi untuk menyimpan token di cookies
   const saveToken = (token: string) => {
-    localStorage.setItem('token', token);
+    Cookies.set('token', token, { expires: 7, secure: true, sameSite: 'Strict' });
   };
 
   // Fungsi untuk menangani pengiriman formulir login
@@ -43,23 +44,21 @@ export default function Login() {
 
       if (response.ok) {
         const result = await response.json();
-        saveToken(result.token); // Simpan token di localStorage
+        saveToken(result.token); // Simpan token di cookies
 
         console.log('Login successful:', result);
         toast.success('Login successful! Redirecting...');
 
         // Arahkan berdasarkan peran
-        if (result.user.role === 'user') {
-          setTimeout(() => {
+        setTimeout(() => {
+          if (result.user.role === 'user') {
             router.push('/'); // Halaman home untuk pengguna
-          }, 2000);
-        } else if (result.user.role === 'expert') {
-          setTimeout(() => {
+          } else if (result.user.role === 'expert') {
             router.push('/expertpage'); // Halaman untuk expert
-          }, 2000);
-        } else {
-          toast.error('Unknown role. Please contact support.');
-        }
+          } else {
+            toast.error('Unknown role. Please contact support.');
+          }
+        }, 2000);
       } else {
         const result = await response.json();
         // Menampilkan notifikasi error dengan pesan dari server
@@ -113,12 +112,12 @@ export default function Login() {
             {/* Logo */}
             <div className="flex items-center px-3 py-3 bg-white">
               <img
-                src="/icon512.png"
+                src="/images/logo/logo_dokterikan512.png"
                 alt="Dokter Ikan Logo"
                 className="w-10 h-10"
               />
               <img
-                src="/icondokterikan.png"
+                src="/images/logo/logo_dokterikan.png"
                 alt="Dokter Ikan Logo"
                 className="w-15 h-6"
               />

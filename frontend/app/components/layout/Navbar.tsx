@@ -34,12 +34,10 @@ export default function Navbar() {
           } else {
             const errorData = await response.json();
             console.error('Error details:', errorData); // Log error untuk melihat pesan lebih lanjut
-            alert(`Gagal mengambil data pengguna: ${errorData.message}`);
           }
           
         } catch (error) {
           console.error('Error fetching user data:', error);
-          alert('Terjadi kesalahan saat mengambil data pengguna.');
         }
       }
     };

@@ -65,10 +65,10 @@ export default function Home() {
             <Link href="/userpost">
               <div className="flex flex-col items-center">
                 <img src="/images/icon/ic_konsul.png" alt="Riwayat Icon" className="w-16 h-16 mb-4" />
-                <h3 className="font-bold font-sans text-sm sm:text-base text-[#1A83FB] mb-4">
+                <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">
                   KONSULTASI TENAGA AHLI
                 </h3>
-                <p className="text-xs sm:text-sm text-black text-center">
+                <p className="text-xs text-black text-center">
                   Petambak dapat berkonsultasi dengan tenaga ahli ikan secara daring melalui aplikasi.
                   Konsultasi ini membantu petambak mendapatkan saran dan solusi langsung dari ahli terkait
                   kesehatan ikan, perawatan, dan resep obat.

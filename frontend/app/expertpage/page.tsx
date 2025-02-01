@@ -5,6 +5,7 @@ import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import jwtDecode from "jwt-decode"; // Untuk mendekode token JWT
 import ConsultationCard from "../components/history/CardRiwayatExpert"; // Import komponen
+import Cookies from "js-cookie"; // Import js-cookie
 
 interface DecodedToken {
   id: number;
@@ -37,7 +38,7 @@ export default function DashboardExpert() {
   // Fetch expert ID from JWT token
   useEffect(() => {
     const fetchExpertId = () => {
-      const token = localStorage.getItem("token");
+      const token = Cookies.get("token");
       if (token) {
         try {
           const decodedToken = jwtDecode<DecodedToken>(token);

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import jwtDecode from 'jwt-decode';
+import Cookies from 'js-cookie';
 import Navbar from '../../../components/layout/Navbar';
 import Footer from '../../../components/layout/Footer';
 import Complaint from '@/app/components/complaints/Complaint';
@@ -17,7 +18,7 @@ type Params = {
 };
 
 export default function ExpertPost() {
-  const { id } = useParams() as Params; // Tipe eksplisit untuk useParams()
+  const { id } = useParams() as Params;
   const [data, setData] = useState<{
     title: string;
     description: string;
@@ -27,26 +28,25 @@ export default function ExpertPost() {
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State untuk modal
-  const [inputText, setInputText] = useState(''); // State untuk textarea input
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inputText, setInputText] = useState('');
 
   const toggleModal = () => {
-    setIsModalOpen(!isModalOpen); // Toggle modal open/close
+    setIsModalOpen(!isModalOpen);
   };
 
   const handleSubmit = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token'); // Ambil token dari cookies
       if (!token) {
-        console.error('Token tidak ditemukan di localStorage');
+        console.error('Token tidak ditemukan di cookies');
         return;
       }
-  
+
       const decoded: { id: string } = jwtDecode(token);
       const fishExpert_id = decoded.id;
       const timestamp = new Date().toISOString();
-  
-      // Kirim jawaban ke tabel fish-expert-answers
+
       const answerResponse = await fetch('http://localhost:9000/fish-expert-answers', {
         method: 'POST',
         headers: {
@@ -59,19 +59,17 @@ export default function ExpertPost() {
           timestamp,
         }),
       });
-  
+
       if (!answerResponse.ok) {
         throw new Error('Gagal mengirim jawaban');
       }
-  
+
       const answerResult = await answerResponse.json();
       console.log('Answer Result:', answerResult);
-  
-      // Ambil ID dari jawaban yang baru saja dibuat
+
       const fish_expert_answer_id = answerResult.newAnswer.fish_expert_answer_id;
       console.log('fish_expert_answer_id:', fish_expert_answer_id);
-  
-      // Update tabel consultations
+
       const consultationUpdateResponse = await fetch(`http://localhost:9000/consultations/${id}`, {
         method: 'PUT',
         headers: {
@@ -83,20 +81,20 @@ export default function ExpertPost() {
           consultation_status: 'Selesai',
         }),
       });
-  
+
       if (!consultationUpdateResponse.ok) {
         throw new Error('Gagal memperbarui konsultasi');
       }
-  
+
       console.log('Konsultasi berhasil diperbarui');
-      setInputText(''); // Reset input setelah kirim
+      setInputText('');
     } catch (error) {
       console.error('Terjadi kesalahan:', error);
     }
   };
 
   useEffect(() => {
-    if (!id) return; // Pastikan id tersedia sebelum fetch data
+    if (!id) return;
 
     const fetchData = async () => {
       try {

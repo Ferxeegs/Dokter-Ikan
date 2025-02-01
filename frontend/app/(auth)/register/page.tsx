@@ -95,12 +95,12 @@ export default function Register() {
             {/* Logo */}
             <div className="flex items-center px-4 py-2 bg-white">
               <img
-                src="/icon512.png"
+                src="/images/logo/logo_dokterikan512.png"
                 alt="Dokter Ikan Logo"
                 className="w-8 h-8"
               />
               <img
-                src="/icondokterikan.png"
+                src="/images/logo/logo_dokterikan.png"
                 alt="Dokter Ikan Text Logo"
                 className="w-15 h-6 ml-2"
               />

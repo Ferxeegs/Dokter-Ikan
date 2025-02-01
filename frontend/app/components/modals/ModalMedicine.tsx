@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router'; // Import useRouter untuk menangkap parameter path
 import jwt_decode from 'jwt-decode';
+import Cookies from 'js-cookie';
 
 interface Medicine {
   medicine_id: number;
@@ -28,7 +28,7 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [selectedMedicines, setSelectedMedicines] = useState<number[]>([]);
 
-  const token = localStorage.getItem('token'); // Mengambil token dari localStorage
+  const token = Cookies.get('token'); // Mengambil token dari localStorage
 
   let expert_id: number | null = null;
 

@@ -57,8 +57,8 @@ export default function Navbar() {
     <nav className="flex items-center justify-between bg-white text-black font-bold p-4 sticky top-0 z-10">
       <Link href="/">
       <div className="flex items-center">
-        <Image src="/icon512.png" alt="Home Icon" width={64} height={96} />
-        <Image src="/icondokterikan.png" alt="Extra Icon" width={164} height={164} />
+        <Image src="/images/logo/logo_dokterikan512.png" alt="Home Icon" width={64} height={96} />
+        <Image src="/images/logo/logo_dokterikan.png" alt="Extra Icon" width={164} height={164} />
       </div>
       </Link>
 

@@ -6,11 +6,15 @@ import { useRouter } from 'next/navigation';
 import { toast, ToastContainer } from 'react-toastify'; // Import notifikasi
 import 'react-toastify/dist/ReactToastify.css'; // Gaya notifikasi
 import Cookies from 'js-cookie';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+
 
   // Fungsi untuk menangani perubahan input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,23 +172,33 @@ export default function Login() {
                     required
                   />
                 </div>
-                <div>
+                <div className="relative w-full">
                   <label
                     htmlFor="password"
                     className="block mb-2 text-sm font-medium text-gray-900"
                   >
                     Password
                   </label>
-                  <input
-                    type="password"
-                    name="password"
-                    id="password"
-                    value={password}
-                    onChange={handleChange}
-                    placeholder="••••••••"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    required
-                  />
+                  <div className="relative flex items-center">
+                    <input 
+                      type={showPassword ? 'text' : 'password'} 
+                      name="password" 
+                      id="password" 
+                      value={password} 
+                      onChange={handleChange} 
+                      className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-10"
+                      placeholder="*********"
+                      required 
+                    />
+                    <button 
+                      type="button" 
+                      className="absolute right-3 text-gray-500"
+                      style={{ top: '50%', transform: 'translateY(-50%)' }}
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-start">

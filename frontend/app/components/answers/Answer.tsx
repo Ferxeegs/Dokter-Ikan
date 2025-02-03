@@ -33,7 +33,7 @@ const Answer: React.FC<AnswerProps> = ({ answer, name, specialization, toggleMod
 
       {/* Foto Profil dan Informasi Tenaga Ahli */}
       <div className="absolute bottom-4 left-4 flex items-center space-x-2">
-        <img src="ic_profile.png" alt="Foto Profil" className="w-10 h-10 rounded-full" />
+        <img src="/images/icon/ic_profile.png" alt="Foto Profil" className="w-10 h-10 rounded-full" />
         <div className="flex flex-col text-left font-sans">
           <span className="text-sm font-bold text-black">{name || 'Nama Tenaga Ahli'}</span>
           <span className="text-xs font-light text-black italic">

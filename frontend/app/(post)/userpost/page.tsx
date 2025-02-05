@@ -38,10 +38,10 @@ export default function UserPost() {
 
   const getUserIdFromToken = (): number | null => {
     const token = Cookies.get('token');
-    console.log('Token dari localStorage:', token); // Debugging token
+    console.log('Token :', token); // Debugging token
     
     if (!token) {
-      console.warn('Token tidak ditemukan di localStorage.');
+      console.warn('Token tidak ditemukan.');
       return null;
     }
   
@@ -87,7 +87,7 @@ export default function UserPost() {
       return;
     }
   
-    const token = localStorage.getItem("token");
+    const token = Cookies.get("token");
     if (!token) {
       setMessage("Token autentikasi tidak ditemukan.");
       return;

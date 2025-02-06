@@ -5,16 +5,14 @@ import Footer from '@/app/components/layout/Footer';
 import Complaint from '@/app/components/complaints/Complaint';
 import Answer from '@/app/components/answers/Answer';
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation'; // Menggunakan useParams dari next/navigation
+import { useParams } from 'next/navigation';
 import DetailResep from '@/app/components/prescriptions/DetailResep';
 
 export default function Consultation() {
-  const { id } = useParams(); // Mengambil parameter ID dari URL
+  const { id } = useParams();
   
-  // Pastikan id adalah string, bukan array atau undefined
   const consultationId = Array.isArray(id) ? id[0] : id;
 
-  // Cek jika consultationId tidak ada
   if (!consultationId) {
     return (
       <div className="flex flex-col min-h-screen justify-center items-center">
@@ -29,6 +27,10 @@ export default function Consultation() {
     answer: string;
     fish_expert_name: string;
     fish_expert_specialization: string;
+    fish_type: string;
+    fish_length: string;
+    fish_age: string;
+    fish_image: string;
   } | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +49,7 @@ export default function Consultation() {
           throw new Error('Gagal memuat data');
         }
         const result = await response.json();
+        console.log("Data konsultasi:", result);
         setData(result);
       } catch (error) {
         setIsError(true);
@@ -73,6 +76,10 @@ export default function Consultation() {
       </div>
     );
   }
+
+  // Add base URL for images
+  const baseUrl = 'http://localhost:9000';
+  const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${baseUrl}${image}`);
 
   return (
     <div
@@ -102,7 +109,14 @@ export default function Consultation() {
 
         {/* Dua Kotak: Complaint dan Answer */}
         <div className="flex flex-col md:flex-row justify-center gap-8 mt-20 mx-6 font-sans">
-          <Complaint title={data.title} description={data.description} />
+          <Complaint 
+            title={data.title} 
+            description={data.description} 
+            fishType={data.fish_type} 
+            fishLength={data.fish_length} 
+            fishAge={data.fish_age} 
+            fishImageUrls={fishImageUrls} 
+          />
 
           <Answer
             toggleModal={toggleModal}
@@ -118,7 +132,7 @@ export default function Consultation() {
         <DetailResep
           isOpen={isModalOpen}
           toggleModal={toggleModal}
-          consultationId={consultationId} // Pass the consultationId as string
+          consultationId={consultationId}
         />
       )}
       {/* Footer */}

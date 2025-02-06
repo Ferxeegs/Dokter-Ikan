@@ -32,6 +32,10 @@ export default function UserPost() {
   const [data, setData] = useState<{
     title: string;
     description: string;
+    fishType: string;
+    fishLength: string;
+    fishAge: string;
+    fishImageUrls: string;
     answer: string;
     fish_expert_name: string;
     fish_expert_specialization: string;
@@ -242,14 +246,21 @@ export default function UserPost() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-center gap-8 mt-20 mx-6 font-sans">
-          <Complaint title={judul} description={inputText} />
-          <Answer
-            toggleModal={toggleModal}
-            answer={data?.answer || 'Jawaban akan muncul di sini setelah tenaga ahli memberikan respons.'}
-            name={data?.fish_expert_name || 'Nama ahli belum tersedia'}
-            specialization={data?.fish_expert_specialization || 'Spesialisasi ahli belum tersedia'}
-          />
-        </div>
+        <Complaint 
+          title={data?.title || 'Judul keluhan akan muncul di sini'} 
+          description={data?.description || 'Deskripsi akan muncul di sini setelah Anda mengirimkan keluhan.'}
+          fishType={data?.fishType || 'Jenis ikan belum tersedia'}
+          fishLength={data?.fishLength || 'Panjang ikan belum tersedia'}
+          fishAge={data?.fishAge || 'Umur ikan belum tersedia'}
+          fishImageUrls={Array.isArray(data?.fishImageUrls) ? data.fishImageUrls : data?.fishImageUrls ? [data.fishImageUrls] : []} 
+        />
+        <Answer
+          toggleModal={toggleModal}
+          answer={data?.answer || 'Jawaban akan muncul di sini setelah tenaga ahli memberikan respons.'}
+          name={data?.fish_expert_name || 'Nama ahli belum tersedia'}
+          specialization={data?.fish_expert_specialization || 'Spesialisasi ahli belum tersedia'}
+        />
+      </div>
       </main>
 
       <div className="mt-8 flex justify-center">

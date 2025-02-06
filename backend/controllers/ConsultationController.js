@@ -4,6 +4,7 @@ import UserConsultation from '../models/UserConsultationModel.js';
 import FishExpert from '../models/FishExpertsModel.js';
 import FishExpertAnswer from '../models/FishExpertAnswerModel.js';
 import jwt from "jsonwebtoken";
+import FishTypes from '../models/FishTypeModel.js';
 
 
 // Fungsi untuk mendapatkan semua konsultasi
@@ -217,11 +218,17 @@ export const getConsultation = async (req, res) => {
         },
         {
           model: UserConsultation,
-          attributes: ['user_consultation_id', 'complaint', 'consultation_topic'],  // Menambahkan topik konsultasi
+          attributes: ['user_consultation_id', 'complaint', 'consultation_topic', 'fish_type_id', 'fish_length', 'fish_age', 'fish_image'],
+          include: [
+            {
+              model: FishTypes, // Pastikan ada relasi di model Sequelize
+              attributes: ['name'], // Ambil nama ikan
+            },
+          ],
         },
         {
           model: FishExpert,
-          attributes: ['fishExperts_id', 'name', 'specialization'],  // Menambahkan specialization
+          attributes: ['fishExperts_id', 'name', 'specialization'],
         },
         {
           model: FishExpertAnswer,
@@ -230,7 +237,7 @@ export const getConsultation = async (req, res) => {
       ],
     });
 
-    console.log('Consultation data:', JSON.stringify(consultation, null, 2)); // Log struktur data
+    console.log('Consultation data:', JSON.stringify(consultation, null, 2));
 
     if (!consultation) {
       return res.status(404).json({ error: 'Konsultasi tidak ditemukan' });
@@ -238,25 +245,34 @@ export const getConsultation = async (req, res) => {
 
     const complaint = consultation.UserConsultation ? consultation.UserConsultation.complaint : 'Tidak ada keluhan';
     const answer = consultation.FishExpertAnswer ? consultation.FishExpertAnswer.answer : 'Belum ada jawaban dari ahli ikan';
-    const consultationTopic = consultation.UserConsultation ? consultation.UserConsultation.consultation_topic : 'Tidak ada topik konsultasi'; // Menambahkan topik konsultasi
-
-    // Menambahkan name dan specialization dari FishExpert
+    const consultationTopic = consultation.UserConsultation ? consultation.UserConsultation.consultation_topic : 'Tidak ada topik konsultasi';
+    
     const fishExpert = consultation.FishExpert || {};
     const fishExpertName = fishExpert.name || 'Tidak ada nama ahli ikan';
     const fishExpertSpecialization = fishExpert.specialization || 'Tidak ada spesialisasi';
+    
+    const fishTypeName = consultation.UserConsultation && consultation.UserConsultation.FishType ? consultation.UserConsultation.FishType.name : 'Tidak ada jenis ikan';
+    const fishLength = consultation.UserConsultation ? consultation.UserConsultation.fish_length : 'Tidak ada panjang ikan';
+    const fishAge = consultation.UserConsultation ? consultation.UserConsultation.fish_age : 'Tidak ada umur ikan';
+    const fishImage = consultation.UserConsultation ? consultation.UserConsultation.fish_image : '[]';
 
     res.json({
       title: consultationTopic,
       description: complaint,
-      answer: answer,  // Menambahkan topik konsultasi
-      fish_expert_name: fishExpertName,       // Menambahkan nama ahli ikan
-      fish_expert_specialization: fishExpertSpecialization,  // Menambahkan spesialisasi ahli ikan
+      answer: answer,
+      fish_expert_name: fishExpertName,
+      fish_expert_specialization: fishExpertSpecialization,
+      fish_type: fishTypeName,  // Pastikan ini berisi nama ikan
+      fish_length: fishLength,
+      fish_age: fishAge,
+      fish_image: fishImage,
     });
   } catch (error) {
-    console.error('Error:', error.message, error.stack); // Log error lebih detail
+    console.error('Error:', error.message, error.stack);
     res.status(500).json({ error: 'Terjadi kesalahan pada server' });
   }
 };
+
 
 
 

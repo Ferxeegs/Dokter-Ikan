@@ -1,25 +1,53 @@
-import React, { useRef } from 'react';
+import React, { useState, useRef } from "react";
 
-export default function UploadFileButton() {
-  const fileInputRef = useRef<HTMLInputElement | null>(null); // Referensi ke input file
+interface UploadFileButtonProps {
+  setImageUrls: (urls: string[]) => void; // Prop untuk menyimpan URL gambar (array karena multiple)
+}
+
+export default function UploadFileButton({ setImageUrls }: UploadFileButtonProps) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [imageUrls, setImageUrlsState] = useState<string[]>([]); // Menyimpan URL gambar yang diupload
 
   const handleButtonClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.click(); // Klik otomatis pada input file
+      fileInputRef.current.click();
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]; // Ambil file yang dipilih
-    if (file) {
-      console.log('Selected file:', file.name);
-      // Tambahkan logika unggah file di sini
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    console.log("Selected files:", Array.from(files).map((file) => file.name));
+
+    const formData = new FormData();
+    // Tambahkan semua file ke FormData
+    Array.from(files).forEach((file) => formData.append("files", file));
+
+    try {
+      const response = await fetch("http://localhost:9000/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Gabungkan filePaths baru dengan filePaths yang sudah ada
+        setImageUrlsState((prevImageUrls) => [...prevImageUrls, ...result.filePaths]); // Menambahkan file baru
+        setImageUrls([...imageUrls, ...result.filePaths]); // Mengupdate parent state
+        
+      } else {
+        alert("Upload gagal: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error saat mengupload:", error);
+      alert("Terjadi kesalahan saat mengupload.");
     }
   };
 
   return (
-    <div>
-      {/* Button */}
+    <div className="flex flex-col items-center space-y-4">
       <button
         className="bg-white text-[#69CBF4] px-6 py-2 rounded-lg hover:bg-[#f0f0f0] transition text-sm font-semibold w-full md:w-auto border-2 border-[#69CBF4] flex items-center justify-center space-x-2"
         onClick={handleButtonClick}
@@ -28,12 +56,12 @@ export default function UploadFileButton() {
         <span>File</span>
       </button>
 
-      {/* Hidden File Input */}
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        style={{ display: 'none' }}
+        multiple
+        style={{ display: "none" }}
       />
     </div>
   );

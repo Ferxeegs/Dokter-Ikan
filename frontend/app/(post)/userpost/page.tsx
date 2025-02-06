@@ -28,6 +28,7 @@ export default function UserPost() {
   const [fishtypes, setFishtypes] = useState<FishType[]>([]); // Type for fishtypes state
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Status dropdown
   const [fishTypeId, setFishTypeId] = useState<number | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [data, setData] = useState<{
     title: string;
     description: string;
@@ -99,7 +100,7 @@ export default function UserPost() {
       fish_age: String(berat),
       fish_length: String(panjang),
       consultation_topic: judul,
-      fish_image: "https://example.com/images/fish.jpg",
+      fish_image: JSON.stringify(imageUrls),
       complaint: inputText,
       consultation_status: "Pending",
     };
@@ -177,6 +178,44 @@ export default function UserPost() {
       console.warn('Fish not found for name:', fishName); // Log warning if fish not found
     }
     setIsDropdownOpen(false); // Close dropdown
+  };
+
+  const handleDeleteImage = async (url: string) => { // Terima URL gambar yang akan dihapus
+    const token = Cookies.get("token");
+    if (!token) {
+      setMessage("Token autentikasi tidak ditemukan.");
+      return;
+    }
+  
+    try {
+      // Ambil nama file dari URL gambar
+      const fileName = url.split("/").pop();
+  
+      // Kirim request ke backend untuk menghapus gambar dari server lokal
+      const response = await fetch("http://localhost:9000/delete-file", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          fileName: fileName, // Kirim nama file ke backend
+        }),
+      });
+  
+      const responseData = await response.json();
+      if (response.ok) {
+        // Hapus gambar dari state imageUrls setelah berhasil dihapus dari server
+        setImageUrls(imageUrls.filter((imageUrl) => imageUrl !== url)); // Filter gambar yang tidak dihapus
+        setMessage("Gambar berhasil dihapus.");
+      } else {
+        console.error("Error menghapus gambar:", responseData);
+        setMessage("Gagal menghapus gambar.");
+      }
+    } catch (error) {
+      console.error("Error saat menghapus gambar:", error);
+      setMessage("Terjadi kesalahan saat menghapus gambar.");
+    }
   };
 
   return (
@@ -264,22 +303,48 @@ export default function UserPost() {
             />
           </div>
 
-          <div className="flex items-center w-full h-32 p-4 border-2 border-[#0795D2] rounded-lg shadow-md">
-            <img src="/images/icon/ic_profile.png" alt="Foto Profil" className="w-12 h-12 rounded-full ml-4 mr-4" />
-            <textarea
-              className="flex-1 h-full p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
-              placeholder="Masukkan keluhan yang ingin anda sampaikan..."
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-            />
-          </div>
+          <div className="flex flex-col w-full p-4 border-2 border-[#0795D2] rounded-lg shadow-md">
+      <div className="flex items-center">
+        <img
+          src="/images/icon/ic_profile.png"
+          alt="Foto Profil"
+          className="w-12 h-12 rounded-full ml-4 mr-4"
+        />
+        <textarea
+          className="flex-1 w-full h-32 p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
+          placeholder="Masukkan keluhan yang ingin anda sampaikan..."
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+        />
+      </div>
+
+      {/* Menampilkan gambar yang diupload */}
+      {imageUrls.length > 0 && (
+        <div className="relative mt-4 flex justify-start">
+          {imageUrls.map((url: string, index: number) => (
+            <div key={index} className="w-24 h-24 border rounded-lg overflow-hidden ml-4 relative">
+              {/* Tombol silang di pojok kanan atas */}
+              <button
+                className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
+                onClick={() => handleDeleteImage(url)} // Hapus gambar berdasarkan URL
+              >
+                ✕
+              </button>
+
+              {/* Gambar yang diupload */}
+              <img src={`http://localhost:9000${url}`} alt="Uploaded" className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
         </div>
       </div>
 
       <div className="flex gap-12 justify-center mt-6 mx-6 font-sans">
         <UploadFotoButton />
         <UploadVideoButton />
-        <UploadFileButton />
+        <UploadFileButton setImageUrls={setImageUrls} />
         <button
           onClick={handleSubmit}
           className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"

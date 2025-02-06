@@ -15,6 +15,7 @@ import PrescriptionRoutes from './routes/PrescriptionRoute.js';
 import Payment from "./routes/PaymentRoute.js";
 import PrescriptionMedicine from "./routes/PrescriptionMedicineRoute.js";
 import AuthRoutes from "./routes/AuthRoutes.js";
+import UploadRoute from "./routes/UploadRoute.js";
 
 dotenv.config();
 
@@ -38,6 +39,8 @@ app.use(cors({
 
 app.use(express.json());
 
+app.use('/uploads', express.static('uploads'));
+
 // Gunakan route
 app.use(UserRoute);
 app.use(FishTypes);
@@ -51,6 +54,7 @@ app.use(PrescriptionRoutes);
 app.use(Payment);
 app.use(PrescriptionMedicine);
 app.use(AuthRoutes)
+app.use(UploadRoute);
 
 
 // Menjalankan server

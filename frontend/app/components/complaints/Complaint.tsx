@@ -65,7 +65,7 @@ const Complaint: React.FC<ComplaintProps> = ({
             />
           ))
         ) : (
-          <p className="text-sm text-gray-500">Gambar ikan belum diupload.</p>
+          <p className="text-sm text-gray-500"></p>
         )}
       </div>
 

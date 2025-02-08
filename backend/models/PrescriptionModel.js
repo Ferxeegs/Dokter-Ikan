@@ -27,6 +27,9 @@ const Prescription = db.define('Prescription', {
       key: 'fishExperts_id'
     }
   },
+  instruction: {
+    type: DataTypes.TEXT,
+  },
   created_at: { // Sesuaikan dengan nama kolom di database
     type: DataTypes.DATE,
     allowNull: false

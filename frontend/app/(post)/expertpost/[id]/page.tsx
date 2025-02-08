@@ -12,6 +12,8 @@ import UploadVideoButton from '@/app/components/uploads/UploadVideo';
 import UploadFileButton from '@/app/components/uploads/UploadFile';
 import ModalObat from '@/app/components/modals/ModalMedicine';
 import { useParams } from 'next/navigation';
+import Modal from '@/app/components/modals/ModalPost';
+import ChatExpert from '@/app/components/chat/ChatExpert';
 
 type Params = {
   id: string;
@@ -25,21 +27,33 @@ export default function ExpertPost() {
     answer: string;
     fish_expert_name: string;
     fish_expert_specialization: string;
+    fish_type: string;
+    fish_length: string;
+    fish_age: string;
+    fish_image: string;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [isModalPostOpen, setIsModalPostOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputText, setInputText] = useState('');
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
 
-  const handleSubmit = async () => {
+  const handleCloseModal = () => {
+    setIsModalPostOpen(false);
+  };
+
+ const handleSubmit = async () => {
     try {
-      const token = Cookies.get('token'); // Ambil token dari cookies
+      const token = Cookies.get("token");
       if (!token) {
-        console.error('Token tidak ditemukan di cookies');
+        setModalMessage("Token tidak ditemukan. Silakan login ulang.");
+        setIsModalPostOpen(true);
         return;
       }
 
@@ -47,49 +61,55 @@ export default function ExpertPost() {
       const fishExpert_id = decoded.id;
       const timestamp = new Date().toISOString();
 
-      const answerResponse = await fetch('http://localhost:9000/fish-expert-answers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          fishExpert_id,
-          answer: inputText,
-          timestamp,
-        }),
-      });
+      const answerResponse = await fetch(
+        "http://localhost:9000/fish-expert-answers",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            fishExpert_id,
+            answer: inputText,
+            image: JSON.stringify(imageUrls),
+            timestamp,
+          }),
+        }
+      );
 
       if (!answerResponse.ok) {
-        throw new Error('Gagal mengirim jawaban');
+        throw new Error("Kolom jawaban tidak boleh kosong!");
       }
 
       const answerResult = await answerResponse.json();
-      console.log('Answer Result:', answerResult);
-
       const fish_expert_answer_id = answerResult.newAnswer.fish_expert_answer_id;
-      console.log('fish_expert_answer_id:', fish_expert_answer_id);
 
-      const consultationUpdateResponse = await fetch(`http://localhost:9000/consultations/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          fish_expert_answer_id,
-          consultation_status: 'Selesai',
-        }),
-      });
+      const consultationUpdateResponse = await fetch(
+        `http://localhost:9000/consultations/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            fish_expert_answer_id,
+            consultation_status: "Selesai",
+          }),
+        }
+      );
 
       if (!consultationUpdateResponse.ok) {
-        throw new Error('Gagal memperbarui konsultasi');
+        throw new Error("Gagal memperbarui konsultasi.");
       }
 
-      console.log('Konsultasi berhasil diperbarui');
-      setInputText('');
+      setModalMessage("Jawaban berhasil dikirim");
+      setIsModalPostOpen(true);
+      setInputText(""); // Reset input setelah sukses
     } catch (error) {
-      console.error('Terjadi kesalahan:', error);
+      setModalMessage((error as Error).message || "Terjadi kesalahan.");
+      setIsModalPostOpen(true);
     }
   };
 
@@ -130,6 +150,44 @@ export default function ExpertPost() {
     );
   }
 
+  const baseUrl = 'http://localhost:9000';
+  const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${baseUrl}${image}`);
+
+  const handleDeleteImage = async (url: string) => { // Terima URL gambar yang akan dihapus
+    const token = Cookies.get("token");
+    if (!token) {
+      console.error("Token tidak ditemukan di cookies");
+      return;
+    }
+  
+    try {
+      // Ambil nama file dari URL gambar
+      const fileName = url.split("/").pop();
+  
+      // Kirim request ke backend untuk menghapus gambar dari server lokal
+      const response = await fetch("http://localhost:9000/delete-file", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          fileName: fileName, // Kirim nama file ke backend
+        }),
+      });
+  
+      const responseData = await response.json();
+      if (response.ok) {
+        // Hapus gambar dari state imageUrls setelah berhasil dihapus dari server
+        setImageUrls(imageUrls.filter((imageUrl) => imageUrl !== url)); // Filter gambar yang tidak dihapus   
+      } else {
+        console.error("Error menghapus gambar:", responseData);
+      }
+    } catch (error) {
+      console.error("Error saat menghapus gambar:", error);
+    }
+  };
+
   return (
     <div
       className="flex flex-col min-h-screen"
@@ -154,7 +212,14 @@ export default function ExpertPost() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-center gap-8 mt-20 mx-6 font-sans">
-          <Complaint title={data.title} description={data.description} />
+          <Complaint 
+            title={data.title} 
+            description={data.description} 
+            fishType={data.fish_type} 
+            fishLength={data.fish_length} 
+            fishAge={data.fish_age} 
+            fishImageUrls={fishImageUrls} 
+          />
 
           <Answer
             toggleModal={toggleModal}
@@ -163,39 +228,63 @@ export default function ExpertPost() {
             specialization={data.fish_expert_specialization}
           />
         </div>
-
+        {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
         <div className="flex justify-center mt-6">
           <button
             className="bg-[rgba(105,203,244,0.4)] text-black px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold flex items-center gap-2"
             onClick={toggleModal}
           >
-            <img src="obat.png" alt="Icon" className="w-6 h-6" />
+            <img src="/images/icon/ic_obat.png" alt="Icon" className="w-6 h-6" />
             <div className="flex flex-col text-left font-sans">
               <span className="font-light text-xs italic">Ayo bantu klien lebih lanjut</span>
               <span className="font-bold text-sm">Berikan resep obat disini!</span>
             </div>
           </button>
         </div>
-
+        ):null}
         <ModalObat isOpen={isModalOpen} toggleModal={toggleModal} consultationId={id} />
+        {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
+        <div className="flex flex-col w-full p-4 border-2 border-[#0795D2] rounded-lg shadow-md mt-8">
+            <div className="flex items-center">
+              <img
+                src="/images/icon/ic_profile.png"
+                alt="Foto Profil"
+                className="w-12 h-12 rounded-full ml-4 mr-4"
+              />
+              <textarea
+                className="flex-1 w-full h-32 p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
+                placeholder="Masukkan keluhan yang ingin anda sampaikan..."
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+              />
+            </div>
+            {/* Menampilkan gambar yang diupload */}
+            {imageUrls.length > 0 && (
+              <div className="relative mt-4 flex justify-start ml-24">
+                {imageUrls.map((url: string, index: number) => (
+                  <div key={index} className="w-24 h-24 border rounded-lg overflow-hidden mr-4 relative">
+                    {/* Tombol silang di pojok kanan atas */}
+                    <button
+                      className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
+                      onClick={() => handleDeleteImage(url)} // Hapus gambar berdasarkan URL
+                    >
+                      ✕
+                    </button>
 
-        <div className="flex items-center justify-center w-full max-w-5xl h-32 p-4 border-2 border-[#0795D2] rounded-lg shadow-md mt-6 mx-auto">
-          <img src="profil.png" alt="Foto Profil" className="w-12 h-12 rounded-full ml-8 mr-4" />
-          
-          <div className="flex-1 flex items-center justify-center">
-            <textarea
-              className="w-full h-full p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
-              placeholder="Masukkan jawaban dari keluhan yang diberikan klien..."
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-            />
+                    {/* Gambar yang diupload */}
+                    <img src={`http://localhost:9000${url}`} alt="Uploaded" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+          ):null}
 
+        {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
         <div className="flex gap-12 justify-center mt-6 mx-6 font-sans">
           <UploadFotoButton />
           <UploadVideoButton />
-          <UploadFileButton />
+          <UploadFileButton setImageUrls={setImageUrls} />
           <button
             onClick={handleSubmit}
             className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
@@ -203,6 +292,12 @@ export default function ExpertPost() {
             <img src="/images/icon/ic_send.png" alt="Kirim" className="w-4 h-4" />
             <span>Kirim</span>
           </button>
+          {isModalPostOpen && <Modal message={modalMessage} onClose={handleCloseModal} />}
+        </div>
+        ):null}
+
+        <div className="mt-10 mx-auto w-full max-w-4xl px-4">
+          <ChatExpert consultationId={id} />
         </div>
       </main>
 

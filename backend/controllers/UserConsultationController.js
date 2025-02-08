@@ -132,7 +132,7 @@ export const createUserConsultation = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ 
-      message: "Input tidak valid.", 
+      message: "Harap mengisi semua kolom yang tersedia!",
       errors: errors.array() 
     });
   }
@@ -179,14 +179,14 @@ export const createUserConsultation = async (req, res) => {
     console.log("Respons yang Dikembalikan ke Frontend:", responseData);
 
     res.status(201).json({
-      message: "Konsultasi berhasil ditambahkan.",
+      message: "Konsultasi berhasil ditambahkan!",
       data: responseData,
     });
   } catch (error) {
     await transaction.rollback();
     console.error("Error saat menyimpan konsultasi:", error);
     res.status(500).json({
-      message: "Gagal menambahkan konsultasi.",
+      message: "Gagal menambahkan konsultasi",
       error: error.message,
     });
   }

@@ -45,6 +45,10 @@ const Consultation = db.define('Consultation', {
       key: 'fish_expert_answer_id',
     },
   },
+  last_message_sender: {
+    type: DataTypes.ENUM("user", "expert"),
+    allowNull: true,
+  },
   consultation_status: {
     type: DataTypes.STRING,
   },

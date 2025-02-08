@@ -232,7 +232,7 @@ export const getConsultation = async (req, res) => {
         },
         {
           model: FishExpertAnswer,
-          attributes: ['fish_expert_answer_id', 'answer'],
+          attributes: ['fish_expert_answer_id', 'answer', 'image'],
         },
       ],
     });
@@ -245,6 +245,7 @@ export const getConsultation = async (req, res) => {
 
     const complaint = consultation.UserConsultation ? consultation.UserConsultation.complaint : 'Tidak ada keluhan';
     const answer = consultation.FishExpertAnswer ? consultation.FishExpertAnswer.answer : 'Belum ada jawaban dari ahli ikan';
+    const answerImage = consultation.FishExpertAnswer?consultation.FishExpertAnswer.image : 'Tidak ada gambar jawaban';
     const consultationTopic = consultation.UserConsultation ? consultation.UserConsultation.consultation_topic : 'Tidak ada topik konsultasi';
     
     const fishExpert = consultation.FishExpert || {};
@@ -266,6 +267,7 @@ export const getConsultation = async (req, res) => {
       fish_length: fishLength,
       fish_age: fishAge,
       fish_image: fishImage,
+      answer_image: answerImage,
     });
   } catch (error) {
     console.error('Error:', error.message, error.stack);

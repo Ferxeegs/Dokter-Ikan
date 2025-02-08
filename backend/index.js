@@ -16,6 +16,7 @@ import Payment from "./routes/PaymentRoute.js";
 import PrescriptionMedicine from "./routes/PrescriptionMedicineRoute.js";
 import AuthRoutes from "./routes/AuthRoutes.js";
 import UploadRoute from "./routes/UploadRoute.js";
+import MessageRoutes from "./routes/MessageRoutes.js";
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use(Payment);
 app.use(PrescriptionMedicine);
 app.use(AuthRoutes)
 app.use(UploadRoute);
+app.use(MessageRoutes);
 
 
 // Menjalankan server

@@ -10,6 +10,7 @@ import Complaint from '@/app/components/complaints/Complaint';
 import Answer from '@/app/components/answers/Answer';
 import jwt_decode from 'jwt-decode';
 import Cookies from 'js-cookie';
+import Modal from '@/app/components/modals/ModalPost';
 
 type FishType = {
   id: number;
@@ -19,6 +20,8 @@ type FishType = {
 export default function UserPost() {
   const [inputText, setInputText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState<string>("");
+  const [showModal, setShowModal] = useState<boolean>(false);
   const [judul, setJudul] = useState('');
   const [jenisIkan, setJenisIkan] = useState('');
   const [panjang, setPanjang] = useState('');
@@ -85,30 +88,32 @@ export default function UserPost() {
   };
 
   const handleSubmit = async () => {
-    const userId = getUserIdFromToken();
-  
+    const userId = getUserIdFromToken(); // Pastikan fungsi ini tersedia
+
     if (!userId) {
-      setMessage("Pengguna tidak terautentikasi.");
+      setModalMessage("Pengguna tidak terautentikasi.");
+      setShowModal(true);
       return;
     }
-  
+
     const token = Cookies.get("token");
     if (!token) {
-      setMessage("Token autentikasi tidak ditemukan.");
+      setModalMessage("Token autentikasi tidak ditemukan.");
+      setShowModal(true);
       return;
     }
-  
+
     const requestData = {
       user_id: userId,
-      fish_type_id: fishTypeId,
-      fish_age: String(berat),
-      fish_length: String(panjang),
-      consultation_topic: judul,
-      fish_image: JSON.stringify(imageUrls),
-      complaint: inputText,
+      fish_type_id: fishTypeId, // Pastikan variabel ini terdefinisi
+      fish_age: String(berat), // Pastikan variabel ini terdefinisi
+      fish_length: String(panjang), // Pastikan variabel ini terdefinisi
+      consultation_topic: judul, // Pastikan variabel ini terdefinisi
+      fish_image: JSON.stringify(imageUrls), // Pastikan variabel ini terdefinisi
+      complaint: inputText, // Pastikan variabel ini terdefinisi
       consultation_status: "Pending",
     };
-  
+
     try {
       const response = await fetch("http://localhost:9000/user-consultations", {
         method: "POST",
@@ -118,23 +123,23 @@ export default function UserPost() {
         },
         body: JSON.stringify(requestData),
       });
-  
+
       const responseData = await response.json();
       console.log("Respons dari /user-consultations:", responseData);
-  
+
       if (response.ok) {
         const userConsultationId = responseData.data?.user_consultation_id || responseData.data?.id;
-  
+
         if (!userConsultationId) {
           console.error("user_consultation_id tidak ditemukan dalam respons:", responseData);
           throw new Error("user_consultation_id not found in response");
         }
-  
+
         const consultationRequest = {
           user_id: userId,
           user_consultation_id: userConsultationId,
         };
-  
+
         const consultationResponse = await fetch("http://localhost:9000/consultations", {
           method: "POST",
           headers: {
@@ -143,24 +148,25 @@ export default function UserPost() {
           },
           body: JSON.stringify(consultationRequest),
         });
-  
+
         const consultationResponseData = await consultationResponse.json();
         console.log("Respons dari /consultations:", consultationResponseData);
-  
+
         if (!consultationResponse.ok) {
           console.error("Error dari konsultasi API:", consultationResponseData);
           throw new Error("Gagal menambahkan data ke tabel consultations");
         }
-  
-        setMessage("Konsultasi berhasil ditambahkan");
+
+        setModalMessage("Konsultasi berhasil ditambahkan, silahkan menunggu hingga ahli ikan memberikan respons!");
       } else {
         console.error("Error dari backend:", responseData);
-        setMessage(responseData.message || "Terjadi kesalahan pada backend");
+        setModalMessage(responseData.message || "Terjadi kesalahan pada backend");
       }
     } catch (error) {
       console.error("Error saat mengirim data:", error);
-      setMessage("Terjadi kesalahan saat mengirim data");
+      setModalMessage("Terjadi kesalahan saat mengirim data");
     }
+    setShowModal(true);
   };
   
   
@@ -211,14 +217,11 @@ export default function UserPost() {
       if (response.ok) {
         // Hapus gambar dari state imageUrls setelah berhasil dihapus dari server
         setImageUrls(imageUrls.filter((imageUrl) => imageUrl !== url)); // Filter gambar yang tidak dihapus
-        setMessage("Gambar berhasil dihapus.");
       } else {
         console.error("Error menghapus gambar:", responseData);
-        setMessage("Gagal menghapus gambar.");
       }
     } catch (error) {
       console.error("Error saat menghapus gambar:", error);
-      setMessage("Terjadi kesalahan saat menghapus gambar.");
     }
   };
 
@@ -315,40 +318,40 @@ export default function UserPost() {
           </div>
 
           <div className="flex flex-col w-full p-4 border-2 border-[#0795D2] rounded-lg shadow-md">
-      <div className="flex items-center">
-        <img
-          src="/images/icon/ic_profile.png"
-          alt="Foto Profil"
-          className="w-12 h-12 rounded-full ml-4 mr-4"
-        />
-        <textarea
-          className="flex-1 w-full h-32 p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
-          placeholder="Masukkan keluhan yang ingin anda sampaikan..."
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-        />
-      </div>
-
-      {/* Menampilkan gambar yang diupload */}
-      {imageUrls.length > 0 && (
-        <div className="relative mt-4 flex justify-start">
-          {imageUrls.map((url: string, index: number) => (
-            <div key={index} className="w-24 h-24 border rounded-lg overflow-hidden ml-4 relative">
-              {/* Tombol silang di pojok kanan atas */}
-              <button
-                className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
-                onClick={() => handleDeleteImage(url)} // Hapus gambar berdasarkan URL
-              >
-                ✕
-              </button>
-
-              {/* Gambar yang diupload */}
-              <img src={`http://localhost:9000${url}`} alt="Uploaded" className="w-full h-full object-cover" />
+            <div className="flex items-center">
+              <img
+                src="/images/icon/ic_profile.png"
+                alt="Foto Profil"
+                className="w-12 h-12 rounded-full ml-4 mr-4"
+              />
+              <textarea
+                className="flex-1 w-full h-32 p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
+                placeholder="Masukkan keluhan yang ingin anda sampaikan..."
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+              />
             </div>
-          ))}
-        </div>
-      )}
-    </div>
+
+            {/* Menampilkan gambar yang diupload */}
+            {imageUrls.length > 0 && (
+              <div className="relative mt-4 flex justify-start ml-24">
+                {imageUrls.map((url: string, index: number) => (
+                  <div key={index} className="w-24 h-24 border rounded-lg overflow-hidden mr-4 relative">
+                    {/* Tombol silang di pojok kanan atas */}
+                    <button
+                      className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
+                      onClick={() => handleDeleteImage(url)} // Hapus gambar berdasarkan URL
+                    >
+                      ✕
+                    </button>
+
+                    {/* Gambar yang diupload */}
+                    <img src={`http://localhost:9000${url}`} alt="Uploaded" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -357,12 +360,15 @@ export default function UserPost() {
         <UploadVideoButton />
         <UploadFileButton setImageUrls={setImageUrls} />
         <button
-          onClick={handleSubmit}
-          className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
-        >
-          <img src="/images/icon/ic_send.png" alt="Kirim" className="w-4 h-4" />
-          <span>Kirim</span>
-        </button>
+        onClick={handleSubmit}
+        className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
+      >
+        <img src="/images/icon/ic_send.png" alt="Kirim" className="w-4 h-4" />
+        <span>Kirim</span>
+      </button>
+
+      {/* Modal diletakkan di luar tombol agar tidak error */}
+      {showModal && <Modal message={modalMessage} onClose={() => setShowModal(false)} />}
       </div>
 
       {message && (

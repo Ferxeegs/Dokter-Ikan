@@ -26,16 +26,19 @@ export const getFishExpertAnswerById = async (req, res) => {
 // Fungsi untuk menambahkan jawaban baru
 export const createFishExpertAnswer = async (req, res) => {
   try {
-    const { fishExpert_id, answer, timestamp } = req.body;
+    const { fishExpert_id, answer, timestamp, image } = req.body; // Menambahkan image ke dalam request body
 
+    // Validasi input (image opsional, tidak wajib)
     if (!fishExpert_id || !answer || !timestamp) {
       return res.status(400).json({ message: 'Data tidak lengkap' });
     }
 
+    // Menyimpan jawaban ke database
     const newAnswer = await FishExpertAnswer.create({
       fishExpert_id,
       answer,
       timestamp,
+      image: image || null, // Jika tidak ada image, disimpan sebagai NULL
     });
 
     res.status(201).json({ message: 'Jawaban berhasil dibuat', newAnswer });
@@ -44,6 +47,7 @@ export const createFishExpertAnswer = async (req, res) => {
     res.status(500).json({ message: 'Terjadi kesalahan pada server', error });
   }
 };
+
 
 // Fungsi untuk memperbarui jawaban berdasarkan ID
 export const updateFishExpertAnswer = async (req, res) => {

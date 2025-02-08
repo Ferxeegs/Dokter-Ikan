@@ -7,6 +7,7 @@ import Answer from '@/app/components/answers/Answer';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import DetailResep from '@/app/components/prescriptions/DetailResep';
+import ChatConsultation from '@/app/components/chat/ChatConsultation';
 
 export default function Consultation() {
   const { id } = useParams();
@@ -31,6 +32,7 @@ export default function Consultation() {
     fish_length: string;
     fish_age: string;
     fish_image: string;
+    answer_image: string;
   } | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -80,6 +82,14 @@ export default function Consultation() {
   // Add base URL for images
   const baseUrl = 'http://localhost:9000';
   const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${baseUrl}${image}`);
+  let fishImageUrl: string[] = [];
+    try {
+      fishImageUrl = data.answer_image && data.answer_image.startsWith('[') 
+        ? JSON.parse(data.answer_image).map((image: string) => `${baseUrl}${image}`)
+        : [];
+    } catch {
+      fishImageUrl = [];
+    }
 
   return (
     <div
@@ -121,10 +131,15 @@ export default function Consultation() {
           <Answer
             toggleModal={toggleModal}
             answer={data.answer}
+            fishImageUrls={fishImageUrl}
             name={data.fish_expert_name}
             specialization={data.fish_expert_specialization}
           />
         </div>
+        <div className="mt-10 mx-auto w-full max-w-4xl px-4">
+          <ChatConsultation consultationId={consultationId} />
+        </div>
+
       </main>
 
       {/* Modal Placeholder */}

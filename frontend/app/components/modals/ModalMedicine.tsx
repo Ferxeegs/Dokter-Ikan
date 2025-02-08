@@ -16,28 +16,26 @@ interface Medicine {
 interface ModalObatProps {
   isOpen: boolean;
   toggleModal: () => void;
-  consultationId: string; // Terima consultationId dari props
+  consultationId: string;
 }
 
-// Definisikan tipe untuk hasil decode token
 interface DecodedToken {
-  id: number; // Ganti 'fishExperts_id' menjadi 'id'
+  id: number;
 }
 
 const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultationId }) => {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [selectedMedicines, setSelectedMedicines] = useState<number[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [instruction, setInstruction] = useState<string>('');
 
-  const token = Cookies.get('token'); // Mengambil token dari localStorage
-
+  const token = Cookies.get('token');
   let expert_id: number | null = null;
 
-  // Decode token hanya jika token ada
   if (token) {
     try {
-      const decoded = jwt_decode<DecodedToken>(token); // Casting hasil decode
-      expert_id = decoded.id; // Ambil 'id' dari token
-      console.log('Decoded token:', decoded); // Log token yang sudah didekode
+      const decoded = jwt_decode<DecodedToken>(token);
+      expert_id = decoded.id;
     } catch (error) {
       console.error('Error decoding token:', error);
     }
@@ -47,10 +45,7 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
     if (isOpen) {
       fetch('http://localhost:9000/medicines')
         .then(response => response.json())
-        .then(data => {
-          console.log('Fetched medicines:', data); // Log data obat yang diambil
-          setMedicines(data);
-        })
+        .then(data => setMedicines(data))
         .catch(error => console.error('Error fetching medicines:', error));
     }
   }, [isOpen]);
@@ -68,11 +63,10 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
     }
 
     const requestPayload = {
-      consultation_id: consultationId, // Gunakan consultationId dari props
-      fishExperts_id: expert_id,  // Menggunakan 'id' yang didekode dari token
+      consultation_id: consultationId,
+      fishExperts_id: expert_id,
+      instruction,
     };
-
-    console.log('Request payload for prescription:', requestPayload); // Log data request untuk prescription
 
     try {
       const prescriptionResponse = await fetch('http://localhost:9000/prescriptions', {
@@ -86,16 +80,12 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
       }
 
       const prescriptionData = await prescriptionResponse.json();
-      console.log('Prescription created:', prescriptionData); // Log data prescription yang diterima
-
       const prescription_id = prescriptionData.prescription_id;
 
       const medicinePayloads = selectedMedicines.map(medicine_id => ({
         prescription_id,
         medicine_id,
       }));
-
-      console.log('Medicine payloads:', medicinePayloads); // Log payload obat yang akan dikirimkan
 
       await Promise.all(medicinePayloads.map(payload =>
         fetch('http://localhost:9000/prescriptions-medicines', {
@@ -115,50 +105,71 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
 
   if (!isOpen) return null;
 
+  const filteredMedicines = medicines.filter(medicine =>
+    medicine.medicine_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-      onClick={toggleModal}
-    >
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" onClick={toggleModal}>
       <div
-        className="bg-white p-6 rounded-xl w-[80%] md:w-[50%] max-h-[70vh] overflow-y-auto relative"
+        className="bg-white p-6 rounded-xl w-[90%] md:w-[60%] max-h-[80vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl font-bold mb-4 text-center text-black">Rekomendasi Obat</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {medicines.map((item) => (
-            <div
-              key={item.medicine_id}
-              className={`flex items-center p-4 bg-gradient-to-r from-[#DCF5FF] to-[#80B7F5] rounded-lg shadow cursor-pointer ${selectedMedicines.includes(item.medicine_id) ? 'border-2 border-blue-500' : ''}`}
-              onClick={() => handleSelectMedicine(item.medicine_id)}
-            >
-              <img
-                src={`http://localhost:9000/${item.medicine_image}`}
-                alt={item.medicine_name}
-                className="w-16 h-16 rounded-lg object-cover"
-              />
-              <div className="ml-4">
-                <h3 className="font-bold text-black text-xs">{item.medicine_name}</h3>
-                <p className="text-xs text-gray-700">{item.contain}</p>
-                <p className="text-xs text-gray-700">{item.dosage}</p>
+        <h2 className="text-lg font-bold mb-4 text-center text-black">Rekomendasi Obat</h2>
+
+        <input
+          type="text"
+          placeholder="Cari obat..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-2 mb-4 border rounded-lg text-black"
+        />
+
+        {/* Daftar obat dengan scroll sendiri */}
+        <div className="max-h-[50vh] overflow-y-auto flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredMedicines.map((item) => (
+              <div
+                key={item.medicine_id}
+                className={`flex items-center p-4 bg-gradient-to-r from-[#DCF5FF] to-[#80B7F5] rounded-lg shadow cursor-pointer ${
+                  selectedMedicines.includes(item.medicine_id) ? 'border-2 border-blue-500' : ''
+                }`}
+                onClick={() => handleSelectMedicine(item.medicine_id)}
+              >
+                <img
+                  src={item.medicine_image}
+                  alt={item.medicine_name}
+                  className="w-16 h-16 rounded-lg object-cover"
+                />
+                <div className="ml-4">
+                  <h3 className="font-bold text-black text-xs">{item.medicine_name}</h3>
+                  <p className="text-xs text-gray-700">{item.contain}</p>
+                  <p className="text-xs text-gray-700">{item.dosage}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
+
+        {/* Instruksi dan tombol tetap */}
+        <textarea
+          placeholder="Tambahkan instruksi..."
+          value={instruction}
+          onChange={(e) => setInstruction(e.target.value)}
+          className="w-full px-4 py-2 mt-4 border rounded-lg text-black"
+          rows={3}
+        ></textarea>
 
         <div className="mt-4 text-center">
           <button
-            className="bg-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold"
+            className="bg-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full"
             onClick={handleSubmit}
           >
             Kirim Resep ke Klien
           </button>
         </div>
 
-        <button
-          className="absolute top-2 right-2 text-black font-bold text-lg"
-          onClick={toggleModal}
-        >
+        <button className="absolute top-2 right-2 text-black font-bold text-lg" onClick={toggleModal}>
           &times;
         </button>
       </div>

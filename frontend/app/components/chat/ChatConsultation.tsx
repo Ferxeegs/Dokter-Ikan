@@ -1,0 +1,117 @@
+import { useState, useEffect } from "react";
+import { Send } from "lucide-react";
+
+interface Message {
+  sender_role: string;
+  message: string;
+}
+
+interface ChatConsultationProps {
+  consultationId: string;
+}
+
+export default function ChatConsultation({ consultationId }: ChatConsultationProps) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch(`http://localhost:9000/messages/${consultationId}`);
+      if (!response.ok) {
+        throw new Error("Gagal mengambil pesan");
+      }
+      const data = await response.json();
+      setMessages(data.messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim()) return;
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:9000/messages/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          consultation_id: consultationId,
+          sender_role: "user",
+          message: newMessage,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal mengirim pesan");
+      }
+
+      setNewMessage("");
+      fetchMessages(); // Refresh chat setelah mengirim pesan
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages();
+    const interval = setInterval(fetchMessages, 5000); // Auto-refresh chat setiap 5 detik
+    return () => clearInterval(interval);
+  }, [consultationId]);
+
+  return (
+    <div className="mt-10 p-4 border border-gray-300 rounded-lg bg-white shadow-lg max-w-xl mx-auto">
+      <h2 className="text-xl font-semibold text-[#1A83FB] text-center mb-3">
+        Chat Konsultasi
+      </h2>
+
+      <div className="max-h-80 overflow-y-auto mb-4 border p-3 rounded-lg bg-gray-50">
+        {messages.length > 0 ? (
+          messages.map((msg, index) => (
+            <div
+              key={index}
+              className={`flex ${msg.sender_role === "user" ? "justify-end" : "justify-start"} mb-2`}
+            >
+              <div
+                className={`p-3 rounded-lg max-w-xs text-sm ${
+                  msg.sender_role === "user"
+                    ? "bg-[#1A83FB] text-white shadow-md"
+                    : "bg-gray-200 text-gray-900 shadow-sm"
+                }`}
+              >
+                <span className="block font-bold text-xs mb-1">
+                  {msg.sender_role === "user" ? "Anda" : "Ahli Ikan"}
+                </span>
+                {msg.message}
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500 text-center">Belum ada pesan.</p>
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        <input
+          type="text"
+          className="w-full border p-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1A83FB]"
+          placeholder="Ketik pesan..."
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          disabled={isLoading}
+        />
+        <button
+          onClick={sendMessage}
+          className="bg-[#1A83FB] text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-md hover:bg-[#166ecb] transition-all duration-200 disabled:opacity-50"
+          disabled={isLoading}
+        >
+          {isLoading ? "Mengirim..." : <Send size={18} />}
+        </button>
+      </div>
+    </div>
+  );
+}

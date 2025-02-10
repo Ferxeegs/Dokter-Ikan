@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import UploadFotoButton from '@/app/components/uploads/UploadFoto';
-import UploadVideoButton from '@/app/components/uploads/UploadVideo';
 import UploadFileButton from '@/app/components/uploads/UploadFile';
 import Complaint from '@/app/components/complaints/Complaint';
 import Answer from '@/app/components/answers/Answer';
@@ -111,7 +110,7 @@ export default function UserPost() {
       consultation_topic: judul, // Pastikan variabel ini terdefinisi
       fish_image: JSON.stringify(imageUrls), // Pastikan variabel ini terdefinisi
       complaint: inputText, // Pastikan variabel ini terdefinisi
-      consultation_status: "Pending",
+      consultation_status: "Waiting",
     };
 
     try {
@@ -357,7 +356,6 @@ export default function UserPost() {
 
       <div className="flex gap-12 justify-center mt-6 mx-6 font-sans">
         <UploadFotoButton />
-        <UploadVideoButton />
         <UploadFileButton setImageUrls={setImageUrls} />
         <button
         onClick={handleSubmit}

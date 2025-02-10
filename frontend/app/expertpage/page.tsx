@@ -82,9 +82,14 @@ export default function DashboardExpert() {
             throw new Error("Failed to fetch consultations");
           }
           const data = await response.json();
-          const filteredData = data.filter(
-            (consultation: any) => consultation.fishExpert_id === expertId
-          );
+
+          // Filter hanya konsultasi yang sesuai dengan expertId
+          const filteredData = data
+            .filter((consultation: any) => consultation.fishExpert_id === expertId)
+            .sort((a: ConsultationData, b: ConsultationData) => 
+              new Date(b.UserConsultation.createdAt).getTime() - new Date(a.UserConsultation.createdAt).getTime()
+            );
+
           setConsultations(filteredData);
         } catch (error) {
           console.error("Error fetching consultations:", error);

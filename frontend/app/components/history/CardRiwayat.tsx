@@ -140,14 +140,14 @@ export default function CardRiwayat() {
 
   const getStatusColor = (status: string): string => {
     switch (status) {
-      case "Pending":
+      case "Waiting":
         return "bg-yellow-300 text-black";
-      case "Completed":
+      case "In Consultation":
         return "bg-green-400 text-white";
-      case "In Progress":
-        return "bg-blue-400 text-white";
-      default:
+      case "Closed":
         return "bg-gray-400 text-white";
+      default:
+        return "bg-blue-400 text-white";
     }
   };
 

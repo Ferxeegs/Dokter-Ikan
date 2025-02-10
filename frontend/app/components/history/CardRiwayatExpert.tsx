@@ -29,12 +29,16 @@ const formatTime = (dateString: string): string => {
 
 // Fungsi untuk menentukan warna status berdasarkan status konsultasi
 const getStatusColor = (status: string): string => {
-  const statusColors: { [key: string]: string } = {
-    Pending: "bg-yellow-300 text-black",
-    Completed: "bg-green-400 text-white",
-    "In Progress": "bg-blue-400 text-white",
-  };
-  return statusColors[status] || "bg-gray-400 text-white";
+  switch (status) {
+    case "Waiting":
+      return "bg-yellow-300 text-black";
+    case "In Consultation":
+      return "bg-green-400 text-white";
+    case "Closed":
+      return "bg-gray-400 text-white";
+    default:
+      return "bg-blue-400 text-white";
+  }
 };
 
 const ConsultationCard: React.FC<ConsultationCardProps> = ({

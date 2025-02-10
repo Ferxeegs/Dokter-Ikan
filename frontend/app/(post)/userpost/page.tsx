@@ -72,9 +72,10 @@ export default function UserPost() {
     }
   }, []);
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const fetchFishTypes = async () => {
     try {
-      const response = await fetch('http://localhost:9000/fish-types');
+      const response = await fetch(`${API_BASE_URL}/fish-types`);
       const data = await response.json();
       const transformedData = data.map((fish: any) => ({
         id: fish.fish_type_id, // Ubah fish_type_id ke id
@@ -114,7 +115,7 @@ export default function UserPost() {
     };
 
     try {
-      const response = await fetch("http://localhost:9000/user-consultations", {
+      const response = await fetch(`${API_BASE_URL}/user-consultations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,7 +140,7 @@ export default function UserPost() {
           user_consultation_id: userConsultationId,
         };
 
-        const consultationResponse = await fetch("http://localhost:9000/consultations", {
+        const consultationResponse = await fetch(`${API_BASE_URL}/consultations`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -201,7 +202,7 @@ export default function UserPost() {
       const fileName = url.split("/").pop();
   
       // Kirim request ke backend untuk menghapus gambar dari server lokal
-      const response = await fetch("http://localhost:9000/delete-file", {
+      const response = await fetch(`${API_BASE_URL}/delete-file`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -345,7 +346,7 @@ export default function UserPost() {
                     </button>
 
                     {/* Gambar yang diupload */}
-                    <img src={`http://localhost:9000${url}`} alt="Uploaded" className="w-full h-full object-cover" />
+                    <img src={`${API_BASE_URL}${url}`} alt="Uploaded" className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>

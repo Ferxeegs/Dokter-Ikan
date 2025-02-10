@@ -22,13 +22,15 @@ export default function Register() {
     else if (name === 'email') setEmail(value);
     else if (name === 'password') setPassword(value);
     else if (name === 'otp') setOtp(value);
-  };
 
+  };
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   // Step 1: Kirim OTP ke email
   const handleSendVerificationCode = async (e: React.FormEvent) => {
+    
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:9000/start-registration', {
+      const response = await fetch(`${API_BASE_URL}/start-registration`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -48,7 +50,7 @@ export default function Register() {
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:9000/verify-otp', {
+      const response = await fetch(`${API_BASE_URL}/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp_code }),
@@ -68,7 +70,7 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:9000/complete-registration', {
+      const response = await fetch(`${API_BASE_URL}/complete-registration`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),

@@ -7,6 +7,7 @@ interface UploadFileButtonProps {
 export default function UploadFileButton({ setImageUrls }: UploadFileButtonProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [imageUrls, setImageUrlsState] = useState<string[]>([]); // Menyimpan URL gambar yang diupload
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const handleButtonClick = () => {
     if (fileInputRef.current) {
@@ -25,7 +26,7 @@ export default function UploadFileButton({ setImageUrls }: UploadFileButtonProps
     Array.from(files).forEach((file) => formData.append("files", file));
 
     try {
-      const response = await fetch("http://localhost:9000/upload", {
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: "POST",
         body: formData,
       });

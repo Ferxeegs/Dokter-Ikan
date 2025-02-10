@@ -14,10 +14,11 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  
   const fetchMessages = async () => {
     try {
-      const response = await fetch(`http://localhost:9000/messages/${consultationId}`);
+      const response = await fetch(`${API_BASE_URL}/messages/${consultationId}`);
       if (!response.ok) {
         throw new Error("Gagal mengambil pesan");
       }
@@ -41,7 +42,7 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:9000/messages/send", {
+      const response = await fetch(`${API_BASE_URL}/messages/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

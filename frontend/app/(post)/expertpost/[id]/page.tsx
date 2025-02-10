@@ -47,6 +47,7 @@ export default function ExpertPost() {
     setIsModalPostOpen(false);
   };
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
  const handleSubmit = async () => {
     try {
       const token = Cookies.get("token");
@@ -61,7 +62,7 @@ export default function ExpertPost() {
       const timestamp = new Date().toISOString();
 
       const answerResponse = await fetch(
-        "http://localhost:9000/fish-expert-answers",
+        `${API_BASE_URL}/fish-expert-answers`,
         {
           method: "POST",
           headers: {
@@ -85,7 +86,7 @@ export default function ExpertPost() {
       const fish_expert_answer_id = answerResult.newAnswer.fish_expert_answer_id;
 
       const consultationUpdateResponse = await fetch(
-        `http://localhost:9000/consultations/${id}`,
+        `${API_BASE_URL}/consultations/${id}`,
         {
           method: "PUT",
           headers: {
@@ -117,7 +118,7 @@ export default function ExpertPost() {
 
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:9000/consultations/${id}`);
+        const response = await fetch(`${API_BASE_URL}/consultations/${id}`);
         if (!response.ok) {
           throw new Error('Gagal memuat data');
         }
@@ -149,7 +150,7 @@ export default function ExpertPost() {
     );
   }
 
-  const baseUrl = 'http://localhost:9000';
+  const baseUrl = '${API_BASE_URL}';
   const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${baseUrl}${image}`);
 
   const handleDeleteImage = async (url: string) => { // Terima URL gambar yang akan dihapus
@@ -164,7 +165,7 @@ export default function ExpertPost() {
       const fileName = url.split("/").pop();
   
       // Kirim request ke backend untuk menghapus gambar dari server lokal
-      const response = await fetch("http://localhost:9000/delete-file", {
+      const response = await fetch("${API_BASE_URL}/delete-file", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -271,7 +272,7 @@ export default function ExpertPost() {
                     </button>
 
                     {/* Gambar yang diupload */}
-                    <img src={`http://localhost:9000${url}`} alt="Uploaded" className="w-full h-full object-cover" />
+                    <img src={`${API_BASE_URL}${url}`} alt="Uploaded" className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>

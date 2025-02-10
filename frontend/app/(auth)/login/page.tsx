@@ -14,8 +14,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-
-
+  
   // Fungsi untuk menangani perubahan input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -31,14 +30,14 @@ export default function Login() {
   // Fungsi untuk menangani pengiriman formulir login
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
     const data = {
       email,
       password,
     };
 
     try {
-      const response = await fetch('http://localhost:9000/login', {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -28,6 +28,13 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Mencegah enter menambahkan baris baru di input
+      sendMessage();
+    }
+  };
+
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
@@ -102,6 +109,7 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
           placeholder="Ketik pesan..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          onKeyDown={handleKeyDown} 
           disabled={isLoading}
         />
         <button

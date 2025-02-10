@@ -60,7 +60,7 @@ export const createConsultation = async (req, res) => {
       user_consultation_id, 
       fishExpert_id = null, 
       fish_expert_answer_id = null, 
-      consultation_status = "Pending" 
+      consultation_status = "Waiting" 
     } = req.body;
 
     console.log("Received Data in createConsultation:", req.body);
@@ -245,17 +245,20 @@ export const getConsultation = async (req, res) => {
 
     const complaint = consultation.UserConsultation ? consultation.UserConsultation.complaint : 'Tidak ada keluhan';
     const answer = consultation.FishExpertAnswer ? consultation.FishExpertAnswer.answer : 'Belum ada jawaban dari ahli ikan';
-    const answerImage = consultation.FishExpertAnswer?consultation.FishExpertAnswer.image : 'Tidak ada gambar jawaban';
+    const answerImage = consultation.FishExpertAnswer ? consultation.FishExpertAnswer.image : 'Tidak ada gambar jawaban';
     const consultationTopic = consultation.UserConsultation ? consultation.UserConsultation.consultation_topic : 'Tidak ada topik konsultasi';
-    
+
     const fishExpert = consultation.FishExpert || {};
     const fishExpertName = fishExpert.name || 'Tidak ada nama ahli ikan';
     const fishExpertSpecialization = fishExpert.specialization || 'Tidak ada spesialisasi';
-    
+
     const fishTypeName = consultation.UserConsultation && consultation.UserConsultation.FishType ? consultation.UserConsultation.FishType.name : 'Tidak ada jenis ikan';
     const fishLength = consultation.UserConsultation ? consultation.UserConsultation.fish_length : 'Tidak ada panjang ikan';
     const fishAge = consultation.UserConsultation ? consultation.UserConsultation.fish_age : 'Tidak ada umur ikan';
     const fishImage = consultation.UserConsultation ? consultation.UserConsultation.fish_image : '[]';
+
+    // Tambahkan chat_enabled
+    const chatEnabled = consultation.chat_enabled;
 
     res.json({
       title: consultationTopic,
@@ -263,11 +266,12 @@ export const getConsultation = async (req, res) => {
       answer: answer,
       fish_expert_name: fishExpertName,
       fish_expert_specialization: fishExpertSpecialization,
-      fish_type: fishTypeName,  // Pastikan ini berisi nama ikan
+      fish_type: fishTypeName,
       fish_length: fishLength,
       fish_age: fishAge,
       fish_image: fishImage,
       answer_image: answerImage,
+      chat_enabled: chatEnabled, // Pastikan ini dikirim dalam respons
     });
   } catch (error) {
     console.error('Error:', error.message, error.stack);
@@ -275,6 +279,46 @@ export const getConsultation = async (req, res) => {
   }
 };
 
+export const enableChat = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const consultation = await Consultation.findByPk(id);
+    if (!consultation) {
+      return res.status(404).json({ error: "Konsultasi tidak ditemukan" });
+    }
+
+    // Update chat_enabled menjadi true
+    consultation.chat_enabled = true;
+    await consultation.save();
+
+    res.json({ message: "Fitur chat telah diaktifkan." });
+  } catch (error) {
+    console.error("Error:", error.message);
+    res.status(500).json({ error: "Terjadi kesalahan pada server." });
+  }
+};
+
+export const endConsultation = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Cek apakah konsultasi ada
+    const consultation = await Consultation.findByPk(id);
+    if (!consultation) {
+      return res.status(404).json({ error: "Konsultasi tidak ditemukan" });
+    }
+
+    // Update status konsultasi menjadi "Closed"
+    consultation.consultation_status = "Closed";
+    await consultation.save();
+
+    res.json({ message: "Konsultasi berhasil diakhiri" });
+  } catch (error) {
+    console.error("Error saat mengupdate status konsultasi:", error.message);
+    res.status(500).json({ error: "Terjadi kesalahan saat mengakhiri konsultasi" });
+  }
+};
 
 
 

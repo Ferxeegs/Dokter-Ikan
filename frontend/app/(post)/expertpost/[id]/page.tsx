@@ -8,7 +8,6 @@ import Footer from '../../../components/layout/Footer';
 import Complaint from '@/app/components/complaints/Complaint';
 import Answer from '@/app/components/answers/AnswerExpert';
 import UploadFotoButton from '@/app/components/uploads/UploadFoto';
-import UploadVideoButton from '@/app/components/uploads/UploadVideo';
 import UploadFileButton from '@/app/components/uploads/UploadFile';
 import ModalObat from '@/app/components/modals/ModalMedicine';
 import { useParams } from 'next/navigation';
@@ -95,7 +94,7 @@ export default function ExpertPost() {
           },
           body: JSON.stringify({
             fish_expert_answer_id,
-            consultation_status: "Selesai",
+            consultation_status: "In Consultation",
           }),
         }
       );
@@ -244,7 +243,7 @@ export default function ExpertPost() {
         ):null}
         <ModalObat isOpen={isModalOpen} toggleModal={toggleModal} consultationId={id} />
         {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
-        <div className="flex flex-col w-full p-4 border-2 border-[#0795D2] rounded-lg shadow-md mt-8">
+        <div className="flex flex-col w-full p-4 border-2 border-[#0795D2] rounded-lg shadow-md mt-8 max-w-5xl mx-auto justify-center">
             <div className="flex items-center">
               <img
                 src="/images/icon/ic_profile.png"
@@ -253,7 +252,7 @@ export default function ExpertPost() {
               />
               <textarea
                 className="flex-1 w-full h-32 p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
-                placeholder="Masukkan keluhan yang ingin anda sampaikan..."
+                placeholder="Masukkan jawaban dari keluhan..."
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
               />
@@ -283,7 +282,6 @@ export default function ExpertPost() {
         {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
         <div className="flex gap-12 justify-center mt-6 mx-6 font-sans">
           <UploadFotoButton />
-          <UploadVideoButton />
           <UploadFileButton setImageUrls={setImageUrls} />
           <button
             onClick={handleSubmit}

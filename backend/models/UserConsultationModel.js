@@ -44,7 +44,7 @@ const UserConsultation = db.define(
     consultation_status: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: "Pending", // Nilai default
+      defaultValue: "Waiting", // Nilai default
     },
   },
   {

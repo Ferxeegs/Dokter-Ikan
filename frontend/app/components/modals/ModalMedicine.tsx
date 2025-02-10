@@ -28,6 +28,7 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
   const [selectedMedicines, setSelectedMedicines] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [instruction, setInstruction] = useState<string>('');
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
 
   const token = Cookies.get('token');
   let expert_id: number | null = null;
@@ -56,7 +57,7 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
     );
   };
 
-  const handleSubmit = async () => {
+  const handleConfirm = async () => {
     if (!consultationId || !expert_id) {
       alert('Gagal mendapatkan ID konsultasi atau ID ahli ikan.');
       return;
@@ -95,7 +96,7 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
         })
       ));
 
-      alert('Resep telah dikirim ke klien.');
+      setShowConfirmation(false);
       toggleModal();
     } catch (error) {
       console.error('Error submitting prescription:', error);
@@ -105,8 +106,9 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
 
   if (!isOpen) return null;
 
-  const filteredMedicines = medicines.filter(medicine =>
-    medicine.medicine_name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter daftar obat berdasarkan searchQuery
+  const filteredMedicines = medicines.filter((item) =>
+    item.medicine_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -125,7 +127,6 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
           className="w-full px-4 py-2 mb-4 border rounded-lg text-black"
         />
 
-        {/* Daftar obat dengan scroll sendiri */}
         <div className="max-h-[50vh] overflow-y-auto flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredMedicines.map((item) => (
@@ -151,7 +152,6 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
           </div>
         </div>
 
-        {/* Instruksi dan tombol tetap */}
         <textarea
           placeholder="Tambahkan instruksi..."
           value={instruction}
@@ -160,19 +160,23 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
           rows={3}
         ></textarea>
 
-        <div className="mt-4 text-center">
-          <button
-            className="bg-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full"
-            onClick={handleSubmit}
-          >
-            Kirim Resep ke Klien
-          </button>
-        </div>
-
-        <button className="absolute top-2 right-2 text-black font-bold text-lg" onClick={toggleModal}>
-          &times;
+        <button
+          className="mt-4 bg-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full"
+          onClick={() => setShowConfirmation(true)}
+        >
+          Kirim Resep ke Klien
         </button>
       </div>
+
+      {showConfirmation && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <p className="text-lg text-black font-semibold mb-4">Apakah Anda yakin dengan resep yang diberikan?</p>
+            <button className="bg-green-500 text-white px-4 py-2 rounded-lg mr-2" onClick={handleConfirm}>OK</button>
+            <button className="bg-red-500 text-white px-4 py-2 rounded-lg" onClick={() => setShowConfirmation(false)}>Batal</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

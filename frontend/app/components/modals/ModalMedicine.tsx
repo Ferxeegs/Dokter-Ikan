@@ -29,6 +29,7 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [instruction, setInstruction] = useState<string>('');
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const token = Cookies.get('token');
   let expert_id: number | null = null;
@@ -44,7 +45,7 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
 
   useEffect(() => {
     if (isOpen) {
-      fetch('http://localhost:9000/medicines')
+      fetch(`${API_BASE_URL}/medicines`)
         .then(response => response.json())
         .then(data => setMedicines(data))
         .catch(error => console.error('Error fetching medicines:', error));
@@ -70,7 +71,7 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
     };
 
     try {
-      const prescriptionResponse = await fetch('http://localhost:9000/prescriptions', {
+      const prescriptionResponse = await fetch(`${API_BASE_URL}/prescriptions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestPayload),
@@ -89,7 +90,7 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
       }));
 
       await Promise.all(medicinePayloads.map(payload =>
-        fetch('http://localhost:9000/prescriptions-medicines', {
+        fetch(`${API_BASE_URL}/prescriptions-medicines`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),

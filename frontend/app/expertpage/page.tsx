@@ -34,6 +34,7 @@ export default function DashboardExpert() {
   const [expertData, setExpertData] = useState<ExpertData | null>(null);
   const [expertId, setExpertId] = useState<number | null>(null);
   const [consultations, setConsultations] = useState<ConsultationData[]>([]);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // Fetch expert ID from JWT token
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function DashboardExpert() {
     if (expertId) {
       const fetchExpertData = async () => {
         try {
-          const response = await fetch(`http://localhost:9000/fishexperts/${expertId}`);
+          const response = await fetch(`${API_BASE_URL}/fishexperts/${expertId}`);
           if (!response.ok) {
             throw new Error("Failed to fetch expert data");
           }
@@ -77,7 +78,7 @@ export default function DashboardExpert() {
     if (expertId) {
       const fetchConsultations = async () => {
         try {
-          const response = await fetch(`http://localhost:9000/consultations`);
+          const response = await fetch(`${API_BASE_URL}/consultations`);
           if (!response.ok) {
             throw new Error("Failed to fetch consultations");
           }

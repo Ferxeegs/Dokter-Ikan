@@ -42,6 +42,7 @@ export default function Consultation() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isChatEnabled, setIsChatEnabled] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -50,7 +51,7 @@ export default function Consultation() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:9000/consultations/${consultationId}`);
+        const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}`);
         if (!response.ok) {
           throw new Error('Gagal memuat data');
         }
@@ -85,7 +86,7 @@ export default function Consultation() {
   }
 
   // Add base URL for images
-  const baseUrl = 'http://localhost:9000';
+  const baseUrl = `${API_BASE_URL}`;
   const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${baseUrl}${image}`);
   let fishImageUrl: string[] = [];
   try {
@@ -99,7 +100,7 @@ export default function Consultation() {
   const enableChat = async () => {
     const token = Cookies.get('token');
     try {
-      const response = await fetch(`http://localhost:9000/consultations/${consultationId}/enable-chat`, {
+      const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}/enable-chat`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

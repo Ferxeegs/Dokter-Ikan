@@ -16,6 +16,7 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -23,7 +24,7 @@ export default function Navbar() {
       console.log('Token yang digunakan:', token); // Tambahkan log untuk melihat token
       if (token) {
         try {
-          const response = await fetch('http://localhost:9000/me', {
+          const response = await fetch(`${API_BASE_URL}/me`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },

@@ -40,6 +40,7 @@ export default function CardRiwayat() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [userName, setUserName] = useState<string>("");
   const router = useRouter();
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // Ambil token dari cookies
   const token = Cookies.get("token");
@@ -72,7 +73,7 @@ export default function CardRiwayat() {
     }
 
     try {
-      const response = await fetch(`http://localhost:9000/consultation`, {
+      const response = await fetch(`${API_BASE_URL}/consultation`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

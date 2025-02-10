@@ -17,8 +17,7 @@ const ConsultationRules: React.FC<ConsultationRulesProps> = ({ consultationId, o
     message: '',
     type: null
   });
-
-  const router = useRouter();
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const toggleModal = () => {
     setIsOpen(!isOpen);
@@ -32,7 +31,7 @@ const ConsultationRules: React.FC<ConsultationRulesProps> = ({ consultationId, o
     const token = Cookies.get('token');
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:9000/consultations/${consultationId}/end`, {
+      const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}/end`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

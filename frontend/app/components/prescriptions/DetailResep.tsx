@@ -17,10 +17,11 @@ interface Medicine {
 const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consultationId }) => {
   const [prescriptionData, setPrescriptionData] = useState<Medicine[]>([]); // Menyimpan data obat
   const [instruction, setInstruction] = useState<string>(''); // Menyimpan instruction
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     if (isOpen && consultationId) {
-      fetch(`http://localhost:9000/prescriptionsbyconsultation?consultation_id=${consultationId}`)
+      fetch(`${API_BASE_URL}/prescriptionsbyconsultation?consultation_id=${consultationId}`)
         .then((response) => response.json())
         .then((data) => {
           console.log('Fetched prescription data:', data);

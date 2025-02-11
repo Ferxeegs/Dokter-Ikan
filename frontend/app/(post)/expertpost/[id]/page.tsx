@@ -150,7 +150,7 @@ export default function ExpertPost() {
     );
   }
 
-  const baseUrl = '${API_BASE_URL}';
+  const baseUrl =  `${API_BASE_URL}`;
   const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${baseUrl}${image}`);
 
   const handleDeleteImage = async (url: string) => { // Terima URL gambar yang akan dihapus

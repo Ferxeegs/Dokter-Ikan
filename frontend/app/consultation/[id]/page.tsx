@@ -35,6 +35,7 @@ export default function Consultation() {
     fish_image: string;
     answer_image: string;
     chat_enabled: boolean; // Tambahkan chat_enabled agar bisa dicek
+    consultation_status: string;
   } | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -173,6 +174,7 @@ export default function Consultation() {
         fishImageUrls={fishImageUrl}
         name={data.fish_expert_name}
         specialization={data.fish_expert_specialization}
+        consultation_status={data.consultation_status}
       />
     </div>
 

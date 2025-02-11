@@ -92,6 +92,7 @@ export const getPrescriptionsByConsultationId = async (req, res) => {
           content: medicine?.contain || '',
           dose: medicine?.dosage || '',
           image: medicine?.medicine_image || '',
+          price: medicine?.price || '',
         };
       })
     );

@@ -26,6 +26,10 @@ const Medicine = db.define('Medicine', {
     type: DataTypes.TEXT,  // Dosis obat
     allowNull: false,
   },
+  price: {
+    type: DataTypes.INTEGER, // Menyimpan harga dengan dua angka desimal
+    allowNull: false, // Harga default jika tidak ditentukan
+  },
   medicine_image: {
     type: DataTypes.STRING,  // URL gambar obat (atau path lokal)
     allowNull: true,         // Bisa opsional jika tidak ada gambar

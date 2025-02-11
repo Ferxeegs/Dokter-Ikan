@@ -31,8 +31,14 @@ export const createMedicine = async (req, res) => {
       medicine_name,
       contain,
       dosage,
+      price,
       medicine_image
     } = req.body;
+
+    // Validasi harga harus angka positif
+    if (price < 0) {
+      return res.status(400).json({ message: 'Harga tidak boleh negatif' });
+    }
 
     // Membuat data baru di tabel Medicine
     const newMedicine = await Medicine.create({
@@ -40,6 +46,7 @@ export const createMedicine = async (req, res) => {
       medicine_name,
       contain,
       dosage,
+      price,
       medicine_image
     });
 
@@ -70,14 +77,21 @@ export const updateMedicine = async (req, res) => {
       medicine_name,
       contain,
       dosage,
+      price,
       medicine_image
     } = req.body;
+
+    // Validasi harga tidak boleh negatif
+    if (price < 0) {
+      return res.status(400).json({ message: 'Harga tidak boleh negatif' });
+    }
 
     await medicine.update({
       vendor_id,
       medicine_name,
       contain,
       dosage,
+      price,
       medicine_image
     });
 

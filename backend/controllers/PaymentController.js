@@ -1,83 +1,121 @@
 import Payment from '../models/PaymentModel.js';
 import Prescription from '../models/PrescriptionModel.js';
-import User from '../models/UserModel.js';
+import Consultation from '../models/ConsultationModel.js'; // Relasi ke Consultation
 
-// Fungsi untuk mendapatkan semua data pembayaran
+// Mendapatkan semua pembayaran
 export const getAllPayments = async (req, res) => {
   try {
     const payments = await Payment.findAll({
       include: [
-        { model: Prescription },
-        { model: User }
+        {
+          model: Consultation, 
+          attributes: ['consultation_id', 'user_id', 'fishExpert_id']
+        },
+        {
+          model: Prescription,
+          attributes: ['prescription_id', 'instruction']
+        }
       ]
     });
     res.status(200).json(payments);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data pembayaran', error });
+    res.status(500).json({ message: 'Gagal mengambil data pembayaran', error: error.message });
   }
 };
 
-// Fungsi untuk mendapatkan data pembayaran berdasarkan ID
+// Mendapatkan pembayaran berdasarkan ID
 export const getPaymentById = async (req, res) => {
   try {
     const payment = await Payment.findByPk(req.params.id, {
       include: [
-        { model: Prescription },
-        { model: User }
+        {
+          model: Consultation, 
+          attributes: ['consultation_id', 'user_id', 'fishExpert_id']
+        },
+        {
+          model: Prescription,
+          attributes: ['prescription_id', 'instruction']
+        }
       ]
     });
+
     if (!payment) {
       return res.status(404).json({ message: 'Data pembayaran tidak ditemukan' });
     }
+
     res.status(200).json(payment);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data pembayaran', error });
+    res.status(500).json({ message: 'Gagal mengambil data pembayaran', error: error.message });
   }
 };
 
-// Fungsi untuk menambahkan pembayaran baru
+// Menambahkan pembayaran baru
 export const createPayment = async (req, res) => {
   try {
-    const {
-      medical_prescription_id,
-      user_id,
-      medicine_fee,
-      consultation_fee,
-      total_fee,
-      payment_status
-    } = req.body;
+    const { consultation_id, prescription_id, total_fee, payment_status } = req.body;
+
+    // Validasi input
+    if (!consultation_id || !prescription_id || !total_fee) {
+      return res.status(400).json({ message: 'Harap isi semua data yang diperlukan' });
+    }
 
     const newPayment = await Payment.create({
-      medical_prescription_id,
-      user_id,
-      medicine_fee,
-      consultation_fee,
+      consultation_id,
+      prescription_id,
       total_fee,
-      payment_status
+      payment_status: payment_status || 'pending' // Default pending jika tidak diisi
     });
 
     res.status(201).json({ message: 'Pembayaran berhasil ditambahkan', data: newPayment });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menambahkan pembayaran', error });
+    res.status(500).json({ message: 'Gagal menambahkan pembayaran', error: error.message });
   }
 };
 
-// Fungsi untuk memperbarui data pembayaran berdasarkan ID
+// Memperbarui pembayaran
 export const updatePayment = async (req, res) => {
   try {
+    const { payment_status } = req.body;
     const payment = await Payment.findByPk(req.params.id);
+
     if (!payment) {
       return res.status(404).json({ message: 'Data pembayaran tidak ditemukan' });
     }
 
-    await payment.update(req.body);
+    await payment.update({ payment_status });
+
     res.status(200).json({ message: 'Data pembayaran berhasil diperbarui', data: payment });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal memperbarui data pembayaran', error });
+    res.status(500).json({ message: 'Gagal memperbarui data pembayaran', error: error.message });
   }
 };
 
-// Fungsi untuk menghapus data pembayaran berdasarkan ID
+export const getPaymentByConsultationId = async (req, res) => {
+  try {
+    const { consultation_id } = req.query;
+    
+    if (!consultation_id) {
+      return res.status(400).json({ error: "consultation_id is required" });
+    }
+
+    // Cari pembayaran berdasarkan consultation_id
+    const payment = await Payment.findOne({
+      where: { consultation_id },
+      attributes: ["payment_id"], // Hanya ambil payment_id
+    });
+
+    if (!payment) {
+      return res.status(404).json({ error: "Payment not found for this consultation" });
+    }
+
+    res.json({ payment_id: payment.payment_id });
+  } catch (error) {
+    console.error("Error fetching payment:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Menghapus pembayaran berdasarkan ID
 export const deletePayment = async (req, res) => {
   try {
     const payment = await Payment.findByPk(req.params.id);
@@ -88,6 +126,6 @@ export const deletePayment = async (req, res) => {
     await payment.destroy();
     res.status(200).json({ message: 'Data pembayaran berhasil dihapus' });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus data pembayaran', error });
+    res.status(500).json({ message: 'Gagal menghapus data pembayaran', error: error.message });
   }
 };

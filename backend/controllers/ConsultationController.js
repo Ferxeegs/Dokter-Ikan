@@ -242,7 +242,7 @@ export const getConsultation = async (req, res) => {
     if (!consultation) {
       return res.status(404).json({ error: 'Konsultasi tidak ditemukan' });
     }
-
+    const userName = consultation.User ? consultation.User.name : 'Tidak ada nama pengguna';
     const complaint = consultation.UserConsultation ? consultation.UserConsultation.complaint : 'Tidak ada keluhan';
     const answer = consultation.FishExpertAnswer ? consultation.FishExpertAnswer.answer : 'Belum ada jawaban dari ahli ikan';
     const answerImage = consultation.FishExpertAnswer ? consultation.FishExpertAnswer.image : 'Tidak ada gambar jawaban';
@@ -265,6 +265,7 @@ export const getConsultation = async (req, res) => {
       title: consultationTopic,
       description: complaint,
       answer: answer,
+      name:userName,
       fish_expert_name: fishExpertName,
       fish_expert_specialization: fishExpertSpecialization,
       fish_type: fishTypeName,

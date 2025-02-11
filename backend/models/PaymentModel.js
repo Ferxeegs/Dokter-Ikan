@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 import db from '../config/Database.js';
-import Prescription from './PrescriptionModel.js'; // Asosiasi ke resep medis
-import User from './UserModel.js'; // Asosiasi ke pengguna
+import Prescription from './PrescriptionModel.js'; 
+import Consultation from './ConsultationModel.js'; // Harus diimpor agar foreign key valid
 
 const { DataTypes } = Sequelize;
 
@@ -11,7 +11,15 @@ const Payment = db.define('Payment', {
     primaryKey: true,
     autoIncrement: true
   },
-  medical_prescription_id: {
+  consultation_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Consultation,
+      key: 'consultation_id'
+    }
+  },
+  prescription_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
@@ -19,37 +27,22 @@ const Payment = db.define('Payment', {
       key: 'prescription_id'
     }
   },
-  user_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: User,
-      key: 'user_id'
-    }
-  },
-  medicine_fee: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  consultation_fee: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
   total_fee: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER, // Pakai INTEGER karena ini harga
     allowNull: false
   },
   payment_status: {
     type: DataTypes.STRING,
+    defaultValue: "pending",
     allowNull: false
   }
 }, {
-  tableName: 'payment', // Nama tabel sesuai database
-  timestamps: false // Menggunakan kolom createdAt dan updatedAt
+  tableName: 'payment',
+  timestamps: true 
 });
 
-// Relasi dengan MedicalPrescription dan User
+// Relasi dengan Consultation dan Prescription
+Payment.belongsTo(Consultation, { foreignKey: 'consultation_id' });
 Payment.belongsTo(Prescription, { foreignKey: 'prescription_id' });
-Payment.belongsTo(User, { foreignKey: 'user_id' });
 
 export default Payment;

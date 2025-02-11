@@ -259,6 +259,7 @@ export const getConsultation = async (req, res) => {
 
     // Tambahkan chat_enabled
     const chatEnabled = consultation.chat_enabled;
+    const consultationStatus = consultation.consultation_status;
 
     res.json({
       title: consultationTopic,
@@ -271,7 +272,8 @@ export const getConsultation = async (req, res) => {
       fish_age: fishAge,
       fish_image: fishImage,
       answer_image: answerImage,
-      chat_enabled: chatEnabled, // Pastikan ini dikirim dalam respons
+      chat_enabled: chatEnabled, 
+      consultation_status: consultationStatus,
     });
   } catch (error) {
     console.error('Error:', error.message, error.stack);

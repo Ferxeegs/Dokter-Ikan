@@ -30,6 +30,8 @@ export default function ExpertPost() {
     fish_length: string;
     fish_age: string;
     fish_image: string;
+    name: string;
+    created_at: string;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -219,6 +221,8 @@ export default function ExpertPost() {
             fishLength={data.fish_length} 
             fishAge={data.fish_age} 
             fishImageUrls={fishImageUrls} 
+            senderName={data.name}
+            consultationDate={data.created_at}
           />
 
           <Answer

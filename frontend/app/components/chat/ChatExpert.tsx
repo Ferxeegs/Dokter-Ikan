@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 
 interface Message {
@@ -16,6 +16,9 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const lastMessageRef = useRef<string | null>(null);
+
   const fetchMessages = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/messages/${consultationId}`);
@@ -23,9 +26,19 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
         throw new Error("Gagal mengambil pesan");
       }
       const data = await response.json();
-      setMessages(data.messages);
+
+      if (JSON.stringify(messages) !== JSON.stringify(data.messages)) {
+        setMessages(data.messages);
+      }
     } catch (error) {
       console.error("Error fetching messages:", error);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendMessage();
     }
   };
 
@@ -40,7 +53,7 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           consultation_id: consultationId,
-          sender_role: "expert", // Perbedaan: Mengirim sebagai "expert"
+          sender_role: "expert",
           message: newMessage,
         }),
       });
@@ -50,7 +63,7 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
       }
 
       setNewMessage("");
-      fetchMessages(); // Refresh chat setelah mengirim pesan
+      fetchMessages();
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
@@ -60,17 +73,32 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
 
   useEffect(() => {
     fetchMessages();
-    const interval = setInterval(fetchMessages, 5000); // Auto-refresh chat setiap 5 detik
+    const interval = setInterval(fetchMessages, 2000);
     return () => clearInterval(interval);
   }, [consultationId]);
 
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1].message;
+      if (lastMessage !== lastMessageRef.current) {
+        lastMessageRef.current = lastMessage;
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      }
+    }
+  }, [messages]);
+
   return (
     <div className="mt-10 p-4 border border-gray-300 rounded-lg bg-white shadow-lg max-w-xl mx-auto">
-      <h2 className="text-xl font-semibold text-green-600 text-center mb-3">
-        Chat Konsultasi (Ahli Ikan)
+      <h2 className="text-xl font-semibold text-blue-600 text-center mb-3">
+        Chat Konsultasi
       </h2>
 
-      <div className="max-h-80 overflow-y-auto mb-4 border p-3 rounded-lg bg-gray-50">
+      <div
+        ref={chatContainerRef}
+        className="max-h-80 overflow-y-auto mb-4 border p-3 rounded-lg bg-gray-50"
+      >
         {messages.length > 0 ? (
           messages.map((msg, index) => (
             <div
@@ -80,7 +108,7 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
               <div
                 className={`p-3 rounded-lg max-w-xs text-sm ${
                   msg.sender_role === "expert"
-                    ? "bg-green-600 text-white shadow-md"
+                    ? "bg-blue-600 text-white shadow-md"
                     : "bg-gray-200 text-gray-900 shadow-sm"
                 }`}
               >
@@ -99,15 +127,16 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
       <div className="flex gap-2">
         <input
           type="text"
-          className="w-full border p-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-600"
+          className="w-full border p-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
           placeholder="Ketik pesan..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
           disabled={isLoading}
         />
         <button
           onClick={sendMessage}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-md hover:bg-green-700 transition-all duration-200 disabled:opacity-50"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-md hover:bg-green-700 transition-all duration-200 disabled:opacity-50"
           disabled={isLoading}
         >
           {isLoading ? "Mengirim..." : <Send size={18} />}

@@ -36,6 +36,8 @@ export default function Consultation() {
     answer_image: string;
     chat_enabled: boolean; // Tambahkan chat_enabled agar bisa dicek
     consultation_status: string;
+    name: string;
+    created_at: string;
   } | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -166,6 +168,8 @@ export default function Consultation() {
         fishLength={data.fish_length}
         fishAge={data.fish_age}
         fishImageUrls={fishImageUrls}
+        senderName={data.name}
+        consultationDate={data.created_at}
       />
 
       <Answer

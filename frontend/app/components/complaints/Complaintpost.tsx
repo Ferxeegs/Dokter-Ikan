@@ -6,20 +6,16 @@ interface ComplaintProps {
   fishType: string;
   fishLength: string;
   fishAge: string;
-  fishImageUrls?: string[]; // Opsional
-  senderName: string; // Nama pengirim
-  consultationDate: string; // Tanggal konsultasi
+  fishImageUrls?: string[]; // Jadikan opsional untuk menghindari undefined
 }
 
-const Complaint: React.FC<ComplaintProps> = ({
+const ComplaintPost: React.FC<ComplaintProps> = ({
   title,
   description,
   fishType,
   fishLength,
   fishAge,
-  fishImageUrls = [],
-  senderName,
-  consultationDate,
+  fishImageUrls = [], // Berikan default array kosong
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -35,16 +31,6 @@ const Complaint: React.FC<ComplaintProps> = ({
     setIsModalOpen(false);
     setSelectedImage(null);
   };
-  const formattedDate = new Intl.DateTimeFormat('id-ID', { 
-    day: '2-digit', 
-    month: 'long', 
-    year: 'numeric', 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    second: '2-digit',
-    timeZoneName: 'short' 
-  }).format(new Date(consultationDate));
-  
 
   // Fungsi untuk menutup modal jika klik di luar gambar
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -54,7 +40,7 @@ const Complaint: React.FC<ComplaintProps> = ({
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-2xl p-6 w-full md:w-[40%] h-auto border-4 border-[#1A83FB] overflow-y-auto relative">
+    <div className="bg-white shadow-lg rounded-2xl p-6 w-full md:w-[40%] h-auto border-4 border-[#1A83FB] overflow-y-auto">
       <h3 className="text-xl font-bold text-black mb-4 text-center">
         {title || 'Judul keluhan akan muncul di sini'}
       </h3>
@@ -83,12 +69,6 @@ const Complaint: React.FC<ComplaintProps> = ({
         )}
       </div>
 
-      {/* Nama Pengirim dan Tanggal Konsultasi di Pojok Kanan Bawah */}
-      <div className="absolute bottom-4 right-4 text-right font-sans">
-        <span className="text-sm font-bold text-black">{senderName || 'Pengirim'}</span>
-        <span className="block text-xs text-gray-600">{formattedDate || 'Tanggal Konsultasi'}</span>
-      </div>
-
       {/* Modal untuk menampilkan gambar yang diperbesar */}
       {isModalOpen && selectedImage && (
         <div
@@ -114,4 +94,4 @@ const Complaint: React.FC<ComplaintProps> = ({
   );
 };
 
-export default Complaint;
+export default ComplaintPost;

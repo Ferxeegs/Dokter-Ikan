@@ -5,7 +5,7 @@ import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import UploadFotoButton from '@/app/components/uploads/UploadFoto';
 import UploadFileButton from '@/app/components/uploads/UploadFile';
-import Complaint from '@/app/components/complaints/Complaint';
+import ComplaintPost from '@/app/components/complaints/Complaintpost';
 import Answer from '@/app/components/answers/Answer';
 import jwt_decode from 'jwt-decode';
 import Cookies from 'js-cookie';
@@ -41,6 +41,7 @@ export default function UserPost() {
     answer: string;
     fish_expert_name: string;
     fish_expert_specialization: string;
+    consultation_status: string;
   } | null>(null);
 
   const getUserIdFromToken = (): number | null => {
@@ -249,7 +250,7 @@ export default function UserPost() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-center gap-8 mt-20 mx-6 font-sans">
-        <Complaint 
+        <ComplaintPost
           title={data?.title || 'Judul keluhan akan muncul di sini'} 
           description={data?.description || 'Deskripsi akan muncul di sini setelah Anda mengirimkan keluhan.'}
           fishType={data?.fishType || 'Jenis ikan belum tersedia'}
@@ -262,6 +263,7 @@ export default function UserPost() {
           answer={data?.answer || 'Jawaban akan muncul di sini setelah tenaga ahli memberikan respons.'}
           name={data?.fish_expert_name || 'Nama ahli belum tersedia'}
           specialization={data?.fish_expert_specialization || 'Spesialisasi ahli belum tersedia'}
+          consultation_status={data?.consultation_status || 'Status konsultasi belum tersedia'}
         />
       </div>
       </main>

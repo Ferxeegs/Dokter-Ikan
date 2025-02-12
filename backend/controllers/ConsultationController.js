@@ -211,6 +211,7 @@ export const getConsultation = async (req, res) => {
   try {
     const consultation = await Consultation.findOne({
       where: { consultation_id: id },
+      attributes: ['created_at', 'chat_enabled', 'consultation_status'], // Ambil created_at langsung
       include: [
         {
           model: User,
@@ -218,11 +219,19 @@ export const getConsultation = async (req, res) => {
         },
         {
           model: UserConsultation,
-          attributes: ['user_consultation_id', 'complaint', 'consultation_topic', 'fish_type_id', 'fish_length', 'fish_age', 'fish_image'],
+          attributes: [
+            'user_consultation_id',
+            'complaint',
+            'consultation_topic',
+            'fish_type_id',
+            'fish_length',
+            'fish_age',
+            'fish_image',
+          ],
           include: [
             {
-              model: FishTypes, // Pastikan ada relasi di model Sequelize
-              attributes: ['name'], // Ambil nama ikan
+              model: FishTypes,
+              attributes: ['name'],
             },
           ],
         },
@@ -242,6 +251,7 @@ export const getConsultation = async (req, res) => {
     if (!consultation) {
       return res.status(404).json({ error: 'Konsultasi tidak ditemukan' });
     }
+
     const userName = consultation.User ? consultation.User.name : 'Tidak ada nama pengguna';
     const complaint = consultation.UserConsultation ? consultation.UserConsultation.complaint : 'Tidak ada keluhan';
     const answer = consultation.FishExpertAnswer ? consultation.FishExpertAnswer.answer : 'Belum ada jawaban dari ahli ikan';
@@ -257,15 +267,16 @@ export const getConsultation = async (req, res) => {
     const fishAge = consultation.UserConsultation ? consultation.UserConsultation.fish_age : 'Tidak ada umur ikan';
     const fishImage = consultation.UserConsultation ? consultation.UserConsultation.fish_image : '[]';
 
-    // Tambahkan chat_enabled
+    // Tambahkan chat_enabled, consultation_status, dan created_at
     const chatEnabled = consultation.chat_enabled;
     const consultationStatus = consultation.consultation_status;
+    const createdAt = consultation.created_at; // Ambil tanggal konsultasi dibuat
 
     res.json({
       title: consultationTopic,
       description: complaint,
       answer: answer,
-      name:userName,
+      name: userName,
       fish_expert_name: fishExpertName,
       fish_expert_specialization: fishExpertSpecialization,
       fish_type: fishTypeName,
@@ -275,12 +286,14 @@ export const getConsultation = async (req, res) => {
       answer_image: answerImage,
       chat_enabled: chatEnabled, 
       consultation_status: consultationStatus,
+      created_at: createdAt, // Kirim ke response
     });
   } catch (error) {
     console.error('Error:', error.message, error.stack);
     res.status(500).json({ error: 'Terjadi kesalahan pada server' });
   }
 };
+
 
 export const enableChat = async (req, res) => {
   const { id } = req.params;

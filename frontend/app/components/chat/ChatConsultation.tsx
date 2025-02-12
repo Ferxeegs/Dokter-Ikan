@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 
 interface Message {
@@ -15,7 +15,10 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
   const [newMessage, setNewMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-  
+
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const lastMessageRef = useRef<string | null>(null);
+
   const fetchMessages = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/messages/${consultationId}`);
@@ -23,7 +26,10 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
         throw new Error("Gagal mengambil pesan");
       }
       const data = await response.json();
-      setMessages(data.messages);
+
+      if (JSON.stringify(messages) !== JSON.stringify(data.messages)) {
+        setMessages(data.messages);
+      }
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
@@ -31,7 +37,7 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      e.preventDefault(); // Mencegah enter menambahkan baris baru di input
+      e.preventDefault();
       sendMessage();
     }
   };
@@ -57,7 +63,7 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
       }
 
       setNewMessage("");
-      fetchMessages(); // Refresh chat setelah mengirim pesan
+      fetchMessages();
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
@@ -67,9 +73,21 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
 
   useEffect(() => {
     fetchMessages();
-    const interval = setInterval(fetchMessages, 5000); // Auto-refresh chat setiap 5 detik
+    const interval = setInterval(fetchMessages, 2000);
     return () => clearInterval(interval);
   }, [consultationId]);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1].message;
+      if (lastMessage !== lastMessageRef.current) {
+        lastMessageRef.current = lastMessage;
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      }
+    }
+  }, [messages]);
 
   return (
     <div className="mt-10 p-4 border border-gray-300 rounded-lg bg-white shadow-lg max-w-xl mx-auto">
@@ -77,7 +95,10 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
         Chat Konsultasi
       </h2>
 
-      <div className="max-h-80 overflow-y-auto mb-4 border p-3 rounded-lg bg-gray-50">
+      <div
+        ref={chatContainerRef}
+        className="max-h-80 overflow-y-auto mb-4 border p-3 rounded-lg bg-gray-50"
+      >
         {messages.length > 0 ? (
           messages.map((msg, index) => (
             <div
@@ -110,7 +131,7 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
           placeholder="Ketik pesan..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={handleKeyDown} 
+          onKeyDown={handleKeyDown}
           disabled={isLoading}
         />
         <button

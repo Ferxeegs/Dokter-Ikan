@@ -55,7 +55,9 @@ const Consultation = db.define('Consultation', {
   },
 }, {
   tableName: 'consultation',
-  timestamps: false, // createdAt dan updatedAt otomatis diaktifkan
+  timestamps: true, 
+  createdAt: 'created_at', // Gunakan nama kolom yang benar
+  updatedAt: 'updated_at'// createdAt dan updatedAt otomatis diaktifkan
 });
 
 // Definisi relasi dengan model terkait

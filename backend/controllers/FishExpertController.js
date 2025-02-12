@@ -46,6 +46,7 @@ export const createFishExpert = async (req, res) => {
       phone_number,
       specialization,
       experience,
+      image_url
     });
 
     res.status(201).json({
@@ -57,6 +58,7 @@ export const createFishExpert = async (req, res) => {
         phone_number: newExpert.phone_number,
         specialization: newExpert.specialization,
         experience: newExpert.experience,
+        image: newExpert.image_url,
       },
     });
   } catch (error) {

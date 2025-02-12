@@ -1,9 +1,7 @@
-// const { DataTypes } = require('sequelize');
-// const sequelize = require('../config/Database.js'); // Pastikan ada koneksi database
 import { Sequelize } from "sequelize";
 import db from "../config/Database.js";
 
-const {DataTypes} = Sequelize;
+const { DataTypes } = Sequelize;
 
 const FishExperts = db.define('FishExperts', {
   fishExperts_id: {
@@ -45,10 +43,16 @@ const FishExperts = db.define('FishExperts', {
     allowNull: false,
     defaultValue: 'expert', // Role default sebagai 'expert'
   },
+  image_url: {
+    type: DataTypes.STRING,
+    allowNull: true, // Bisa kosong jika belum ada gambar
+    validate: {
+      isUrl: true, // Validasi format URL
+    },
+  },
 }, {
   tableName: 'fishexperts',
-  timestamps: false, // Mengaktifkan createdAt dan updatedAt
+  timestamps: false, // Menonaktifkan createdAt dan updatedAt
 });
 
-// module.exports = FishExperts;
 export default FishExperts;

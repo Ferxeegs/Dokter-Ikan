@@ -4,6 +4,11 @@ import { Op } from 'sequelize';
 import moment from 'moment';
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+import PasswordReset from '../models/PasswordResetModel.js';
+import crypto from 'crypto';
+
+dotenv.config();
 
 export const startRegistration = async (req, res) => {
     const { email } = req.body;
@@ -137,5 +142,100 @@ export const completeRegistration = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Terjadi kesalahan, coba lagi nanti' });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+
+    // Generate token unik
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpiry = moment().add(10, 'minutes').toDate();
+
+    // Hash token sebelum disimpan untuk keamanan
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    // Simpan token ke database (tabel password_resets)
+    await PasswordReset.create({
+      user_id: user.user_id,
+      reset_token: hashedToken,
+      reset_token_expiry: tokenExpiry
+    });
+
+    // Buat URL reset password
+    const resetUrl = `${process.env.FRONTEND_URL}/resetpassword?token=${resetToken}&email=${email}`;
+
+    // Konfigurasi email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: `"Dokter Ikan" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Reset Password Link',
+      text: `Klik link berikut untuk mereset password Anda: ${resetUrl}\nLink ini berlaku selama 10 menit.`
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({ message: 'Link reset password telah dikirim ke email Anda' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Terjadi kesalahan saat mengirim link reset password' });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { email, token, newPassword } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ message: 'Token tidak valid atau tidak ada' });
+  }
+
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+
+    // Hash token yang dikirim oleh user
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Cari token yang valid di tabel password_resets
+    const passwordReset = await PasswordReset.findOne({
+      where: {
+        user_id: user.user_id,
+        reset_token: hashedToken,
+        reset_token_expiry: { [Op.gt]: new Date() } // Token belum expired
+      }
+    });
+
+    if (!passwordReset) {
+      return res.status(400).json({ message: 'Token tidak valid atau sudah kadaluarsa' });
+    }
+
+    // Hash password baru sebelum menyimpan ke database
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    // Hapus token setelah digunakan
+    await PasswordReset.destroy({ where: { user_id: user.user_id } });
+
+    return res.status(200).json({ message: 'Password berhasil direset' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Terjadi kesalahan saat mereset password' });
   }
 };

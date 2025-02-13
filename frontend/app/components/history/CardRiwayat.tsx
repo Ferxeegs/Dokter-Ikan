@@ -117,7 +117,7 @@ export default function CardRiwayat() {
           console.error("Data tidak ditemukan dalam response");
         }
       } else {
-        console.error("Error:", data.message);
+        
       }
     } catch (error) {
       console.error("Fetch error:", error);

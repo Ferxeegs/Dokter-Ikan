@@ -6,6 +6,7 @@ import {
   updateUser,
   loginUser,
   getMe,
+  updatePassword,
 } from "../controllers/UserController.js";
 import { authenticate } from "../middlewares/authMiddleware.js"; // Impor middleware authenticate
 
@@ -20,6 +21,7 @@ router.get('/users', authenticate, getAllUsers); // Mendapatkan semua pengguna (
 router.get('/users/:id', authenticate, getUserById); // Mendapatkan pengguna berdasarkan ID (diperlukan autentikasi)
 router.put('/users/:id', authenticate, updateUser); // Memperbarui pengguna berdasarkan ID (diperlukan autentikasi)
 router.get('/me', authenticate, getMe);
+router.put('/update-password', authenticate, updatePassword);
 
 
 export default router;

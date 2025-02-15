@@ -174,6 +174,10 @@ export const getMe = async (req, res) => {
       id: user.user_id,
       name: user.name,
       email: user.email,
+      phone_number: user.phone_number,
+      address: user.address,
+      image: user.image,
+      created_at: user.created_at,
       role: 'user',
     });
   } catch (error) {
@@ -182,3 +186,47 @@ export const getMe = async (req, res) => {
   }
 };
 
+export const updatePassword = async (req, res) => {
+  try {
+    // Ambil user ID dari token
+    const userId = req.user.id; 
+
+    // Ambil data dari request body
+    const { currentPassword, newPassword } = req.body;
+
+    // Validasi input
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Semua kolom harus diisi." });
+    }
+
+    // Ambil data user dari database
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User tidak ditemukan." });
+    }
+
+    // Pastikan password lama yang dimasukkan tidak undefined
+    if (!user.password) {
+      return res.status(500).json({ message: "Password lama tidak ditemukan di database." });
+    }
+
+    // Cek apakah password lama cocok
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Kata sandi saat ini salah." });
+    }
+
+    // Hash password baru
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Simpan password baru ke database
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: "Kata sandi berhasil diperbarui." });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server." });
+  }
+};

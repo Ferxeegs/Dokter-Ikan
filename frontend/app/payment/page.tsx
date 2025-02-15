@@ -22,6 +22,7 @@ interface PaymentData {
 export default function Payment() {
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const consultationId = searchParams.get("consultation_id");
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -31,24 +32,23 @@ export default function Payment() {
 
     const controller = new AbortController();
     const signal = controller.signal;
+    let isMounted = true;
 
     const fetchPaymentData = async () => {
       setLoading(true);
+      setError(null);
       try {
         console.log(`Fetching consultation data for ID: ${consultationId}`);
 
-        // Fetch data konsultasi
         const consultationResponse = await fetch(`${API_BASE_URL}/consultations/${consultationId}`, { signal });
         if (!consultationResponse.ok) throw new Error("Gagal mengambil data konsultasi.");
         const consultationData = await consultationResponse.json();
 
-        // Fetch data resep
         console.log(`Fetching prescription data for consultation ID: ${consultationId}`);
         const prescriptionResponse = await fetch(`${API_BASE_URL}/prescriptionsbyconsultation?consultation_id=${consultationId}`, { signal });
         if (!prescriptionResponse.ok) throw new Error("Gagal mengambil data resep.");
         const prescriptionData = await prescriptionResponse.json();
 
-        // Fetch data pembayaran
         console.log(`Fetching payment ID for consultation ID: ${consultationId}`);
         const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`, { signal });
         if (!paymentLookupResponse.ok) throw new Error("Gagal mengambil data ID pembayaran.");
@@ -65,7 +65,6 @@ export default function Payment() {
         if (!paymentResponse.ok) throw new Error("Gagal mengambil data pembayaran.");
         const paymentDetail = await paymentResponse.json();
 
-        // Format tanggal dan waktu
         const formattedDateTime = paymentDetail?.createdAt
           ? new Date(paymentDetail.createdAt).toLocaleString("id-ID", {
               year: "numeric",
@@ -78,44 +77,43 @@ export default function Payment() {
             })
           : "Waktu Tidak Diketahui";
 
-        setPaymentData({
-          userName: consultationData?.name || "Nama Tidak Diketahui",
-          expertName: consultationData?.fish_expert_name || "Expert Tidak Diketahui",
-          medicines: Array.isArray(prescriptionData?.medicines) ? prescriptionData.medicines : [],
-          dateTime: formattedDateTime,
-          totalFee: paymentDetail?.total_fee || 0,
-          chatEnabled: consultationData?.chat_enabled || false,
-        });
+        if (isMounted) {
+          setPaymentData({
+            userName: consultationData?.name || "Nama Tidak Diketahui",
+            expertName: consultationData?.fish_expert_name || "Expert Tidak Diketahui",
+            medicines: Array.isArray(prescriptionData?.medicines) ? prescriptionData.medicines : [],
+            dateTime: formattedDateTime,
+            totalFee: paymentDetail?.total_fee || 0,
+            chatEnabled: consultationData?.chat_enabled || false,
+          });
+        }
       } catch (error) {
-        if (error instanceof Error) {
-          console.error("Terjadi kesalahan saat mengambil data pembayaran:", error.message);
-        } else {
-          console.error("Terjadi kesalahan yang tidak diketahui.");
+        if (isMounted) {
+          setError(error instanceof Error ? error.message : "Terjadi kesalahan yang tidak diketahui.");
         }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchPaymentData();
 
-    return () => controller.abort();
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [consultationId, API_BASE_URL]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen text-xl font-semibold text-blue-600">
-        Memuat data pembayaran...
-      </div>
-    );
+    return <div className="flex items-center justify-center h-screen text-xl font-semibold text-blue-600">Memuat data pembayaran...</div>;
+  }
+
+  if (error) {
+    return <div className="flex items-center justify-center h-screen text-xl font-semibold text-red-600">{error}</div>;
   }
 
   if (!paymentData) {
-    return (
-      <div className="flex items-center justify-center h-screen text-xl font-semibold text-blue-900">
-        Memuat data pembayaran...
-      </div>
-    );
+    return <div className="flex items-center justify-center h-screen text-xl font-semibold text-blue-900">Data pembayaran tidak ditemukan.</div>;
   }
 
   return (

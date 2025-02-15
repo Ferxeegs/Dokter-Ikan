@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation"; // Import useRouter dari next/navigation
+import { useRouter } from "next/navigation";
 
 interface DetailResepProps {
   isOpen: boolean;
@@ -27,13 +27,14 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
   const [prescriptionId, setPrescriptionId] = useState<number | null>(null);
   const [chatEnabled, setChatEnabled] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
-  const [isProcessing, setIsProcessing] = useState<boolean>(false); // State untuk loading
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const isMounted = useRef<boolean>(false);
-  const router = useRouter(); // Menggunakan useRouter dari next/navigation
+  const router = useRouter();
 
   useEffect(() => {
+    if (!isOpen || !consultationId || !API_BASE_URL) return;
     isMounted.current = true;
 
     const fetchPrescriptionData = async () => {
@@ -58,8 +59,6 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
         if (!response.ok) throw new Error("Failed to fetch consultation data");
         const data = await response.json();
 
-        console.log("chat_enabled type:", typeof data?.chat_enabled, "value:", data?.chat_enabled);
-
         if (isMounted.current) {
           setChatEnabled(data?.chat_enabled === true || data?.chat_enabled === "true");
           setTitle(data?.title || "");
@@ -69,10 +68,8 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
       }
     };
 
-    if (isOpen && consultationId) {
-      fetchPrescriptionData();
-      fetchConsultationData();
-    }
+    fetchPrescriptionData();
+    fetchConsultationData();
 
     return () => {
       isMounted.current = false;
@@ -86,36 +83,59 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
 
   const handlePayment = async () => {
     if (!prescriptionId) {
-      alert("Gagal mendapatkan ID resep.");
-      return;
+        alert("Gagal mendapatkan ID resep.");
+        return;
     }
 
-    setIsProcessing(true); // Set state isProcessing agar tombol menampilkan "Memproses..."
+    setIsProcessing(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/payments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          consultation_id: consultationId,
-          prescription_id: prescriptionId,
-          total_fee: totalFee,
-          payment_status: "pending",
-        }),
-      });
+        // Cek apakah consultation_id sudah ada di tabel payment
+        const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`);
 
-      if (!response.ok) throw new Error("Failed to initiate payment");
-      // Tunggu 2 detik sebelum mengarahkan ke halaman pembayaran
-      setTimeout(() => {
-        router.push(`/payment?consultation_id=${consultationId}`);
-      }, 2000);
+        let paymentLookupData;
+        if (paymentLookupResponse.ok) {
+            paymentLookupData = await paymentLookupResponse.json();
+        } else {
+            const errorData = await paymentLookupResponse.json();
+            if (errorData.error === "Payment not found for this consultation") {
+                paymentLookupData = null; // Simpan sebagai null untuk menandakan perlu membuat payment baru
+            } else {
+                throw new Error("Failed to check payment data");
+            }
+        }
+
+        if (paymentLookupData && paymentLookupData.payment_id) {
+            // Jika pembayaran ditemukan, langsung lanjut ke halaman pembayaran
+            router.push(`/payment?consultation_id=${consultationId}`);
+        } else {
+            // Jika pembayaran tidak ditemukan, lakukan POST request untuk membuat payment baru
+            const response = await fetch(`${API_BASE_URL}/payments`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    consultation_id: consultationId,
+                    prescription_id: prescriptionId,
+                    total_fee: totalFee,
+                    payment_status: "pending",
+                }),
+            });
+
+            if (!response.ok) throw new Error("Failed to initiate payment");
+
+            // Setelah berhasil membuat payment, arahkan ke halaman payment
+            setTimeout(() => {
+                router.push(`/payment?consultation_id=${consultationId}`);
+            }, 2000);
+        }
     } catch (error) {
-      console.error("Error processing payment:", error);
-      alert("Terjadi kesalahan saat memproses pembayaran.");
+        console.error("Error processing payment:", error);
+        alert("Terjadi kesalahan saat memproses pembayaran.");
     } finally {
-      setIsProcessing(false);
+        setIsProcessing(false);
     }
-  };
+};
+
 
   return (
     <div
@@ -125,7 +145,7 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
       onClick={toggleModal}
     >
       <div
-        className="bg-white p-6 rounded-2xl w-[90%] md:w-[40%] relative overflow-y-auto max-h-[80vh] flex flex-col shadow-lg transform transition-transform duration-300 scale-100"
+        className="bg-white p-6 rounded-2xl w-[90%] md:w-[40%] relative overflow-hidden max-h-[80vh] flex flex-col shadow-lg transform transition-transform duration-300 scale-100"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl font-bold text-gray-900 text-center mb-4">{'🩺 Resep Obat dari Tenaga Ahli'}</h2>
@@ -134,15 +154,15 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
           <span className="text-blue-600 text-xl">📌</span>
           <div>
             <h3 className="font-semibold text-blue-800">Instruksi Penggunaan</h3>
-            <p className="text-gray-700 text-sm">{instruction ? instruction : "Tidak ada instruksi penggunaan."}</p>
+            <p className="text-gray-700 text-sm">{instruction || "Tidak ada instruksi penggunaan."}</p>
           </div>
         </div>
 
-        <div className="font-sans space-y-4 mb-6">
+        <div className="font-sans space-y-4 mb-6 overflow-y-auto max-h-60">
           {prescriptionData.length > 0 ? (
-            prescriptionData.map((item) => (
+            prescriptionData.map((item, index) => (
               <div
-                key={item.id}
+                key={item.id ?? `medicine-${index}`}
                 className="flex items-center p-4 bg-gradient-to-r from-[#DCF5FF] to-[#80B7F5] rounded-lg shadow hover:scale-105 transition-transform duration-300"
               >
                 <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center overflow-hidden">

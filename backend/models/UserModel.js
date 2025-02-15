@@ -18,7 +18,7 @@ const User = db.define('User', {
     allowNull: false,
     unique: {
       args: true,
-      msg: 'Email sudah terdaftar'  // Pesan error jika email sudah ada
+      msg: 'Email sudah terdaftar'
     },
     validate: {
       isEmail: {
@@ -34,13 +34,38 @@ const User = db.define('User', {
   address: {
     type: DataTypes.STRING
   },
+  phone_number: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: {
+      args: true,
+      msg: 'Nomor HP sudah terdaftar'
+    },
+    validate: {
+      isNumeric: {
+        args: true,
+        msg: 'Nomor HP hanya boleh berisi angka'
+      },
+      len: {
+        args: [10, 15],
+        msg: 'Nomor HP harus terdiri dari 10-15 digit'
+      }
+    }
+  },
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: 'default-avatar.png' // Default gambar profil
+  },
   role: {
     type: DataTypes.ENUM('user', 'admin'),
     defaultValue: 'user'
   }
 }, {
   tableName: 'user',
-  timestamps: false
+  timestamps: true,
+  createdAt: 'created_at', // Gunakan nama kolom yang benar
+  updatedAt: 'updated_at'// createdAt dan updatedAt otomatis diaktifkan
 });
 
 export default User;

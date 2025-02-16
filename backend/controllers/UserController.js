@@ -125,23 +125,25 @@ export const updateUser = async (req, res) => {
       return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
     }
 
-    const { name, email, password, address, role } = req.body;
+    const { name, email, password, address, province, city, district, village, phone_number, image, role } = req.body;
+
+    // Membuat objek update data
+    let updatedData = { name, email, address, province, city, district, village, phone_number, image, role };
 
     // Jika password diberikan, enkripsi password baru
-    let updatedData = { name, email, address, role };
-
     if (password) {
-      updatedData.password = await bcrypt.hash(password, 10);  // Hash password baru
+      updatedData.password = await bcrypt.hash(password, 10);
     }
 
+    // Update data user
     await user.update(updatedData);
 
     res.status(200).json({ message: 'Pengguna berhasil diperbarui', user });
   } catch (error) {
+    console.error('Error updating user:', error);
     res.status(500).json({ message: 'Gagal memperbarui pengguna', error });
   }
 };
-
 
 
 export const getMe = async (req, res) => {
@@ -228,5 +230,34 @@ export const updatePassword = async (req, res) => {
   } catch (error) {
     console.error("Error updating password:", error);
     res.status(500).json({ message: "Terjadi kesalahan pada server." });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // Asumsikan user ID disimpan di req.user setelah autentikasi
+    const { name, address, province, city, district, village, phone_number, image } = req.body;
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.name = name || user.name;
+    user.address = address || user.address;
+    user.province = province || user.province;
+    user.city = city || user.city;
+    user.district = district || user.district;
+    user.village = village || user.village;
+    user.phone_number = phone_number || user.phone_number;
+    user.image = image || user.image;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Profile updated successfully', user });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

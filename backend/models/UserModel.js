@@ -31,9 +31,6 @@ const User = db.define('User', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  address: {
-    type: DataTypes.STRING
-  },
   phone_number: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -52,6 +49,26 @@ const User = db.define('User', {
       }
     }
   },
+  address: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  province: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  city: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  district: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  village: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   image: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -65,7 +82,7 @@ const User = db.define('User', {
   tableName: 'user',
   timestamps: true,
   createdAt: 'created_at', // Gunakan nama kolom yang benar
-  updatedAt: 'updated_at'// createdAt dan updatedAt otomatis diaktifkan
+  updatedAt: 'updated_at' // createdAt dan updatedAt otomatis diaktifkan
 });
 
 export default User;

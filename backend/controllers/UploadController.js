@@ -1,6 +1,12 @@
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const MODEL_API_URL = process.env.MODEL_API_URL;
+
 
 // Tentukan folder penyimpanan file
 const UPLOADS_DIR = 'uploads';
@@ -64,3 +70,4 @@ export const deleteFile = (req, res) => {
         res.json({ message: 'File successfully deleted' });
     });
 };
+

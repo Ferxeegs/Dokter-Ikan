@@ -2,11 +2,13 @@
 
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import { useRef } from "react";
+import React, { useState, useRef } from "react";
 
 export default function FishDetection() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadBoxRef = useRef<HTMLDivElement | null>(null); // Ref untuk elemen box unggah gambar
+  const [imageUrls, setImageUrls] = useState<string[]>([]); // Menyimpan URL gambar yang diupload
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const handleBrowseClick = () => {
     if (fileInputRef.current) {
@@ -24,6 +26,39 @@ export default function FishDetection() {
       });
     }
   };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+  
+    // Pastikan hanya satu file yang diambil
+    const file = files[0];  // Ambil file pertama saja
+  
+    console.log("Selected file:", file.name);
+  
+    const formData = new FormData();
+    formData.append("file", file);  // Append file ke FormData dengan field 'file'
+  
+    try {
+      const response = await fetch(`${API_BASE_URL}/upload-fish`, {
+        method: "POST",
+        body: formData,
+      });
+  
+      const result = await response.json();
+      console.log("Response from server:", result);
+  
+      if (response.ok && result.success) {
+        setImageUrls((prevImageUrls) => [...prevImageUrls, ...result.predictions]); // Simpan hasil prediksi
+      } else {
+        alert("Upload gagal: " + (result.message || "Terjadi kesalahan tak terduga"));
+      }
+    } catch (error) {
+      console.error("Error saat mengupload:", error);
+      alert("Terjadi kesalahan saat mengupload.");
+    }
+  };
+  
 
   return (
     <div
@@ -79,61 +114,68 @@ export default function FishDetection() {
 
         {/* Upload Box */}
         <div className="w-full max-w-lg mx-auto mt-32 p-6 bg-white border-2 border-blue-500 rounded-lg shadow-md">
-  {/* Teks di atas kotak */}
-  <p className="text-left text-lg font-semibold text-gray-700 mb-4">
-    Upload Image for AI Analysis
-  </p>
-  
-  <div
-    ref={uploadBoxRef} // Tambahkan ref ke div box unggah gambar
-    className="w-full max-w-md mx-auto border-dashed border-2 border-gray-300 rounded-lg"
-  >
-    <div className="p-6 flex flex-col items-center justify-center">
-      <div className="flex flex-col items-center">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-12 w-12 text-blue-500"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M3 8a1 1 0 011-1h12a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm5-4a2 2 0 114 0v1h2a1 1 0 011 1v2H5V6a1 1 0 011-1h2V4z"
-            clipRule="evenodd"
-          />
-        </svg>
-        <span className="mt-2 text-sm text-gray-600">
-          Drag & drop your image here <br /> or
-        </span>
-      </div>
-      <button
-        type="button"
-        onClick={handleBrowseClick}
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-      >
-        Browse
-      </button>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) {
-            console.log("File selected:", file.name);
-          }
-        }}
-      />
-    </div>
-  </div>
-  <div className="bg-blue-100 text-blue-600 p-4 mt-4 rounded-lg">
-    <p className="text-sm font-medium">AI Detected Result:</p>
-    <p className="text-sm">Upload an image to see the result.</p>
-  </div>
-</div>
+          {/* Teks di atas kotak */}
+          <p className="text-left text-lg font-semibold text-gray-700 mb-4">
+            Upload Image for AI Analysis
+          </p>
+          
+          <div
+            ref={uploadBoxRef} // Tambahkan ref ke div box unggah gambar
+            className="w-full max-w-md mx-auto border-dashed border-2 border-gray-300 rounded-lg"
+          >
+            <div className="p-6 flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 text-blue-500"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3 8a1 1 0 011-1h12a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm5-4a2 2 0 114 0v1h2a1 1 0 011 1v2H5V6a1 1 0 011-1h2V4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span className="mt-2 text-sm text-gray-600">
+                  Drag & drop your image here <br /> or
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleBrowseClick}
+                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+              >
+                Browse
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </div>
+          </div>
+          <div className="bg-blue-100 text-blue-600 p-4 mt-4 rounded-lg">
+            <p className="text-sm font-medium">AI Detected Result:</p>
+            <p className="text-sm">Upload an image to see the result.</p>
+          </div>
+        </div>
 
-
+        {/* Menampilkan gambar yang diunggah */}
+        {imageUrls.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold text-blue-700 mb-2">Gambar yang Diupload:</h3>
+            <ul className="space-y-2">
+              {imageUrls.map((url, index) => (
+                <li key={index} className="text-sm text-gray-700">
+                  <img src={`${API_BASE_URL}${url}`} alt={`Uploaded Image ${index + 1}`} className="w-full h-auto rounded-lg" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Footer */}

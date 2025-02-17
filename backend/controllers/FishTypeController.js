@@ -23,4 +23,3 @@ export const getFishTypeById = async (req, res) => {
   }
 };
 
-

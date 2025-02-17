@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 import db from '../config/Database.js';
 import Prescription from './PrescriptionModel.js'; 
-import Consultation from './ConsultationModel.js'; // Harus diimpor agar foreign key valid
+import Consultation from './ConsultationModel.js';
 
 const { DataTypes } = Sequelize;
 
@@ -28,8 +28,21 @@ const Payment = db.define('Payment', {
     }
   },
   total_fee: {
-    type: DataTypes.INTEGER, // Pakai INTEGER karena ini harga
+    type: DataTypes.INTEGER,
     allowNull: false
+  },
+  shipping_fee: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  payment_method: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  payment_proof: {
+    type: DataTypes.STRING,
+    allowNull: true // URL atau path gambar bukti pembayaran
   },
   payment_status: {
     type: DataTypes.STRING,
@@ -41,7 +54,6 @@ const Payment = db.define('Payment', {
   timestamps: true 
 });
 
-// Relasi dengan Consultation dan Prescription
 Payment.belongsTo(Consultation, { foreignKey: 'consultation_id' });
 Payment.belongsTo(Prescription, { foreignKey: 'prescription_id' });
 

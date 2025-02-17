@@ -75,20 +75,25 @@ export const createPayment = async (req, res) => {
 // Memperbarui pembayaran
 export const updatePayment = async (req, res) => {
   try {
-    const { payment_status } = req.body;
-    const payment = await Payment.findByPk(req.params.id);
+    const { id } = req.params;
+    const { payment_method, payment_proof } = req.body;
 
+    const payment = await Payment.findByPk(id);
     if (!payment) {
-      return res.status(404).json({ message: 'Data pembayaran tidak ditemukan' });
+      return res.status(404).json({ message: 'Payment not found' });
     }
 
-    await payment.update({ payment_status });
+    payment.payment_method = payment_method;
+    payment.payment_proof = payment_proof;
+    await payment.save();
 
-    res.status(200).json({ message: 'Data pembayaran berhasil diperbarui', data: payment });
+    res.status(200).json({ message: 'Payment updated successfully', payment });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal memperbarui data pembayaran', error: error.message });
+    console.error('Error updating payment:', error); // Tambahkan log error
+    res.status(500).json({ message: 'Error updating payment', error });
   }
 };
+
 
 export const getPaymentByConsultationId = async (req, res) => {
   try {

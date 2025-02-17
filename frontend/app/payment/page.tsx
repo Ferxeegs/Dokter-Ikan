@@ -4,6 +4,7 @@ import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import PaymentModal from "../components/modals/ModalPayment";
 
 interface Medicine {
   title: string;
@@ -17,10 +18,12 @@ interface PaymentData {
   dateTime: string;
   totalFee: number;
   chatEnabled: boolean;
+  shippingFee: number;
 }
 
 export default function Payment() {
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+  const [isModalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -83,8 +86,9 @@ export default function Payment() {
             expertName: consultationData?.fish_expert_name || "Expert Tidak Diketahui",
             medicines: Array.isArray(prescriptionData?.medicines) ? prescriptionData.medicines : [],
             dateTime: formattedDateTime,
-            totalFee: paymentDetail?.total_fee || 0,
+            totalFee: (paymentDetail?.total_fee || 0) + (paymentDetail?.shipping_fee || 0),
             chatEnabled: consultationData?.chat_enabled || false,
+            shippingFee: paymentDetail?.shipping_fee || 0,
           });
         }
       } catch (error) {
@@ -158,6 +162,10 @@ export default function Payment() {
                   <span className="font-semibold text-blue-600">Rp 25.000</span>
                 </li>
               )}
+              <li className="flex justify-between py-3 border-b last:border-none text-gray-800">
+                <span>Biaya Pengiriman</span>
+                <span className="font-semibold text-blue-600">Rp {paymentData.shippingFee.toLocaleString()}</span>
+              </li>
             </ul>
           </div>
 
@@ -167,9 +175,16 @@ export default function Payment() {
             Total Biaya: Rp {paymentData.totalFee.toLocaleString()}
           </h3>
 
-          <button className="mt-6 w-full py-3 bg-blue-500 text-white font-semibold rounded-xl shadow-md transition hover:bg-blue-600 hover:scale-105 focus:ring focus:ring-blue-300">
-            Bayar Sekarang
+          <button onClick={() => setModalOpen(true)} className="mt-6 w-full py-3 bg-blue-500 text-white font-semibold rounded-xl shadow-md transition hover:bg-blue-600 hover:scale-105">
+            Pilih Metode Pembayaran
           </button>
+          {consultationId && (
+            <PaymentModal 
+              isOpen={isModalOpen} 
+              onClose={() => setModalOpen(false)} 
+              consultationId={consultationId}
+            />
+          )}
         </div>
       </main>
       <Footer />

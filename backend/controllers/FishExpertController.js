@@ -67,3 +67,48 @@ export const createFishExpert = async (req, res) => {
   }
 };
 
+
+export const updateFishExpertPassword = async (req, res) => {
+  try {
+    // Ambil fishExpert ID dari token
+    const fishExpertId = req.user.id;
+
+    // Ambil data dari request body
+    const { currentPassword, newPassword } = req.body;
+
+    // Validasi input
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Semua kolom harus diisi." });
+    }
+
+    // Ambil data fishExpert dari database
+    const fishExpert = await FishExperts.findByPk(fishExpertId);
+    if (!fishExpert) {
+      return res.status(404).json({ message: "Fish Expert tidak ditemukan." });
+    }
+
+    // Pastikan password lama yang disimpan di database ada
+    if (!fishExpert.password) {
+      return res.status(500).json({ message: "Password lama tidak ditemukan di database." });
+    }
+
+    // Cek apakah password lama cocok
+    const isMatch = await bcrypt.compare(currentPassword, fishExpert.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Kata sandi saat ini salah." });
+    }
+
+    // Hash password baru
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Simpan password baru ke database
+    fishExpert.password = hashedPassword;
+    await fishExpert.save();
+
+    res.json({ message: "Kata sandi berhasil diperbarui." });
+  } catch (error) {
+    console.error("Error updating fish expert password:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server." });
+  }
+};

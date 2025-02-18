@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { Eye, EyeOff } from 'lucide-react'; // Menggunakan lucide-react untuk ikon
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -10,6 +10,7 @@ export default function ChangePassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [role, setRole] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<{ current: boolean; new: boolean; confirm: boolean }>({
     current: false,
     new: false,
@@ -17,6 +18,12 @@ export default function ChangePassword() {
   });
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  useEffect(() => {
+    // Ambil role dari cookies
+    const userRole = Cookies.get('role');
+    setRole(userRole || 'user'); // Default ke 'user' jika tidak ditemukan
+  }, []);
 
   const handleChangePassword = async () => {
     setMessage('');
@@ -39,14 +46,21 @@ export default function ChangePassword() {
         throw new Error('Token tidak ditemukan, silakan login ulang.');
       }
   
-      const response = await fetch(`${API_BASE_URL}/update-password`, {
+      // Decode token untuk mendapatkan role
+      const decodedToken = JSON.parse(atob(token.split('.')[1]));
+      const role = decodedToken.role;
+  
+      // Tentukan endpoint berdasarkan role
+      const endpoint = role === 'expert' ? 'update-expert-password' : 'update-password';
+  
+      const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          currentPassword: currentPassword,  // Pastikan tidak undefined
+          currentPassword: currentPassword,
           newPassword: newPassword,
         }),
       });

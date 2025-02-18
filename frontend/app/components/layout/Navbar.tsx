@@ -98,7 +98,7 @@ export default function Navbar() {
           </button>
           {dropdownOpen && (
             <div className="absolute right-0 mt-36 w-48 bg-white border rounded-lg shadow-lg py-2">
-              <Link href="/profileuser">
+              <Link href={user.role === 'expert' ? '/profile-expert' : '/profile-user'}>
                 <span className="block px-4 py-2 text-black hover:bg-gray-200 cursor-pointer">Profil</span>
               </Link>
               <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-200 cursor-pointer">Logout</button>

@@ -52,7 +52,9 @@ const FishExperts = db.define('FishExperts', {
   },
 }, {
   tableName: 'fishexperts',
-  timestamps: false, // Menonaktifkan createdAt dan updatedAt
+  timestamps: true,
+  createdAt: 'created_at', // Gunakan nama kolom yang benar
+  updatedAt: 'updated_at', // Menonaktifkan createdAt dan updatedAt
 });
 
 export default FishExperts;

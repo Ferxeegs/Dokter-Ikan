@@ -163,6 +163,11 @@ export const getMe = async (req, res) => {
         id: fishExpert.fishExperts_id,
         name: fishExpert.name,
         email: fishExpert.email,
+        phone_number: fishExpert.phone_number,
+        specialization: fishExpert.specialization,
+        experience: fishExpert.experience,
+        created_at: fishExpert.created_at,
+        image: fishExpert.image_url,
         role: 'expert',
       });
     }

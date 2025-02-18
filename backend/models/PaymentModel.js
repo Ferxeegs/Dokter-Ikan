@@ -33,12 +33,12 @@ const Payment = db.define('Payment', {
   },
   shipping_fee: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     defaultValue: 0
   },
   payment_method: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   payment_proof: {
     type: DataTypes.STRING,

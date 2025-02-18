@@ -83,7 +83,7 @@ export default function Navbar() {
           <span className={`hover:underline ${pathname === '/' ? 'text-[#1A83FB]' : ''}`}>Beranda</span>
         </Link>
         <Link href="/article">
-          <span className={`hover:underline ${pathname === '/artikel' ? 'text-[#1A83FB]' : ''}`}>Artikel</span>
+          <span className={`hover:underline ${pathname === '/article' ? 'text-[#1A83FB]' : ''}`}>Artikel</span>
         </Link>
         <Link href={user?.role === 'expert' ? '/riwayatexpert' : '/riwayat'}>
           <span className={`hover:underline ${(pathname === '/riwayat' || pathname === '/riwayatexpert') ? 'text-[#1A83FB]' : ''}`}>Riwayat</span>

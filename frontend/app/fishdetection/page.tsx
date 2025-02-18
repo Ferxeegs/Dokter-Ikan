@@ -3,12 +3,15 @@
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import React, { useState, useRef } from "react";
+import { useRouter } from 'next/navigation';
 
 export default function FishDetection() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadBoxRef = useRef<HTMLDivElement | null>(null); // Ref untuk elemen box unggah gambar
   const [imageUrls, setImageUrls] = useState<string[]>([]); // Menyimpan URL gambar yang diupload
+  const [isLoading, setIsLoading] = useState(false); // State untuk loading
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const router = useRouter();
 
   const handleBrowseClick = () => {
     if (fileInputRef.current) {
@@ -30,35 +33,40 @@ export default function FishDetection() {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-  
+
     // Pastikan hanya satu file yang diambil
     const file = files[0];  // Ambil file pertama saja
-  
+
     console.log("Selected file:", file.name);
-  
+
     const formData = new FormData();
     formData.append("file", file);  // Append file ke FormData dengan field 'file'
-  
+
+    setIsLoading(true); // Set loading state to true
+
     try {
       const response = await fetch(`${API_BASE_URL}/upload-fish`, {
         method: "POST",
         body: formData,
       });
-  
+
       const result = await response.json();
       console.log("Response from server:", result);
-  
+
       if (response.ok && result.success) {
         setImageUrls((prevImageUrls) => [...prevImageUrls, ...result.predictions]); // Simpan hasil prediksi
+        const className = result.predictions[0].class_name; // Ambil class_name dari hasil prediksi
+        router.push(`/result-fish-detection?class_name=${encodeURIComponent(className)}`); // Redirect to result page with class_name as parameter
       } else {
         alert("Upload gagal: " + (result.message || "Terjadi kesalahan tak terduga"));
       }
     } catch (error) {
       console.error("Error saat mengupload:", error);
       alert("Terjadi kesalahan saat mengupload.");
+    } finally {
+      setIsLoading(false); // Set loading state to false
     }
   };
-  
 
   return (
     <div
@@ -174,6 +182,16 @@ export default function FishDetection() {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-2xl shadow-2xl">
+              <h2 className="text-2xl font-bold text-center text-blue-700 mb-4">Loading...</h2>
+              <p className="text-gray-700 text-center">Please wait while we process your image.</p>
+            </div>
           </div>
         )}
       </div>

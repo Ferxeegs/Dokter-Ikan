@@ -120,6 +120,8 @@ export default function Payment() {
     return <div className="flex items-center justify-center h-screen text-xl font-semibold text-blue-900">Data pembayaran tidak ditemukan.</div>;
   }
 
+  const isShippingFeeValid = paymentData.shippingFee > 0;
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-300 to-blue-100">
       <Navbar />
@@ -175,7 +177,15 @@ export default function Payment() {
             Total Biaya: Rp {paymentData.totalFee.toLocaleString()}
           </h3>
 
-          <button onClick={() => setModalOpen(true)} className="mt-6 w-full py-3 bg-blue-500 text-white font-semibold rounded-xl shadow-md transition hover:bg-blue-600 hover:scale-105">
+          {!isShippingFeeValid && (
+            <p className="text-center text-red-500 mt-4">Biaya pengiriman belum ditentukan. Silakan hubungi admin.</p>
+          )}
+
+          <button
+            onClick={() => setModalOpen(true)}
+            className={`mt-6 w-full py-3 bg-blue-500 text-white font-semibold rounded-xl shadow-md transition hover:bg-blue-600 hover:scale-105 ${!isShippingFeeValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={!isShippingFeeValid}
+          >
             Pilih Metode Pembayaran
           </button>
           {consultationId && (

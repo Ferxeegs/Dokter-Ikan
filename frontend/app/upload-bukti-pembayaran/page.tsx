@@ -72,10 +72,8 @@ export default function UploadPaymentProof() {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    console.log("Selected files:", Array.from(files).map((file) => file.name));
-
     const formData = new FormData();
-    // Tambahkan semua file ke FormData
+ 
     Array.from(files).forEach((file) => formData.append("files", file));
 
     try {

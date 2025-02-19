@@ -51,7 +51,6 @@ export default function FishDetection() {
       });
 
       const result = await response.json();
-      console.log("Response from server:", result);
 
       if (response.ok && result.success) {
         setImageUrls((prevImageUrls) => [...prevImageUrls, ...result.predictions]); // Simpan hasil prediksi

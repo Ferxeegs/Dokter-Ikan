@@ -51,15 +51,6 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({
 }) => {
   const router = useRouter(); 
   
-  console.log({
-    consultationId,
-    userName,
-    consultationTopic,
-    complaint,
-    createdAt,
-    consultationStatus,
-  });// Gunakan useRouter dari next/navigation
-
   const handleClick = () => {
     router.push(`/expertpost/${consultationId}`); // Arahkan ke halaman detail dengan ID konsultasi
   };

@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 import dotenv from "dotenv";
-// import db from "./config/Database.js";  // Pastikan ini sesuai dengan konfigurasi database
+// import db from "./config/Database.js"; 
 import UserRoute from "./routes/UserRoute.js";
 import FishTypes from "./routes/FishTypeRoute.js";
 import FishExperts from "./routes/FishExpertRoute.js";

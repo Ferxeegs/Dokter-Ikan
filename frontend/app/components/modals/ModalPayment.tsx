@@ -10,10 +10,7 @@ interface PaymentModalProps {
 }
 
 const bankAccounts = [
-  { bank: "BCA", accountNumber: "123-456-7890", holder: "PT. Dokter Ikan", logo: "/images/logo/logo_BCA.png" },
-  { bank: "Mandiri", accountNumber: "987-654-3210", holder: "PT. Dokter Ikan", logo: "/images/logo/logo_mandiri.png" },
-  { bank: "BRI", accountNumber: "456-789-1234", holder: "PT. Dokter Ikan", logo: "/images/logo/logo_BRI.png" },
-  { bank: "BNI", accountNumber: "321-654-9876", holder: "PT. Dokter Ikan", logo: "/images/logo/logo_BNI.png" }
+  { bank: "BNI", accountNumber: "026-110-7219", holder: "REKAYASA AGROMARIN INDONESIA", logo: "/images/logo/logo_BNI.png" }
 ];
 
 export default function PaymentModal({ isOpen, onClose, consultationId }: PaymentModalProps) {
@@ -76,24 +73,24 @@ export default function PaymentModal({ isOpen, onClose, consultationId }: Paymen
               onClick={() => handleBankSelection(bank.bank)}
             >
               <div className="flex items-center space-x-3">
-                <img src={bank.logo} alt={`${bank.bank} Logo`} className="w-10 h-10 object-contain" />
-                <p className="text-lg font-semibold text-blue-700">{bank.bank}</p>
+                <img src={bank.logo} alt={`${bank.bank} Logo`} className="w-12 h-12 object-contain" />
+                <div>
+                  <p className="text-lg font-semibold text-blue-700">{bank.bank}</p>
+                  <p className="text-gray-700 text-sm">
+                    No. Rekening:{" "}
+                    <span className="font-medium text-gray-900">{bank.accountNumber}</span>
+                  </p>
+                  <p className="text-gray-700 text-sm">
+                    Atas Nama: <span className="font-normal text-gray-900">{bank.holder}</span>
+                  </p>
+                </div>
               </div>
-              <div className="space-y-1 ml-4">
-                <p className="text-gray-700 text-sm">
-                  No. Rekening:{" "}
-                  <span className="font-medium text-gray-900">{bank.accountNumber}</span>
-                </p>
-                <button
-                  onClick={() => copyToClipboard(bank.accountNumber)}
-                  className="mt-1 text-xs text-blue-600 hover:underline"
-                >
-                  Salin
-                </button>
-                <p className="text-gray-700 text-sm">
-                  Atas Nama: <span className="font-medium text-gray-900">{bank.holder}</span>
-                </p>
-              </div>
+              <button
+                onClick={() => copyToClipboard(bank.accountNumber)}
+                className="text-xs text-blue-600 hover:underline"
+              >
+                Salin
+              </button>
             </div>
           ))}
         </div>

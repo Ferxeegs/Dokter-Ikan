@@ -6,7 +6,7 @@ import FormData from "form-data";  // Import form-data
 // Konfigurasi Multer untuk menyimpan file di folder 'uploads'
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');  // Tentukan folder upload
+    cb(null, 'uploads');  // Tentukan folder upload
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + file.originalname); // Menyimpan file dengan timestamp

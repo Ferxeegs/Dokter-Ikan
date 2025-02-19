@@ -20,14 +20,15 @@ export default function Footer() {
           <div className="text-left mt-4">
             <p className="text-black font-semibold mb-4">Layanan Pengaduan</p>
             <p className="text-black font-semibold text-sm mb-2">PT Rekayasa Agromarin Indonesia</p>
-            <p className="text-black text-sm mb-2">Jl. H.R. Rasuna Said, Jakarta Selatan</p>
-            <p className="text-black text-sm">help@dokterikan.com / 012-3456-7890</p>
+            <p className="text-black text-sm mb-2">Citra Onyx, c22 Tanjung Uban Selatan, Bintan, Kepulauan Riau</p>
+            <p className="text-black text-sm">rekayasaagromarin@gmail.com / 08117775353</p>
           </div>
           <div className="text-left -mt-4">
             <p className="text-black font-semibold text-sm">Kolaborasi dengan:</p>
             <div className="flex gap-4 mb-0">
-              <Image src="/images/logo/logo_cemebsa.png" alt="Partner 1" width={120} height={50} />
-              <Image src="/images/logo/logo_rai.png" alt="Partner 2" width={50} height={50} />
+              <Image src="/images/logo/logo_undip.png" alt="Partner 1" width={50} height={20} />
+              <Image src="/images/logo/logo_cemebsacut.png" alt="Partner 2" width={120} height={50} />
+              <Image src="/images/logo/logo_rai.png" alt="Partner 3" width={50} height={50} />
             </div>
             <p className="text-black font-semibold -mt-1">Follow Us:</p>
             <div className="flex gap-4 mb-1">

@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Head from 'next/head';
-import { Open_Sans } from 'next/font/google';
-import { Lato } from 'next/font/google';
-
-
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,9 +25,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
-        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

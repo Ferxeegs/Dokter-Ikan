@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 interface AnswerProps {
   answer: string;
@@ -41,13 +42,17 @@ const Answer: React.FC<AnswerProps> = ({ answer, name, specialization, fishImage
       <div className="flex space-x-2">
         {fishImageUrls.length > 0 ? (
           fishImageUrls.map((url, index) => (
-            <img
-              key={index}
-              src={url}
-              alt={`Fish Image ${index + 1}`}
-              className="w-24 h-24 object-cover rounded-lg cursor-pointer"
-              onClick={() => openModal(url)}
-            />
+            <div key={index} className="w-24 h-24 relative">
+              <Image
+                src={url}
+                alt={`Fish Image ${index + 1}`}
+                layout="fill"
+                objectFit="cover"
+                className="rounded-lg cursor-pointer"
+                onClick={() => openModal(url)}
+                unoptimized={true}
+              />
+            </div>
           ))
         ) : (
           <p className="text-sm text-gray-500"></p>
@@ -58,7 +63,9 @@ const Answer: React.FC<AnswerProps> = ({ answer, name, specialization, fishImage
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={handleOverlayClick}>
           <div className="relative bg-white p-4 rounded-lg">
             <span onClick={closeModal} className="absolute top-0 right-0 p-2 cursor-pointer text-black font-bold">X</span>
-            <img src={selectedImage} alt="Selected Fish" className="max-w-[80vw] max-h-[80vh] object-contain" />
+            <div className="max-w-[80vw] max-h-[80vh] relative">
+              <Image src={selectedImage} alt="Selected Fish" layout="fill" objectFit="contain" />
+            </div>
           </div>
         </div>
       )}
@@ -75,7 +82,7 @@ const Answer: React.FC<AnswerProps> = ({ answer, name, specialization, fishImage
       )}
 
       <div className="absolute bottom-4 left-4 flex items-center space-x-2">
-        <img src="/images/icon/ic_profile.png" alt="Foto Profil" className="w-10 h-10 rounded-full" />
+        <Image src="/images/icon/ic_profile.png" alt="Foto Profil" width={40} height={40} className="rounded-full" />
         <div className="flex flex-col text-left font-sans">
           <span className="text-sm font-bold text-black">{name || 'Nama Tenaga Ahli'}</span>
           <span className="text-xs font-light text-black italic">{specialization || 'Spesialisasi'}</span>

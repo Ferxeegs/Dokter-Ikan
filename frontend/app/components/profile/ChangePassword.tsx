@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Cookies from 'js-cookie';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -10,7 +10,6 @@ export default function ChangePassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [role, setRole] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<{ current: boolean; new: boolean; confirm: boolean }>({
     current: false,
     new: false,
@@ -18,12 +17,6 @@ export default function ChangePassword() {
   });
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-  useEffect(() => {
-    // Ambil role dari cookies
-    const userRole = Cookies.get('role');
-    setRole(userRole || 'user'); // Default ke 'user' jika tidak ditemukan
-  }, []);
 
   const handleChangePassword = async () => {
     setMessage('');

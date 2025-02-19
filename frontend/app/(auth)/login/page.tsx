@@ -7,7 +7,7 @@ import { toast, ToastContainer } from 'react-toastify'; // Import notifikasi
 import 'react-toastify/dist/ReactToastify.css'; // Gaya notifikasi
 import Cookies from 'js-cookie';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
-
+import Image from 'next/image';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -24,7 +24,7 @@ export default function Login() {
 
   // Fungsi untuk menyimpan token di cookies
   const saveToken = (token: string) => {
-    Cookies.set('token', token, { expires: 7, secure: true, sameSite: 'Strict' });
+    Cookies.set('token', token, { expires: 7, secure: false, sameSite: 'Strict' });
   };
 
   // Fungsi untuk menangani pengiriman formulir login
@@ -48,10 +48,7 @@ export default function Login() {
       if (response.ok) {
         const result = await response.json();
         saveToken(result.token); // Simpan token di cookies
-
-        // console.log('Login successful:', result);
         toast.success('Login successful! Redirecting...');
-
         // Arahkan berdasarkan peran
         setTimeout(() => {
           if (result.user.role === 'user') {
@@ -114,14 +111,18 @@ export default function Login() {
           >
             {/* Logo */}
             <div className="flex items-center px-3 py-3 bg-white">
-              <img
+              <Image
                 src="/images/logo/logo_dokterikan512.png"
                 alt="Dokter Ikan Logo"
+                width={40}
+                height={40}
                 className="w-10 h-10"
               />
-              <img
+              <Image
                 src="/images/logo/logo_dokterikan.png"
                 alt="Dokter Ikan Logo"
+                width={60}
+                height={24}
                 className="w-15 h-6"
               />
             </div>
@@ -242,5 +243,4 @@ export default function Login() {
       <ToastContainer autoClose={2000} hideProgressBar={false} /> {/* Menambahkan ToastContainer */}
     </div>
   );
-  
 }

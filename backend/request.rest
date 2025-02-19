@@ -1,0 +1,13 @@
+// create a user
+POST Http://localhost:5000/users
+Content-Type:  application/json
+
+{
+    "name" : "Aku Raja",
+    "email" : "AkuRaja@gmail.com",
+    "password" : "1234",
+    "address" : "ngawi",
+    "role" : "admin"
+}
+###
+GET Http://localhost:5000/users

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 interface ComplaintProps {
   title: string;
@@ -70,13 +71,17 @@ const Complaint: React.FC<ComplaintProps> = ({
       <div className="flex space-x-2">
         {fishImageUrls.length > 0 ? (
           fishImageUrls.map((url, index) => (
-            <img
-              key={index}
-              src={url}
-              alt={`Fish Image ${index + 1}`}
-              className="w-24 h-24 object-cover rounded-lg cursor-pointer"
-              onClick={() => openModal(url)} // Membuka modal dengan gambar yang diklik
-            />
+            <div key={index} className="w-24 h-24 relative">
+              <Image
+                src={url}
+                alt={`Fish Image ${index + 1}`}
+                layout="fill"
+                objectFit="cover"
+                className="rounded-lg cursor-pointer"
+                onClick={() => openModal(url)} 
+                unoptimized={true}
+              />
+            </div>
           ))
         ) : (
           <p className="text-sm text-gray-500"></p>
@@ -102,11 +107,15 @@ const Complaint: React.FC<ComplaintProps> = ({
             >
               X
             </span>
-            <img
-              src={selectedImage}
-              alt="Selected Fish"
-              className="max-w-[80vw] max-h-[80vh] object-contain"
-            />
+            <div className="relative max-w-[80vw] max-h-[80vh]">
+              <Image
+                src={selectedImage}
+                alt="Selected Fish"
+                layout="fill"
+                objectFit="contain"
+                unoptimized={true}
+              />
+            </div>
           </div>
         </div>
       )}

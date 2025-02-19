@@ -4,6 +4,12 @@ import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import React, { useState, useRef } from "react";
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+
+interface Prediction {
+  image_url: string;
+  class_name: string;
+}
 
 export default function FishDetection() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -53,7 +59,7 @@ export default function FishDetection() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        setImageUrls((prevImageUrls) => [...prevImageUrls, ...result.predictions]); // Simpan hasil prediksi
+        setImageUrls((prevImageUrls) => [...prevImageUrls, ...result.predictions.map((prediction: Prediction) => prediction.image_url)]); // Simpan URL gambar hasil prediksi
         const className = result.predictions[0].class_name; // Ambil class_name dari hasil prediksi
         router.push(`/result-fish-detection?class_name=${encodeURIComponent(className)}`); // Redirect to result page with class_name as parameter
       } else {
@@ -177,7 +183,7 @@ export default function FishDetection() {
             <ul className="space-y-2">
               {imageUrls.map((url, index) => (
                 <li key={index} className="text-sm text-gray-700">
-                  <img src={`${API_BASE_URL}${url}`} alt={`Uploaded Image ${index + 1}`} className="w-full h-auto rounded-lg" />
+                  <Image src={url} alt={`Uploaded Image ${index + 1}`} width={500} height={500} className="w-full h-auto rounded-lg" />
                 </li>
               ))}
             </ul>

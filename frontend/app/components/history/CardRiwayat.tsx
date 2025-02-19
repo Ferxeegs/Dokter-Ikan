@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import jwt_decode from "jwt-decode";
-import Cookies from "js-cookie"; // Import js-cookie
+import Cookies from "js-cookie";
+import Image from 'next/image';
 
 // Menambahkan tipe untuk data konsultasi yang mencakup hasil join dari beberapa tabel
 interface Consultation {
@@ -36,6 +37,27 @@ interface UserFromToken {
   name: string;
 }
 
+interface ApiResponse {
+  data: {
+    consultation_id: number;
+    user_consultation_id: number;
+    fishExpert_id: number | null;
+    fish_expert_answer_id: number | null;
+    consultation_status: string;
+    "UserConsultation.fish_type_id": number;
+    "UserConsultation.fish_age": string;
+    "UserConsultation.fish_length": string;
+    "UserConsultation.consultation_topic": string;
+    "UserConsultation.fish_image": string;
+    "UserConsultation.complaint": string;
+    "UserConsultation.created_at": string;
+    "FishExpert.name": string | null;
+    "FishExpert.specialization": string | null;
+    "FishExpertAnswer.answer": string | null;
+    "FishExpertAnswer.created_at": string | null;
+  }[];
+}
+
 export default function CardRiwayat() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [userName, setUserName] = useState<string>("");
@@ -58,15 +80,7 @@ export default function CardRiwayat() {
     return null;
   };
 
-  useEffect(() => {
-    const user = getUserFromToken(token);
-    if (user) {
-      setUserName(user.name);
-      fetchConsultations(user.id);
-    }
-  }, [token]);
-
-  const fetchConsultations = async (id: number) => {
+  const fetchConsultations = useCallback(async () => {
     if (!token) {
       console.error("Token tidak ditemukan!");
       return;
@@ -80,12 +94,12 @@ export default function CardRiwayat() {
         },
       });
 
-      const data = await response.json();
+      const data: ApiResponse = await response.json();
 
       if (response.ok) {
         if (data && data.data) {
           // Transformasi data agar sesuai dengan tipe `Consultation`
-          const transformedData = data.data.map((item: any) => ({
+          const transformedData = data.data.map((item) => ({
             consultation_id: item.consultation_id,
             user_consultation_id: item.user_consultation_id,
             fishExpert_id: item.fishExpert_id,
@@ -114,12 +128,20 @@ export default function CardRiwayat() {
           console.error("Data tidak ditemukan dalam response");
         }
       } else {
-        
+        console.error("Response error:", response.statusText);
       }
     } catch (error) {
       console.error("Fetch error:", error);
     }
-  };
+  }, [API_BASE_URL, token]);
+
+  useEffect(() => {
+    const user = getUserFromToken(token);
+    if (user) {
+      setUserName(user.name);
+      fetchConsultations();
+    }
+  }, [token, fetchConsultations]);
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -175,10 +197,13 @@ export default function CardRiwayat() {
               onClick={() => handleCardClick(consultation_id)} // Tambahkan event onClick
             >
               <div className="flex flex-row">
-                <img
+                <Image
                   src={fish_image || "/profil.png"}
                   alt="Konsultasi Icon"
-                  className="w-16 h-16 mb-4 rounded-full mr-4 bg-blue-400"
+                  width={64}
+                  height={64}
+                  className="mb-4 rounded-full mr-4 bg-blue-400"
+                  unoptimized={true}
                 />
                 <div className="flex flex-col text-black text-xs justify-center text-left min-w-32">
                   <p className="font-bold text-sm">{userName || "Loading..."}</p>

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState } from 'react';
 import Head from 'next/head';
@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import Image from 'next/image';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -22,12 +23,12 @@ export default function Register() {
     else if (name === 'email') setEmail(value);
     else if (name === 'password') setPassword(value);
     else if (name === 'otp') setOtp(value);
-
   };
+
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   // Step 1: Kirim OTP ke email
   const handleSendVerificationCode = async (e: React.FormEvent) => {
-    
     e.preventDefault();
     try {
       const response = await fetch(`${API_BASE_URL}/start-registration`, {
@@ -41,7 +42,7 @@ export default function Register() {
       } else {
         toast.error('Failed to send OTP. Try again.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error sending OTP.');
     }
   };
@@ -61,7 +62,7 @@ export default function Register() {
       } else {
         toast.error('Invalid OTP. Try again.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error verifying OTP.');
     }
   };
@@ -81,7 +82,7 @@ export default function Register() {
       } else {
         toast.error('Registration failed. Try again.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error during registration.');
     }
   };
@@ -118,14 +119,18 @@ export default function Register() {
           >
             {/* Logo */}
             <div className="flex items-center px-4 py-2 bg-white">
-              <img
+              <Image
                 src="/images/logo/logo_dokterikan512.png"
                 alt="Dokter Ikan Logo"
+                width={32}
+                height={32}
                 className="w-8 h-8"
               />
-              <img
+              <Image
                 src="/images/logo/logo_dokterikan.png"
                 alt="Dokter Ikan Text Logo"
+                width={60}
+                height={24}
                 className="w-15 h-6 ml-2"
               />
             </div>

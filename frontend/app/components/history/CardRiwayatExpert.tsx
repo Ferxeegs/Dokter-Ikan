@@ -1,10 +1,11 @@
 'use client';
 
 import React from "react";
-import { useRouter } from "next/navigation"; // Import useRouter dari next/navigation
+import { useRouter } from "next/navigation";
+import Image from 'next/image';
 
 interface ConsultationCardProps {
-  consultationId: string; // ID unik konsultasi
+  consultationId: string;
   userName: string;
   consultationTopic: string;
   complaint: string;
@@ -52,19 +53,21 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({
   const router = useRouter(); 
   
   const handleClick = () => {
-    router.push(`/expertpost/${consultationId}`); // Arahkan ke halaman detail dengan ID konsultasi
+    router.push(`/expertpost/${consultationId}`);
   };
 
   return (
     <button
       className="overflow-hidden flex flex-col w-full bg-white border-blue-400 border-2 text-white px-8 py-10 rounded-xl shadow-lg hover:shadow-2xl transition mx-2 my-2 max-w-md"
-      onClick={handleClick} // Gunakan handleClick untuk navigasi
+      onClick={handleClick}
     >
       {/* Header Card */}
       <div className="flex flex-row">
-        <img
+        <Image
           src="/profil.png"
           alt="Konsultasi Icon"
+          width={64}
+          height={64}
           className="w-16 h-16 mb-4 rounded-full mr-4 bg-blue-400"
         />
         <div className="flex flex-col text-black text-xs justify-center text-left min-w-32">

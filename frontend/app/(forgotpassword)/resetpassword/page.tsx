@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Head from 'next/head';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Image from 'next/image';
 
 const ResetPassword = () => {
   const router = useRouter();
@@ -43,7 +44,7 @@ const ResetPassword = () => {
       if (!response.ok) throw new Error('Gagal mereset password, coba lagi!');
       toast.success('Password berhasil diubah!');
       router.push('/login');
-    } catch (error) {
+    } catch {
       toast.error('Gagal mereset password, coba lagi!');
     } finally {
       setLoading(false);
@@ -71,8 +72,8 @@ const ResetPassword = () => {
         <div className="relative z-10 flex flex-col items-center justify-center px-6 py-8 mx-auto w-full md:h-screen lg:py-0">
           <div className="relative w-full bg-white rounded-lg shadow max-w-md xl:p-0">
             <div className="flex items-center px-3 py-3 bg-white">
-              <img src="/images/logo/logo_dokterikan512.png" alt="Dokter Ikan Logo" className="w-10 h-10" />
-              <img src="/images/logo/logo_dokterikan.png" alt="Dokter Ikan Logo" className="w-15 h-6" />
+              <Image src="/images/logo/logo_dokterikan512.png" alt="Dokter Ikan Logo" width={40} height={40} />
+              <Image src="/images/logo/logo_dokterikan.png" alt="Dokter Ikan Logo" width={60} height={24} />
             </div>
 
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
@@ -144,4 +145,10 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+const ResetPasswordPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <ResetPassword />
+  </Suspense>
+);
+
+export default ResetPasswordPage;

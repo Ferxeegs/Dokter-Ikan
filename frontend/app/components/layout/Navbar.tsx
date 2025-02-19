@@ -43,7 +43,7 @@ export default function Navbar() {
     };
 
     fetchUserData();
-  }, []);
+  }, [API_BASE_URL]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

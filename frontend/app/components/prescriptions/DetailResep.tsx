@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
 
 interface DetailResepProps {
   isOpen: boolean;
@@ -26,7 +27,6 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
   const [instruction, setInstruction] = useState<string>("");
   const [prescriptionId, setPrescriptionId] = useState<number | null>(null);
   const [chatEnabled, setChatEnabled] = useState<boolean>(false);
-  const [title, setTitle] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -61,7 +61,6 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
 
         if (isMounted.current) {
           setChatEnabled(data?.chat_enabled === true || data?.chat_enabled === "true");
-          setTitle(data?.title || "");
         }
       } catch (error) {
         console.error("Error fetching consultation data:", error);
@@ -167,7 +166,7 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
               >
                 <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center overflow-hidden">
                   {item.image ? (
-                    <img src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded-lg" />
+                    <Image src={item.image} alt={item.title} width={80} height={80} className="object-cover rounded-lg" unoptimized={true}/>
                   ) : (
                     <span className="text-xs text-gray-500 text-center">Gambar Tidak Tersedia</span>
                   )}

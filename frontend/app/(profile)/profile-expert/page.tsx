@@ -50,7 +50,7 @@ export default function ProfileExpert() {
     };
 
     fetchExpertData();
-  }, []);
+  }, [API_BASE_URL]);
 
   if (!fishExpert) {
     return <p className="text-center mt-10 text-gray-800">Loading...</p>;

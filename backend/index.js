@@ -28,14 +28,14 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: {
-        secure: 'auto'  // Atur sesuai kebutuhan (true jika menggunakan HTTPS)
+        secure: 'false'  // Atur sesuai kebutuhan (true jika menggunakan HTTPS)
     }
 }));
 
 // Konfigurasi CORS
 app.use(cors({
     credentials: true,
-    origin: 'http://localhost:3000'  // Sesuaikan dengan frontend kamu
+    origin: 'https://dokterikan-rkkg4fia1-fadlils-projects.vercel.app'  // Sesuaikan dengan frontend kamu
 }));
 
 app.use(express.json());

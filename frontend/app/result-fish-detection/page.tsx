@@ -12,6 +12,8 @@ interface FishData {
   name: string;
   habitat: string;
   description: string;
+  other_name: string;
+  latin_name: string;
   image: string;
 }
 
@@ -52,8 +54,8 @@ export default function DetectionResult() {
 
       {/* Hasil Deteksi */}
       <main className="max-w-4xl mx-auto mt-10 p-8 bg-white rounded-3xl shadow-2xl border border-gray-200">
-        <h2 className="text-center text-2xl font-extrabold text-blue-700 mb-2">Hasil Deteksi Penyakit Ikan dengan AI</h2>
-        <p className="text-center text-gray-500 mb-6">Hasil deteksi spesies dan penyakit ikan menggunakan kecerdasan buatan</p>
+        <h2 className="text-center text-3xl font-extrabold text-blue-700 mb-4">Hasil Deteksi Penyakit Ikan dengan AI</h2>
+        <p className="text-center text-gray-500 mb-8">Hasil deteksi spesies dan penyakit ikan menggunakan kecerdasan buatan</p>
 
         {errorMessage ? (
           <p className="text-center text-red-500">{errorMessage}</p>
@@ -64,11 +66,11 @@ export default function DetectionResult() {
               alt={fishData.name}
               width={250}
               height={180}
-              className="rounded-xl border border-gray-300 shadow-sm"
+              className="rounded-full border-4 border-blue-300 shadow-lg object-cover"
               unoptimized={true} // Menghindari optimasi Next.js sehingga bisa pakai gambar dari domain eksternal tanpa konfigurasi tambahan
             />
-            <h3 className="text-xl font-semibold mt-4 text-gray-700">{fishData.name}</h3>
-            <p className="italic text-gray-500">{fishData.habitat}</p>
+            <h3 className="text-2xl font-semibold mt-4 text-gray-700">{fishData.name} <span className="text-gray-500 italic">({fishData.latin_name})</span></h3>
+            <p className="italic text-gray-500 mt-2 text-center">{fishData.other_name}</p>
           </div>
         ) : (
           <p className="text-center text-gray-500">Memuat data ikan...</p>

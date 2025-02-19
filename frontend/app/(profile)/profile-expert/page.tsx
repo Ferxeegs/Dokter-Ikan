@@ -63,7 +63,14 @@ export default function ProfileExpert() {
         <div className="max-w-4xl w-full bg-white/30 backdrop-blur-lg shadow-2xl rounded-xl p-8 border border-white/40">
           <div className="relative flex items-center space-x-6">
             <div className="relative">
-              <Image src={fishExpert.image || '/default-avatar.png'} alt="Profile Picture" width={96} height={96} className="rounded-full border-2 border-gray-300 shadow-md" unoptimized />
+              <Image
+                src={fishExpert.image || '/default-avatar.png'}
+                alt="Profile Picture"
+                width={96}
+                height={96}
+                className="rounded-full border-2 border-gray-300 shadow-md object-cover"
+                unoptimized
+              />
               <div className="absolute bottom-0 right-0 bg-blue-600 p-1 rounded-full cursor-pointer">
                 <Image src="/images/icon/ic_foto.png" alt="Edit" width={16} height={16} />
               </div>

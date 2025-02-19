@@ -24,8 +24,8 @@ const bankAccounts: Record<BankType, { accountNumber: string; holder: string }> 
     holder: "PT. Dokter Ikan",
   },
   BNI: {
-    accountNumber: "321-654-9876",
-    holder: "PT. Dokter Ikan",
+    accountNumber: "026-110-7219",
+    holder: "REKAYASA AGROMARIN INDONESIA",
   }
 };
 

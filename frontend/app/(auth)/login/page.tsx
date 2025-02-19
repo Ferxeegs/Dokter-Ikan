@@ -93,7 +93,7 @@ export default function Login() {
       <section
         className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center relative"
         style={{
-          backgroundImage: "url('/homebg.png')",
+          backgroundImage: "url('/bg_login.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'top',
         }}

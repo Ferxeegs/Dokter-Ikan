@@ -49,7 +49,7 @@ export default function Login() {
         const result = await response.json();
         saveToken(result.token); // Simpan token di cookies
 
-        console.log('Login successful:', result);
+        // console.log('Login successful:', result);
         toast.success('Login successful! Redirecting...');
 
         // Arahkan berdasarkan peran

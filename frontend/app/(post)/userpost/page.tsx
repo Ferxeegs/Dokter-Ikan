@@ -46,16 +46,13 @@ export default function UserPost() {
 
   const getUserIdFromToken = (): number | null => {
     const token = Cookies.get('token');
-    console.log('Token :', token); // Debugging token
     
     if (!token) {
       console.warn('Token tidak ditemukan.');
       return null;
     }
-  
     try {
       const decodedToken: any = jwt_decode(token);
-      console.log('Decoded Token:', decodedToken); // Debugging decoded token
       return decodedToken.id || null; // Pastikan mengembalikan null jika user_id tidak ada
     } catch (error) {
       console.error('Error decoding token:', error); // Debugging error decoding
@@ -126,8 +123,7 @@ export default function UserPost() {
       });
 
       const responseData = await response.json();
-      console.log("Respons dari /user-consultations:", responseData);
-
+   
       if (response.ok) {
         const userConsultationId = responseData.data?.user_consultation_id || responseData.data?.id;
 
@@ -151,7 +147,6 @@ export default function UserPost() {
         });
 
         const consultationResponseData = await consultationResponse.json();
-        console.log("Respons dari /consultations:", consultationResponseData);
 
         if (!consultationResponse.ok) {
           console.error("Error dari konsultasi API:", consultationResponseData);
@@ -182,7 +177,6 @@ export default function UserPost() {
   const handleSelectFishType = (fishName: string) => {
     setJenisIkan(fishName); // Update selected fish name
     const selectedFish = fishtypes.find(fish => fish.name === fishName); // Find fish by name
-    console.log('Selected Fish:', selectedFish); // Debugging selected fish
     if (selectedFish) {
       setFishTypeId(selectedFish.id); // Update fish type ID
     } else {

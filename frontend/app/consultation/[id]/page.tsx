@@ -59,7 +59,6 @@ export default function Consultation() {
           throw new Error('Gagal memuat data');
         }
         const result = await response.json();
-        console.log("Data konsultasi:", result);
         setData(result);
         setIsChatEnabled(result.chat_enabled); // Perbarui status chat
       } catch (error) {

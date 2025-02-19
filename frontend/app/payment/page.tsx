@@ -41,18 +41,14 @@ export default function Payment() {
       setLoading(true);
       setError(null);
       try {
-        console.log(`Fetching consultation data for ID: ${consultationId}`);
-
         const consultationResponse = await fetch(`${API_BASE_URL}/consultations/${consultationId}`, { signal });
         if (!consultationResponse.ok) throw new Error("Gagal mengambil data konsultasi.");
         const consultationData = await consultationResponse.json();
 
-        console.log(`Fetching prescription data for consultation ID: ${consultationId}`);
         const prescriptionResponse = await fetch(`${API_BASE_URL}/prescriptionsbyconsultation?consultation_id=${consultationId}`, { signal });
         if (!prescriptionResponse.ok) throw new Error("Gagal mengambil data resep.");
         const prescriptionData = await prescriptionResponse.json();
 
-        console.log(`Fetching payment ID for consultation ID: ${consultationId}`);
         const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`, { signal });
         if (!paymentLookupResponse.ok) throw new Error("Gagal mengambil data ID pembayaran.");
         const paymentLookupData = await paymentLookupResponse.json();
@@ -63,7 +59,6 @@ export default function Payment() {
 
         const paymentId = paymentLookupData.payment_id;
 
-        console.log(`Fetching payment details for payment ID: ${paymentId}`);
         const paymentResponse = await fetch(`${API_BASE_URL}/payments/${paymentId}`, { signal });
         if (!paymentResponse.ok) throw new Error("Gagal mengambil data pembayaran.");
         const paymentDetail = await paymentResponse.json();

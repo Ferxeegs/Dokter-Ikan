@@ -50,7 +50,7 @@ export default function Profile() {
     };
 
     fetchUserData();
-  }, []);
+  }, [API_BASE_URL]);
 
   if (!user) {
     return <p className="text-center mt-10 text-gray-800">Loading...</p>;

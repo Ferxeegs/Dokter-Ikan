@@ -6,6 +6,7 @@ import Footer from "../components/layout/Footer";
 import jwtDecode from "jwt-decode";
 import ConsultationCard from "../components/history/CardRiwayatExpert";
 import Cookies from "js-cookie";
+import Image from 'next/image';
 
 interface DecodedToken {
   id: number;
@@ -21,6 +22,7 @@ interface ExpertData {
 interface ConsultationData {
   consultation_id: number;
   consultation_status: string;
+  fishExpert_id: number;
   UserConsultation: {
     consultation_topic: string;
     complaint: string;
@@ -64,7 +66,7 @@ export default function DashboardExpert() {
 
       fetchExpertData();
     }
-  }, [expertId]);
+  }, [expertId, API_BASE_URL]);
 
   useEffect(() => {
     if (expertId) {
@@ -72,9 +74,9 @@ export default function DashboardExpert() {
         try {
           const response = await fetch(`${API_BASE_URL}/consultations`);
           if (!response.ok) throw new Error("Failed to fetch consultations");
-          const data = await response.json();
+          const data: ConsultationData[] = await response.json();
           const filteredData = data
-            .filter((consultation: any) => consultation.fishExpert_id === expertId)
+            .filter((consultation: ConsultationData) => consultation.fishExpert_id === expertId)
             .sort((a: ConsultationData, b: ConsultationData) => 
               new Date(b.UserConsultation.createdAt).getTime() - new Date(a.UserConsultation.createdAt).getTime()
             );
@@ -87,7 +89,7 @@ export default function DashboardExpert() {
 
       fetchConsultations();
     }
-  }, [expertId]);
+  }, [expertId, API_BASE_URL]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
@@ -97,12 +99,14 @@ export default function DashboardExpert() {
         {expertData ? (
           <div className="w-full max-w-4xl bg-white rounded-lg shadow-xl p-6 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 transition-all hover:shadow-2xl">
             <div className="relative">
-              <img
+              <Image
                 src={expertData.image_url}
                 alt="Profil Dokter"
+                width={160}
+                height={160}
                 className="w-40 h-40 rounded-full object-cover border-4 border-blue-500 shadow-md transition-transform hover:scale-105"
+                unoptimized={true}
               />
-              
             </div>
             <div className="text-center md:text-left">
               <h2 className="text-3xl font-extrabold text-blue-600">{expertData.name}</h2>
@@ -112,7 +116,6 @@ export default function DashboardExpert() {
               <p className="text-lg text-gray-500 mt-2">
                 <span className="font-semibold">Pengalaman:</span> {expertData.experience} tahun
               </p>
-             
             </div>
           </div>
         ) : (

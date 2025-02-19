@@ -15,6 +15,7 @@ interface DecodedToken {
 interface ConsultationData {
   consultation_id: number;
   consultation_status: string;
+  fishExpert_id: number; // Tambahkan properti fishExpert_id
   UserConsultation: {
     consultation_topic: string;
     complaint: string;
@@ -49,9 +50,9 @@ export default function RiwayatExpert() {
         try {
           const response = await fetch(`${API_BASE_URL}/consultations`);
           if (!response.ok) throw new Error("Failed to fetch consultations");
-          const data = await response.json();
+          const data: ConsultationData[] = await response.json();
           const filteredData = data
-            .filter((consultation: any) => consultation.fishExpert_id === expertId)
+            .filter((consultation: ConsultationData) => consultation.fishExpert_id === expertId)
             .sort((a: ConsultationData, b: ConsultationData) => 
               new Date(b.UserConsultation.createdAt).getTime() - new Date(a.UserConsultation.createdAt).getTime()
             );
@@ -64,7 +65,7 @@ export default function RiwayatExpert() {
 
       fetchConsultations();
     }
-  }, [expertId]);
+  }, [expertId, API_BASE_URL]);
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);

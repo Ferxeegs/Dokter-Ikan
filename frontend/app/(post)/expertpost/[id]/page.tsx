@@ -13,6 +13,7 @@ import ModalObat from '@/app/components/modals/ModalMedicine';
 import { useParams } from 'next/navigation';
 import Modal from '@/app/components/modals/ModalPost';
 import ChatExpert from '@/app/components/chat/ChatExpert';
+import Image from 'next/image';
 
 type Params = {
   id: string;
@@ -126,7 +127,7 @@ export default function ExpertPost() {
         }
         const result = await response.json();
         setData(result);
-      } catch (error) {
+      } catch {
         setIsError(true);
       } finally {
         setIsLoading(false);
@@ -134,7 +135,7 @@ export default function ExpertPost() {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, API_BASE_URL]);
 
   if (isLoading) {
     return (
@@ -167,7 +168,7 @@ export default function ExpertPost() {
       const fileName = url.split("/").pop();
   
       // Kirim request ke backend untuk menghapus gambar dari server lokal
-      const response = await fetch("${API_BASE_URL}/delete-file", {
+      const response = await fetch(`${API_BASE_URL}/delete-file`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -226,7 +227,6 @@ export default function ExpertPost() {
           />
 
           <Answer
-            toggleModal={toggleModal}
             answer={data.answer}
             name={data.fish_expert_name}
             specialization={data.fish_expert_specialization}
@@ -238,7 +238,7 @@ export default function ExpertPost() {
             className="bg-[rgba(105,203,244,0.4)] text-black px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold flex items-center gap-2"
             onClick={toggleModal}
           >
-            <img src="/images/icon/ic_obat.png" alt="Icon" className="w-6 h-6" />
+            <Image src="/images/icon/ic_obat.png" alt="Icon" width={24} height={24} />
             <div className="flex flex-col text-left font-sans">
               <span className="font-light text-xs italic">Ayo bantu klien lebih lanjut</span>
               <span className="font-bold text-sm">Berikan resep obat disini!</span>
@@ -250,10 +250,13 @@ export default function ExpertPost() {
         {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
         <div className="flex flex-col w-full p-4 border-2 border-[#0795D2] rounded-lg shadow-md mt-8 max-w-5xl mx-auto justify-center">
             <div className="flex items-center">
-              <img
+              <Image
                 src="/images/icon/ic_profile.png"
                 alt="Foto Profil"
-                className="w-12 h-12 rounded-full ml-4 mr-4"
+                width={48}
+                height={48}
+                className="rounded-full ml-4 mr-4"
+                unoptimized={true}
               />
               <textarea
                 className="flex-1 w-full h-32 p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
@@ -276,7 +279,7 @@ export default function ExpertPost() {
                     </button>
 
                     {/* Gambar yang diupload */}
-                    <img src={`${API_BASE_URL}${url}`} alt="Uploaded" className="w-full h-full object-cover" />
+                    <Image src={`${API_BASE_URL}${url}`} alt="Uploaded" layout="fill" objectFit="cover" unoptimized={true}/>
                   </div>
                 ))}
               </div>
@@ -292,7 +295,7 @@ export default function ExpertPost() {
             onClick={handleSubmit}
             className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
           >
-            <img src="/images/icon/ic_send.png" alt="Kirim" className="w-4 h-4" />
+            <Image src="/images/icon/ic_send.png" alt="Kirim" width={16} height={16} />
             <span>Kirim</span>
           </button>
           {isModalPostOpen && <Modal message={modalMessage} onClose={handleCloseModal} />}

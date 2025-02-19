@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PaymentModal from "../components/modals/ModalPayment";
 
@@ -21,7 +21,7 @@ interface PaymentData {
   shippingFee: number;
 }
 
-export default function Payment() {
+const Payment = () => {
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -195,4 +195,12 @@ export default function Payment() {
       <Footer />
     </div>
   );
-}
+};
+
+const PaymentPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <Payment />
+  </Suspense>
+);
+
+export default PaymentPage;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Send } from "lucide-react";
 
 interface Message {
@@ -19,7 +19,7 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const lastMessageRef = useRef<string | null>(null);
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/messages/${consultationId}`);
       if (!response.ok) {
@@ -33,7 +33,7 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
-  };
+  }, [API_BASE_URL, consultationId, messages]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -75,7 +75,7 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
     fetchMessages();
     const interval = setInterval(fetchMessages, 2000);
     return () => clearInterval(interval);
-  }, [consultationId]);
+  }, [fetchMessages]);
 
   useEffect(() => {
     if (messages.length > 0) {

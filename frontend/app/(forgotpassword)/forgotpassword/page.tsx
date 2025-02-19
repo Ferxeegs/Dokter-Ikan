@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Image from 'next/image';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -21,7 +22,7 @@ const ForgotPassword = () => {
       });
       if (!response.ok) throw new Error('Terjadi kesalahan, coba lagi!');
       toast.success('Link reset password telah dikirim ke email!');
-    } catch (error) {
+    } catch {
       toast.error('Terjadi kesalahan, coba lagi!');
     } finally {
       setLoading(false);
@@ -49,8 +50,8 @@ const ForgotPassword = () => {
         <div className="relative z-10 flex flex-col items-center justify-center px-6 py-8 mx-auto w-full md:h-screen lg:py-0">
           <div className="relative w-full bg-white rounded-lg shadow max-w-md xl:p-0">
             <div className="flex items-center px-3 py-3 bg-white">
-              <img src="/images/logo/logo_dokterikan512.png" alt="Dokter Ikan Logo" className="w-10 h-10" />
-              <img src="/images/logo/logo_dokterikan.png" alt="Dokter Ikan Logo" className="w-15 h-6" />
+              <Image src="/images/logo/logo_dokterikan512.png" alt="Dokter Ikan Logo" width={40} height={40} />
+              <Image src="/images/logo/logo_dokterikan.png" alt="Dokter Ikan Logo" width={60} height={24} />
             </div>
 
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">

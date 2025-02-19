@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
+import Image from 'next/image';
 
 // Definisikan tipe data untuk artikel
 interface Article {
@@ -66,7 +67,16 @@ export default function ArticlesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {currentArticles.map((article, index) => (
             <div key={index} className="bg-white p-6 shadow-2xl rounded-2xl transform transition duration-300 hover:scale-105 hover:shadow-xl">
-              <img src={article.urlToImage || "https://via.placeholder.com/300"} alt={article.title} className="w-full h-56 object-cover rounded-xl" />
+              <div className="relative w-full h-56">
+                <Image
+                  src={article.urlToImage || "https://via.placeholder.com/300"}
+                  alt={article.title}
+                  layout="fill"
+                  objectFit="cover"
+                  className="rounded-xl"
+                  unoptimized={true}
+                />
+              </div>
               <h2 className="text-2xl font-bold mt-4 text-gray-800">{article.title}</h2>
               <p className="text-gray-700 mt-3">{article.description}</p>
               <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-semibold hover:text-indigo-800 mt-3 inline-block">Read more →</a>

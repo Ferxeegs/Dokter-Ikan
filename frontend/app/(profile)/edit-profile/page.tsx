@@ -24,7 +24,6 @@ interface Region {
 }
 
 export default function EditProfile() {
-  const [user, setUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<User>({
     name: '',
     email: '',
@@ -55,7 +54,6 @@ export default function EditProfile() {
 
           if (response.ok) {
             const data = await response.json();
-            setUser(data);
             setFormData(data);
           }
         } catch (error) {
@@ -76,7 +74,7 @@ export default function EditProfile() {
 
     fetchUserData();
     fetchProvinces();
-  }, []);
+  }, [API_BASE_URL]);
 
   const handleProvinceChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;

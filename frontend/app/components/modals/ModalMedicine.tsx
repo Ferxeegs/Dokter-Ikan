@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import jwt_decode from 'jwt-decode';
 import Cookies from 'js-cookie';
+import Image from 'next/image';
 
 interface Medicine {
   medicine_id: number;
@@ -50,7 +51,7 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
         .then(data => setMedicines(data))
         .catch(error => console.error('Error fetching medicines:', error));
     }
-  }, [isOpen]);
+  }, [isOpen, API_BASE_URL]);
 
   const handleSelectMedicine = (medicine_id: number) => {
     setSelectedMedicines((prev) =>
@@ -138,10 +139,13 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
                 }`}
                 onClick={() => handleSelectMedicine(item.medicine_id)}
               >
-                <img
+                <Image
                   src={item.medicine_image}
                   alt={item.medicine_name}
+                  width={64}
+                  height={64}
                   className="w-16 h-16 rounded-lg object-cover"
+                  unoptimized={true}
                 />
                 <div className="ml-4">
                   <h3 className="font-bold text-black text-xs">{item.medicine_name}</h3>

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { PaperClipIcon } from '@heroicons/react/20/solid';
-import SuccessModal from "../components/modals/ModalSuccess"; 
+import SuccessModal from "../components/modals/ModalSuccess";
+import Image from 'next/image';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL; // Gantilah dengan URL API Anda
 
@@ -33,10 +33,9 @@ export default function UploadPaymentProof() {
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [bankInfo, setBankInfo] = useState<{ accountNumber: string, holder: string } | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]); // Menyimpan URL gambar yang diupload
-  const [consultationId, setConsultationId] = useState<string | null>(null); // Menyimpan consultationId
+  const [, setConsultationId] = useState<string | null>(null); // Menyimpan consultationId
   const [paymentId, setPaymentId] = useState<string | null>(null); // Menyimpan paymentId
   const [isModalOpen, setModalOpen] = useState(false); // State untuk modal
-  const router = useRouter();
 
   // Mengambil query parameter bank dan consultationId dari URL
   useEffect(() => {
@@ -170,7 +169,7 @@ export default function UploadPaymentProof() {
             {imageUrls.map((url, index) => (
                 <li key={index} className="text-sm text-gray-700">
                 {/* Menampilkan gambar jika URL gambar ada */}
-                <img src={`${API_BASE_URL}${url}`} alt={`Uploaded Image ${index + 1}`} className="w-full h-auto rounded-lg" />
+                <Image src={`${API_BASE_URL}${url}`} alt={`Uploaded Image ${index + 1}`} width={500} height={500} className="w-full h-auto rounded-lg" unoptimized={true}/>
                 </li>
             ))}
             </ul>

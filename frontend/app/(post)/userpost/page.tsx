@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import UploadFotoButton from '@/app/components/uploads/UploadFoto';
@@ -10,6 +10,7 @@ import Answer from '@/app/components/answers/Answer';
 import jwt_decode from 'jwt-decode';
 import Cookies from 'js-cookie';
 import Modal from '@/app/components/modals/ModalPost';
+import Image from 'next/image';
 
 type FishType = {
   id: number;
@@ -26,12 +27,12 @@ export default function UserPost() {
   const [panjang, setPanjang] = useState('');
   const [berat, setBerat] = useState('');
   const [message, setMessage] = useState('');
-  const [userId, setUserId] = useState<number | null>(null);
+  const [, setUserId] = useState<number | null>(null);
   const [fishtypes, setFishtypes] = useState<FishType[]>([]); // Type for fishtypes state
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Status dropdown
   const [fishTypeId, setFishTypeId] = useState<number | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [data, setData] = useState<{
+  const [data] = useState<{
     title: string;
     description: string;
     fishType: string;
@@ -52,13 +53,28 @@ export default function UserPost() {
       return null;
     }
     try {
-      const decodedToken: any = jwt_decode(token);
+      const decodedToken: { id: number } = jwt_decode(token);
       return decodedToken.id || null; // Pastikan mengembalikan null jika user_id tidak ada
     } catch (error) {
       console.error('Error decoding token:', error); // Debugging error decoding
       return null;
     }
   };
+
+  const fetchFishTypes = useCallback(async () => {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+    try {
+      const response = await fetch(`${API_BASE_URL}/fish-types`);
+      const data = await response.json();
+      const transformedData = data.map((fish: { fish_type_id: number; name: string }) => ({
+        id: fish.fish_type_id, // Ubah fish_type_id ke id
+        name: fish.name, // Tambahkan properti name
+      }));
+      setFishtypes(transformedData);
+    } catch (error) {
+      console.error('Error fetching fish types:', error);
+    }
+  }, []);
 
   useEffect(() => {
     const userId = getUserIdFromToken();
@@ -68,22 +84,9 @@ export default function UserPost() {
     } else {
       console.warn('Pengguna tidak terautentikasi.');
     }
-  }, []);
+  }, [fetchFishTypes]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-  const fetchFishTypes = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/fish-types`);
-      const data = await response.json();
-      const transformedData = data.map((fish: any) => ({
-        id: fish.fish_type_id, // Ubah fish_type_id ke id
-        name: fish.name, // Tambahkan properti name
-      }));
-      setFishtypes(transformedData);
-    } catch (error) {
-      console.error('Error fetching fish types:', error);
-    }
-  };
 
   const handleSubmit = async () => {
     const userId = getUserIdFromToken(); // Pastikan fungsi ini tersedia
@@ -164,7 +167,6 @@ export default function UserPost() {
     }
     setShowModal(true);
   };
-  
   
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -315,10 +317,12 @@ export default function UserPost() {
 
           <div className="flex flex-col w-full p-4 border-2 border-[#0795D2] rounded-lg shadow-md">
             <div className="flex items-center">
-              <img
+              <Image
                 src="/images/icon/ic_profile.png"
                 alt="Foto Profil"
-                className="w-12 h-12 rounded-full ml-4 mr-4"
+                width={48}
+                height={48}
+                className="rounded-full ml-4 mr-4"
               />
               <textarea
                 className="flex-1 w-full h-32 p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
@@ -342,7 +346,7 @@ export default function UserPost() {
                     </button>
 
                     {/* Gambar yang diupload */}
-                    <img src={`${API_BASE_URL}${url}`} alt="Uploaded" className="w-full h-full object-cover" />
+                    <Image src={`${API_BASE_URL}${url}`} alt="Uploaded" layout="fill" objectFit="cover" unoptimized={true}/>
                   </div>
                 ))}
               </div>
@@ -358,7 +362,7 @@ export default function UserPost() {
         onClick={handleSubmit}
         className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
       >
-        <img src="/images/icon/ic_send.png" alt="Kirim" className="w-4 h-4" />
+        <Image src="/images/icon/ic_send.png" alt="Kirim" width={16} height={16} unoptimized={true}/>
         <span>Kirim</span>
       </button>
 

@@ -25,7 +25,7 @@ const Modal: React.FC<ModalProps> = ({ message, onClose }) => {
 
 const styles = {
   overlay: {
-    position: "fixed" as "fixed",
+    position: "fixed" as const,
     top: 0,
     left: 0,
     width: "100%",
@@ -41,7 +41,7 @@ const styles = {
     background: "white",
     padding: "24px",
     borderRadius: "12px",
-    textAlign: "center" as "center",
+    textAlign: "center" as const,
     boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.2)",
     minWidth: "300px",
     maxWidth: "90%",

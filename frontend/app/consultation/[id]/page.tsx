@@ -15,14 +15,6 @@ export default function Consultation() {
   const { id } = useParams();
   const consultationId = Array.isArray(id) ? id[0] : id;
 
-  if (!consultationId) {
-    return (
-      <div className="flex flex-col min-h-screen justify-center items-center">
-        <p className="text-xl font-semibold text-red-600">Consultation ID tidak ditemukan.</p>
-      </div>
-    );
-  }
-
   const [data, setData] = useState<{
     title: string;
     description: string;
@@ -61,7 +53,7 @@ export default function Consultation() {
         const result = await response.json();
         setData(result);
         setIsChatEnabled(result.chat_enabled); // Perbarui status chat
-      } catch (error) {
+      } catch {
         setIsError(true);
       } finally {
         setIsLoading(false);
@@ -69,7 +61,15 @@ export default function Consultation() {
     };
 
     fetchData();
-  }, [consultationId]);
+  }, [consultationId, API_BASE_URL]);
+
+  if (!consultationId) {
+    return (
+      <div className="flex flex-col min-h-screen justify-center items-center">
+        <p className="text-xl font-semibold text-red-600">Consultation ID tidak ditemukan.</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -128,124 +128,123 @@ export default function Consultation() {
 
   return (
     <div
-  className="flex flex-col min-h-screen relative"
-  style={{
-    backgroundColor: 'white',
-    backgroundImage:
-      'linear-gradient(to top, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 1) 100%), linear-gradient(to bottom, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 1) 80%), url("/bgpost.png")',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-  }}
->
-  {/* Navbar */}
-  <Navbar />
+      className="flex flex-col min-h-screen relative"
+      style={{
+        backgroundColor: 'white',
+        backgroundImage:
+          'linear-gradient(to top, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 1) 100%), linear-gradient(to bottom, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 1) 80%), url("/bgpost.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Navbar */}
+      <Navbar />
 
-  {/* Consultation Rules Button (Moved to Top Right) */}
-  <div className="absolute top-20 right-4">
-    <ConsultationRules
-      consultationId={consultationId}
-      onEndSession={() => setIsChatEnabled(false)}
-    />
-  </div>
+      {/* Consultation Rules Button (Moved to Top Right) */}
+      <div className="absolute top-20 right-4">
+        <ConsultationRules
+          consultationId={consultationId}
+          onEndSession={() => setIsChatEnabled(false)}
+        />
+      </div>
 
-  {/* Main Content */}
-  <main className="flex-1">
-    <div className="ml-6 mt-32 font-sans">
-      <h1 className="text-2xl font-bold mb-2 text-[#1A83FB] text-center">
-        Konsultasi Masalah Ikan Anda
-      </h1>
-      <h2 className="text-base mb-6 font-semibold text-[#2C2C2C] text-center">
-        Masukkan keluhan Anda dan dapatkan solusi dari tenaga ahli.
-      </h2>
-    </div>
-
-    <div className="flex flex-col md:flex-row justify-center gap-8 mt-20 mx-6 font-sans">
-      <Complaint
-        title={data.title}
-        description={data.description}
-        fishType={data.fish_type}
-        fishLength={data.fish_length}
-        fishAge={data.fish_age}
-        fishImageUrls={fishImageUrls}
-        senderName={data.name}
-        consultationDate={data.created_at}
-      />
-
-      <Answer
-        toggleModal={toggleModal}
-        answer={data.answer}
-        fishImageUrls={fishImageUrl}
-        name={data.fish_expert_name}
-        specialization={data.fish_expert_specialization}
-        consultation_status={data.consultation_status}
-      />
-    </div>
-
-    {/* Chat Consultation Section */}
-    <div className="mt-10 mx-auto w-full max-w-4xl px-4">
-      {!isChatEnabled ? (
-        <div className="text-center">
-          <p className="text-lg font-semibold text-gray-700">
-            Gunakan fitur chat dengan biaya tambahan?
-          </p>
-          <ul className="text-sm text-gray-600 mt-2 list-disc list-inside">
-            <li>Respon lebih cepat dari ahli perikanan</li>
-            <li>Dapat mengajukan pertanyaan tambahan secara langsung</li>
-            <li>Konsultasi lebih interaktif dengan ahli</li>
-            <li>Mendapatkan saran langsung untuk penanganan ikan</li>
-          </ul>
-          <button
-            onClick={() => setShowConfirmation(true)}
-            className="mt-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
-          >
-            Gunakan Fitur Chat
-          </button>
+      {/* Main Content */}
+      <main className="flex-1">
+        <div className="ml-6 mt-32 font-sans">
+          <h1 className="text-2xl font-bold mb-2 text-[#1A83FB] text-center">
+            Konsultasi Masalah Ikan Anda
+          </h1>
+          <h2 className="text-base mb-6 font-semibold text-[#2C2C2C] text-center">
+            Masukkan keluhan Anda dan dapatkan solusi dari tenaga ahli.
+          </h2>
         </div>
-      ) : (
-        <ChatConsultation consultationId={consultationId} />
-      )}
 
-      {showConfirmation && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <p className="text-lg font-semibold text-gray-800">
-              Anda yakin ingin menggunakan fitur chat dengan biaya tambahan?
-            </p>
-            <div className="flex justify-center gap-4 mt-4">
+        <div className="flex flex-col md:flex-row justify-center gap-8 mt-20 mx-6 font-sans">
+          <Complaint
+            title={data.title}
+            description={data.description}
+            fishType={data.fish_type}
+            fishLength={data.fish_length}
+            fishAge={data.fish_age}
+            fishImageUrls={fishImageUrls}
+            senderName={data.name}
+            consultationDate={data.created_at}
+          />
+
+          <Answer
+            toggleModal={toggleModal}
+            answer={data.answer}
+            fishImageUrls={fishImageUrl}
+            name={data.fish_expert_name}
+            specialization={data.fish_expert_specialization}
+            consultation_status={data.consultation_status}
+          />
+        </div>
+
+        {/* Chat Consultation Section */}
+        <div className="mt-10 mx-auto w-full max-w-4xl px-4">
+          {!isChatEnabled ? (
+            <div className="text-center">
+              <p className="text-lg font-semibold text-gray-700">
+                Gunakan fitur chat dengan biaya tambahan?
+              </p>
+              <ul className="text-sm text-gray-600 mt-2 list-disc list-inside">
+                <li>Respon lebih cepat dari ahli perikanan</li>
+                <li>Dapat mengajukan pertanyaan tambahan secara langsung</li>
+                <li>Konsultasi lebih interaktif dengan ahli</li>
+                <li>Mendapatkan saran langsung untuk penanganan ikan</li>
+              </ul>
               <button
-                onClick={async () => {
-                  await enableChat(); // Memanggil fungsi untuk update database
-                  setIsChatEnabled(true);
-                  setShowConfirmation(false);
-                }}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                onClick={() => setShowConfirmation(true)}
+                className="mt-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
               >
-                Ya
-              </button>
-              <button
-                onClick={() => setShowConfirmation(false)}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-              >
-                Tidak
+                Gunakan Fitur Chat
               </button>
             </div>
-          </div>
+          ) : (
+            <ChatConsultation consultationId={consultationId} />
+          )}
+
+          {showConfirmation && (
+            <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                <p className="text-lg font-semibold text-gray-800">
+                  Anda yakin ingin menggunakan fitur chat dengan biaya tambahan?
+                </p>
+                <div className="flex justify-center gap-4 mt-4">
+                  <button
+                    onClick={async () => {
+                      await enableChat(); // Memanggil fungsi untuk update database
+                      setIsChatEnabled(true);
+                      setShowConfirmation(false);
+                    }}
+                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                  >
+                    Ya
+                  </button>
+                  <button
+                    onClick={() => setShowConfirmation(false)}
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                  >
+                    Tidak
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+      </main>
+
+      {isModalOpen && (
+        <DetailResep
+          isOpen={isModalOpen}
+          toggleModal={toggleModal}
+          consultationId={consultationId}
+        />
       )}
+
+      {/* Footer */}
+      <Footer />
     </div>
-  </main>
-
-  {isModalOpen && (
-    <DetailResep
-      isOpen={isModalOpen}
-      toggleModal={toggleModal}
-      consultationId={consultationId}
-    />
-  )}
-
-  {/* Footer */}
-  <Footer />
-</div>
-
   );
 }

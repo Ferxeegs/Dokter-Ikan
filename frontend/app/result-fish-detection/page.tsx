@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { useSearchParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, Suspense } from 'react';
 
 // Definisikan tipe data untuk fishData
 interface FishData {
@@ -17,21 +17,14 @@ interface FishData {
   image: string;
 }
 
-export default function DetectionResult() {
+const DetectionResult = () => {
   const searchParams = useSearchParams();
   const className = searchParams.get('class_name');
   const [fishData, setFishData] = useState<FishData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  useEffect(() => {
-    if (className) {
-      // Fetch fish data based on class_name
-      fetchFishData(className);
-    }
-  }, [className]);
-
-  const fetchFishData = async (className: string) => {
+  const fetchFishData = useCallback(async (className: string) => {
     try {
       const response = await fetch(`${API_BASE_URL}/fish/search?name=${encodeURIComponent(className)}`);
       const data = await response.json();
@@ -46,7 +39,14 @@ export default function DetectionResult() {
       setErrorMessage('Gagal mendeteksi ikan. Silakan coba lagi.');
       console.error('Error fetching fish data:', error);
     }
-  };
+  }, [API_BASE_URL]);
+
+  useEffect(() => {
+    if (className) {
+      // Fetch fish data based on class_name
+      fetchFishData(className);
+    }
+  }, [className, fetchFishData]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-200 to-white text-gray-800">
@@ -93,4 +93,12 @@ export default function DetectionResult() {
       <Footer />
     </div>
   );
-}
+};
+
+const DetectionResultPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <DetectionResult />
+  </Suspense>
+);
+
+export default DetectionResultPage;

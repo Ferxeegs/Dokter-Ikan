@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useRouter } from "next/navigation";
+import Image from 'next/image';
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  consultationId: string; // Tambahkan parameter consultationId
+  consultationId: string;
 }
 
 const bankAccounts = [
@@ -15,7 +16,7 @@ const bankAccounts = [
 
 export default function PaymentModal({ isOpen, onClose, consultationId }: PaymentModalProps) {
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter();
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -28,9 +29,8 @@ export default function PaymentModal({ isOpen, onClose, consultationId }: Paymen
   };
 
   const handleSendPaymentProof = () => {
-    // Redirect to the upload page with consultation_id as a query parameter
     if (selectedBank) {
-      router.push(`/upload-bukti-pembayaran?bank=${selectedBank}&consultation_id=${consultationId}`); // Pass both selected bank and consultationId
+      router.push(`/upload-bukti-pembayaran?bank=${selectedBank}&consultation_id=${consultationId}`);
     }
   };
 
@@ -40,7 +40,6 @@ export default function PaymentModal({ isOpen, onClose, consultationId }: Paymen
     }
   };
 
-  // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -73,7 +72,7 @@ export default function PaymentModal({ isOpen, onClose, consultationId }: Paymen
               onClick={() => handleBankSelection(bank.bank)}
             >
               <div className="flex items-center space-x-3">
-                <img src={bank.logo} alt={`${bank.bank} Logo`} className="w-12 h-12 object-contain" />
+                <Image src={bank.logo} alt={`${bank.bank} Logo`} width={48} height={48} className="object-contain" />
                 <div>
                   <p className="text-lg font-semibold text-blue-700">{bank.bank}</p>
                   <p className="text-gray-700 text-sm">

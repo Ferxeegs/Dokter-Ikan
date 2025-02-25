@@ -29,6 +29,10 @@ const UserConsultation = db.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    fish_weight: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     consultation_topic: {
       type: DataTypes.TEXT,
       allowNull: false,

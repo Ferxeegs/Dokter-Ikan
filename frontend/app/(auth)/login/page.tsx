@@ -112,18 +112,11 @@ export default function Login() {
             {/* Logo */}
             <div className="flex items-center px-3 py-3 bg-white">
               <Image
-                src="/images/logo/logo_dokterikan512.png"
+                src="/images/logo/logo_fdokterikan.png"
                 alt="Dokter Ikan Logo"
-                width={40}
-                height={40}
-                className="w-10 h-10"
-              />
-              <Image
-                src="/images/logo/logo_dokterikan.png"
-                alt="Dokter Ikan Logo"
-                width={60}
-                height={24}
-                className="w-15 h-6"
+                width={128}
+                height={128}
+                className="w-15 h-15"
               />
             </div>
   

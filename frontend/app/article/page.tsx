@@ -53,21 +53,21 @@ export default function ArticlesPage() {
     <div className="bg-gradient-to-b from-gray-100 to-gray-300 min-h-screen flex flex-col">
       <Navbar />
 
-      <main className="container mx-auto p-6 flex-1">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-extrabold text-gray-900">Discover the Latest Tech Trends</h1>
+      <main className="container mx-auto p-4 sm:p-6 flex-1">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 mb-4 sm:mb-0">Discover the Latest Tech Trends</h1>
           <input
             type="text"
             placeholder="Search articles..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="p-2 border text-gray-700 border-gray-400 rounded-lg shadow-sm"
+            className="p-2 border text-gray-700 border-gray-400 rounded-lg shadow-sm w-full sm:w-auto"
           />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {currentArticles.map((article, index) => (
-            <div key={index} className="bg-white p-6 shadow-2xl rounded-2xl transform transition duration-300 hover:scale-105 hover:shadow-xl">
-              <div className="relative w-full h-56">
+            <div key={index} className="bg-white p-4 sm:p-6 shadow-2xl rounded-2xl transform transition duration-300 hover:scale-105 hover:shadow-xl">
+              <div className="relative w-full h-40 sm:h-56">
                 <Image
                   src={article.urlToImage || "https://via.placeholder.com/300"}
                   alt={article.title}
@@ -77,8 +77,8 @@ export default function ArticlesPage() {
                   unoptimized={true}
                 />
               </div>
-              <h2 className="text-2xl font-bold mt-4 text-gray-800">{article.title}</h2>
-              <p className="text-gray-700 mt-3">{article.description}</p>
+              <h2 className="text-lg sm:text-2xl font-bold mt-4 text-gray-800">{article.title}</h2>
+              <p className="text-sm sm:text-base text-gray-700 mt-3">{article.description}</p>
               <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-semibold hover:text-indigo-800 mt-3 inline-block">Read more →</a>
             </div>
           ))}

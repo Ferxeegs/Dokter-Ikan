@@ -55,13 +55,13 @@ export const createPayment = async (req, res) => {
     const { consultation_id, prescription_id, total_fee, payment_status } = req.body;
 
     // Validasi input
-    if (!consultation_id || !prescription_id || !total_fee) {
+    if (!consultation_id || !total_fee) {
       return res.status(400).json({ message: 'Harap isi semua data yang diperlukan' });
     }
 
     const newPayment = await Payment.create({
       consultation_id,
-      prescription_id,
+      prescription_id: prescription_id || null, // Izinkan prescription_id menjadi null
       total_fee,
       payment_status: payment_status || 'pending' // Default pending jika tidak diisi
     });

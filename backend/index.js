@@ -35,7 +35,7 @@ app.use(session({
 // Konfigurasi CORS
 app.use(cors({
     credentials: true,
-    origin: 'https://dokterikan-rkkg4fia1-fadlils-projects.vercel.app'  // Sesuaikan dengan frontend kamu
+    origin: 'http://localhost:3000'  // Sesuaikan dengan frontend kamu
 }));
 
 app.use(express.json());

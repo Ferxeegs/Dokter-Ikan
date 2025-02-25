@@ -1,13 +1,13 @@
-import React, { useState, useRef } from "react";
-import Image from 'next/image';
+import React, { useRef } from "react";
+import Image from "next/image";
 
 interface UploadFileButtonProps {
-  setImageUrls: (urls: string[]) => void; // Prop untuk menyimpan URL gambar (array karena multiple)
+  imageUrls: string[]; // Gunakan state dari parent agar sinkron
+  setImageUrls: (urls: string[] | ((prevUrls: string[]) => string[])) => void;
 }
 
 export default function UploadFileButton({ setImageUrls }: UploadFileButtonProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [imageUrls, setImageUrlsState] = useState<string[]>([]); // Menyimpan URL gambar yang diupload
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const handleButtonClick = () => {
@@ -21,7 +21,6 @@ export default function UploadFileButton({ setImageUrls }: UploadFileButtonProps
     if (!files || files.length === 0) return;
 
     const formData = new FormData();
-    // Tambahkan semua file ke FormData
     Array.from(files).forEach((file) => formData.append("files", file));
 
     try {
@@ -33,10 +32,8 @@ export default function UploadFileButton({ setImageUrls }: UploadFileButtonProps
       const result = await response.json();
 
       if (response.ok) {
-        // Gabungkan filePaths baru dengan filePaths yang sudah ada
-        setImageUrlsState((prevImageUrls) => [...prevImageUrls, ...result.filePaths]); // Menambahkan file baru
-        setImageUrls([...imageUrls, ...result.filePaths]); // Mengupdate parent state
-        
+        // Tambahkan gambar baru ke dalam daftar yang sudah ada
+        setImageUrls((prev) => [...prev, ...result.filePaths]);
       } else {
         alert("Upload gagal: " + result.message);
       }

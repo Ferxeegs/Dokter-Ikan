@@ -91,32 +91,32 @@ export default function FishDetection() {
       <div className="flex flex-col items-center justify-center flex-1 p-4 text-center">
         {/* Title */}
         <div className="ml-6 mt-28">
-          <h1 className="text-3xl font-bold mb-2 text-[#1A83FB] font-lato">
+          <h1 className="text-xl sm:text-2xl font-bold mb-2 text-[#1A83FB] font-lato">
             Deteksi Spesies Ikan dengan AI
           </h1>
-          <h2 className="text-lg mb-6 text-[#2C2C2C]">
+          <h2 className="text-sm sm:text-base mb-6 text-[#2C2C2C]">
             Unggah foto ikan, dan teknologi AI kami akan menganalisis spesies serta penyakit yang mungkin diderita
           </h2>
         </div>
 
         {/* Buttons Container */}
-        <div className="flex items-center justify-center gap-4 mb-8 mt-20">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 mt-20">
           {/* Button for Upload */}
           <button
             onClick={scrollToUploadBox} // Scroll ke box unggah saat tombol diklik
-            className="flex items-center justify-center bg-gradient-to-b from-[#0795D2] to-[#1A83FB] text-white px-8 py-4 rounded-2xl shadow-lg hover:shadow-2xl transition w-64"
+            className="flex items-center justify-center bg-gradient-to-b from-[#0795D2] to-[#1A83FB] text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-2xl transition w-full sm:w-64"
           >
-            <span className="text-lg">Unggah Gambar</span>
+            <span className="text-base">Unggah Gambar</span>
           </button>
 
           {/* "atau" separator */}
-          <span className="text-xl text-[#1A83FB]">atau</span>
+          <span className="text-lg text-[#1A83FB]">atau</span>
 
           {/* Button for Camera Scan */}
           <button
-            className="flex items-center justify-center bg-white text-[#0795D2] px-8 py-4 border-2 border-[#0795D2] rounded-2xl shadow-lg hover:shadow-2xl transition w-64"
+            className="flex items-center justify-center bg-white text-[#0795D2] px-6 py-3 border-2 border-[#0795D2] rounded-2xl shadow-lg hover:shadow-2xl transition w-full sm:w-64"
           >
-            <span className="text-lg">Pindai dengan Kamera</span>
+            <span className="text-base">Pindai dengan Kamera</span>
           </button>
         </div>
 

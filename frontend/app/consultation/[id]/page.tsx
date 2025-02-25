@@ -23,6 +23,7 @@ export default function Consultation() {
     fish_expert_specialization: string;
     fish_type: string;
     fish_length: string;
+    fish_weight:string;
     fish_age: string;
     fish_image: string;
     answer_image: string;
@@ -141,7 +142,7 @@ export default function Consultation() {
       <Navbar />
 
       {/* Consultation Rules Button (Moved to Top Right) */}
-      <div className="absolute top-20 right-4">
+      <div className="absolute top-20 right-4 p-1">
         <ConsultationRules
           consultationId={consultationId}
           onEndSession={() => setIsChatEnabled(false)}
@@ -150,11 +151,11 @@ export default function Consultation() {
 
       {/* Main Content */}
       <main className="flex-1">
-        <div className="ml-6 mt-32 font-sans">
-          <h1 className="text-2xl font-bold mb-2 text-[#1A83FB] text-center">
+        <div className="ml-6 mt-32 font-sans text-center">
+          <h1 className="text-xl sm:text-2xl font-bold mb-2 text-[#1A83FB]">
             Konsultasi Masalah Ikan Anda
           </h1>
-          <h2 className="text-base mb-6 font-semibold text-[#2C2C2C] text-center">
+          <h2 className="text-sm sm:text-base mb-6 font-semibold text-[#2C2C2C]">
             Masukkan keluhan Anda dan dapatkan solusi dari tenaga ahli.
           </h2>
         </div>
@@ -165,6 +166,7 @@ export default function Consultation() {
             description={data.description}
             fishType={data.fish_type}
             fishLength={data.fish_length}
+            fishWeight={data.fish_weight}
             fishAge={data.fish_age}
             fishImageUrls={fishImageUrls}
             senderName={data.name}
@@ -196,7 +198,7 @@ export default function Consultation() {
               </ul>
               <button
                 onClick={() => setShowConfirmation(true)}
-                className="mt-4 px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
+                className="mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
               >
                 Gunakan Fitur Chat
               </button>

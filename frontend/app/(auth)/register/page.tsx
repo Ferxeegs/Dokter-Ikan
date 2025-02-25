@@ -118,20 +118,13 @@ export default function Register() {
             }}
           >
             {/* Logo */}
-            <div className="flex items-center px-4 py-2 bg-white">
+            <div className="flex items-center px-3 py-3 bg-white">
               <Image
-                src="/images/logo/logo_dokterikan512.png"
+                src="/images/logo/logo_fdokterikan.png"
                 alt="Dokter Ikan Logo"
-                width={32}
-                height={32}
-                className="w-8 h-8"
-              />
-              <Image
-                src="/images/logo/logo_dokterikan.png"
-                alt="Dokter Ikan Text Logo"
-                width={60}
-                height={24}
-                className="w-15 h-6 ml-2"
+                width={128}
+                height={128}
+                className="w-15 h-15"
               />
             </div>
 

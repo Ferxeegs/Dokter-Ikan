@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import UploadFotoButton from '@/app/components/uploads/UploadFoto';
@@ -26,6 +26,7 @@ export default function UserPost() {
   const [jenisIkan, setJenisIkan] = useState('');
   const [panjang, setPanjang] = useState('');
   const [berat, setBerat] = useState('');
+  const [umur, setUmur] = useState('');
   const [message, setMessage] = useState('');
   const [, setUserId] = useState<number | null>(null);
   const [fishtypes, setFishtypes] = useState<FishType[]>([]); // Type for fishtypes state
@@ -37,6 +38,7 @@ export default function UserPost() {
     description: string;
     fishType: string;
     fishLength: string;
+    fishWeight: string;
     fishAge: string;
     fishImageUrls: string;
     answer: string;
@@ -106,12 +108,13 @@ export default function UserPost() {
 
     const requestData = {
       user_id: userId,
-      fish_type_id: fishTypeId, // Pastikan variabel ini terdefinisi
-      fish_age: String(berat), // Pastikan variabel ini terdefinisi
-      fish_length: String(panjang), // Pastikan variabel ini terdefinisi
-      consultation_topic: judul, // Pastikan variabel ini terdefinisi
-      fish_image: JSON.stringify(imageUrls), // Pastikan variabel ini terdefinisi
-      complaint: inputText, // Pastikan variabel ini terdefinisi
+      fish_type_id: fishTypeId, 
+      fish_age: String(umur), 
+      fish_length: String(panjang),
+      fish_weight: String(berat),
+      consultation_topic: judul, 
+      fish_image: JSON.stringify(imageUrls), 
+      complaint: inputText, 
       consultation_status: "Waiting",
     };
 
@@ -187,40 +190,39 @@ export default function UserPost() {
     setIsDropdownOpen(false); // Close dropdown
   };
 
-  const handleDeleteImage = async (url: string) => { // Terima URL gambar yang akan dihapus
+  const handleDeleteImage = async (url: string) => { 
     const token = Cookies.get("token");
     if (!token) {
       setMessage("Token autentikasi tidak ditemukan.");
       return;
     }
-  
+
     try {
-      // Ambil nama file dari URL gambar
       const fileName = url.split("/").pop();
-  
-      // Kirim request ke backend untuk menghapus gambar dari server lokal
+
       const response = await fetch(`${API_BASE_URL}/delete-file`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          fileName: fileName, // Kirim nama file ke backend
-        }),
+        body: JSON.stringify({ fileName }),
       });
-  
+
       const responseData = await response.json();
       if (response.ok) {
-        // Hapus gambar dari state imageUrls setelah berhasil dihapus dari server
-        setImageUrls(imageUrls.filter((imageUrl) => imageUrl !== url)); // Filter gambar yang tidak dihapus
+        setImageUrls(prevImageUrls => {
+          const newImageUrls = prevImageUrls.filter(imageUrl => imageUrl !== url);
+          console.log("Updated imageUrls:", newImageUrls);
+          return newImageUrls;
+        });
       } else {
         console.error("Error menghapus gambar:", responseData);
       }
     } catch (error) {
       console.error("Error saat menghapus gambar:", error);
     }
-  };
+};
 
   return (
     <div
@@ -237,22 +239,23 @@ export default function UserPost() {
 
       <main className="flex-1">
         <div className="ml-6 mt-32 font-sans text-center">
-          <h1 className="text-2xl font-bold mb-2 text-[#1A83FB]">
+          <h1 className="text-xl sm:text-2xl font-bold mb-2 text-[#1A83FB]">
             Posting Keluhan Anda Disini!
           </h1>
-          <h2 className="text-base mb-6 font-semibold text-[#2C2C2C]">
+          <h2 className="text-sm sm:text-base mb-6 font-semibold text-[#2C2C2C]">
             Masukan gejala - gejala yang diderita oleh ikan seperti perubahan pada fisik dan perilaku ikan
           </h2>
         </div>
 
         <div className="flex flex-col md:flex-row justify-center gap-8 mt-20 mx-6 font-sans">
         <ComplaintPost
-          title={data?.title || 'Judul keluhan akan muncul di sini'} 
-          description={data?.description || 'Deskripsi akan muncul di sini setelah Anda mengirimkan keluhan.'}
-          fishType={data?.fishType || 'Jenis ikan belum tersedia'}
-          fishLength={data?.fishLength || 'Panjang ikan belum tersedia'}
-          fishAge={data?.fishAge || 'Umur ikan belum tersedia'}
-          fishImageUrls={Array.isArray(data?.fishImageUrls) ? data.fishImageUrls : data?.fishImageUrls ? [data.fishImageUrls] : []} 
+          title={judul}
+          description={inputText}
+          fishType={jenisIkan}
+          fishLength={panjang}
+          fishWeight={berat}
+          fishAge={umur}
+          fishImageUrls={imageUrls}
         />
         <Answer
           toggleModal={toggleModal}
@@ -265,7 +268,7 @@ export default function UserPost() {
       </main>
 
       <div className="mt-8 flex justify-center">
-        <div className="w-full max-w-5xl p-4"> {/* Lebarkan container */}
+        <div className="w-full max-w-5xl p-4"> {/* Lebarkan container */} 
           <input
             type="text"
             className="w-full p-4 mb-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
@@ -274,8 +277,8 @@ export default function UserPost() {
             onChange={(e) => setJudul(e.target.value)}
           />
 
-          <div className="flex space-x-4 mb-4">
-            <div className="relative w-1/3"> {/* Semua input dalam flex-1 agar ukurannya sama */}
+          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
+            <div className="relative w-full md:w-1/4"> {/* Semua input dalam flex-1 agar ukurannya sama */}
               <input
                 type="text"
                 className="w-full p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
@@ -301,17 +304,24 @@ export default function UserPost() {
 
             <input
               type="number"
-              className="w-1/3 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
+              className="w-full md:w-1/4 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
               placeholder="Panjang ikan (cm)"
               value={panjang}
               onChange={(e) => setPanjang(e.target.value)}
             />
             <input
               type="number"
-              className="w-1/3 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
-              placeholder="Umur ikan (bulan)"
+              className="w-full md:w-1/4 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
+              placeholder="Berat ikan (g)"
               value={berat}
               onChange={(e) => setBerat(e.target.value)}
+            />
+            <input
+              type="number"
+              className="w-full md:w-1/4 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
+              placeholder="Umur ikan (bulan)"
+              value={umur}
+              onChange={(e) => setUmur(e.target.value)}
             />
           </div>
 
@@ -339,7 +349,7 @@ export default function UserPost() {
                   <div key={index} className="w-24 h-24 border rounded-lg overflow-hidden mr-4 relative">
                     {/* Tombol silang di pojok kanan atas */}
                     <button
-                      className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
+                      className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition z-10"
                       onClick={() => handleDeleteImage(url)} // Hapus gambar berdasarkan URL
                     >
                       ✕
@@ -355,12 +365,12 @@ export default function UserPost() {
         </div>
       </div>
 
-      <div className="flex gap-12 justify-center mt-6 mx-6 font-sans">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-12 justify-center mt-6 mx-6 font-sans">
         <UploadFotoButton />
-        <UploadFileButton setImageUrls={setImageUrls} />
+        <UploadFileButton setImageUrls={setImageUrls} imageUrls={imageUrls} />
         <button
         onClick={handleSubmit}
-        className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
+        className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-4 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
       >
         <Image src="/images/icon/ic_send.png" alt="Kirim" width={16} height={16} unoptimized={true}/>
         <span>Kirim</span>

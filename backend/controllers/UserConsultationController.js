@@ -15,6 +15,7 @@ export const getAllUserConsultations = async (req, res) => {
         "fish_length",
         "consultation_topic",
         "fish_image",
+        "fish_weight",
         "complaint",
         "consultation_status",
       ],
@@ -99,6 +100,7 @@ export const getUserConsultationHistory = async (req, res) => {
         "fish_type_id",
         "fish_age",
         "fish_length",
+        "fish_weight",
         "consultation_topic",
         "fish_image",
         "complaint",
@@ -142,6 +144,7 @@ export const createUserConsultation = async (req, res) => {
     fish_type_id,
     fish_age,
     fish_length,
+    fish_weight,
     consultation_topic,
     fish_image,
     complaint,
@@ -159,6 +162,7 @@ export const createUserConsultation = async (req, res) => {
         fish_type_id,
         fish_age,
         fish_length,
+        fish_weight,
         consultation_topic,
         fish_image,
         complaint,
@@ -194,25 +198,5 @@ export const createUserConsultation = async (req, res) => {
 
 
 
-// Fungsi untuk memperbarui data konsultasi berdasarkan ID
-export const updateUserConsultation = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const consultation = await UserConsultation.findByPk(id);
-
-    if (!consultation) {
-      return res.status(404).json({ message: "Konsultasi tidak ditemukan." });
-    }
-
-    const updatedConsultation = await consultation.update(req.body);
-    res.status(200).json({
-      message: "Konsultasi berhasil diperbarui.",
-      data: updatedConsultation,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Gagal memperbarui konsultasi.", error: error.message });
-  }
-};
 
 

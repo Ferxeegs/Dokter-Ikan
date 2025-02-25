@@ -128,14 +128,14 @@ export default function UploadPaymentProof() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 via-blue-100 to-blue-200">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
-        <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">Upload Bukti Pembayaran</h2>
-        <p className="text-gray-700 text-center mb-8">Silakan unggah bukti pembayaran Anda untuk bank <span className="font-semibold text-blue-600">{selectedBank}</span>.</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 via-blue-100 to-blue-200 p-4">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-lg">
+        <h2 className="text-xl sm:text-2xl font-bold text-center text-blue-700 mb-4">Upload Bukti Pembayaran</h2>
+        <p className="text-gray-700 text-sm sm:text-base text-center mb-8">Silakan unggah bukti pembayaran Anda untuk bank <span className="font-semibold text-blue-600">{selectedBank}</span>.</p>
 
         {/* Keterangan Bank */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-blue-700">Informasi Rekening</h3>
+          <h3 className="text-base sm:text-base font-semibold text-blue-700">Informasi Rekening</h3>
           <p className="text-gray-700 text-sm">Silakan transfer ke rekening berikut:</p>
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-4">
             <p className="text-sm text-gray-700">No. Rekening: <span className="font-semibold text-gray-900">{bankInfo.accountNumber}</span></p>

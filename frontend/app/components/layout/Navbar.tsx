@@ -16,6 +16,7 @@ interface User {
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -72,13 +73,18 @@ export default function Navbar() {
   return (
     <nav className="flex items-center justify-between bg-white text-black font-bold p-4 sticky top-0 z-10">
       <Link href="/">
-        <div className="flex items-center">
-          <Image src="/images/logo/logo_dokterikan512.png" alt="Home Icon" width={64} height={96} />
-          <Image src="/images/logo/logo_dokterikan.png" alt="Extra Icon" width={164} height={164} />
+        <div className="flex items-center gap-2 md:gap-4">
+          <Image
+            src="/images/logo/logo_fdokterikan.png"
+            alt="Home Icon"
+            width={96}
+            height={64}
+            className="w-28 h-12 md:w-40 md:h-16"
+          />
         </div>
       </Link>
 
-      <div className="flex space-x-14 text-1xl font-semibold font-sans ml-40 -mr-8">
+      <div className="hidden md:flex space-x-8 text-lg font-semibold font-sans">
         <Link href="/">
           <span className={`hover:underline ${pathname === '/' ? 'text-[#1A83FB]' : ''}`}>Beranda</span>
         </Link>
@@ -90,14 +96,48 @@ export default function Navbar() {
         </Link>
       </div>
 
+      <div className="md:hidden flex items-center ml-auto">
+        <button onClick={() => setMenuOpen(!menuOpen)} className="focus:outline-none">
+          <Image src="/images/icon/ic_menu.png" alt="Menu Icon" width={20} height={20} />
+        </button>
+      </div>
+
+      {menuOpen && (
+        <div className="md:hidden absolute top-16 left-0 w-full bg-white shadow-lg z-10">
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <Link href="/">
+              <span className={`hover:underline ${pathname === '/' ? 'text-[#1A83FB]' : ''}`} onClick={() => setMenuOpen(false)}>Beranda</span>
+            </Link>
+            <Link href="/article">
+              <span className={`hover:underline ${pathname === '/article' ? 'text-[#1A83FB]' : ''}`} onClick={() => setMenuOpen(false)}>Artikel</span>
+            </Link>
+            <Link href={user?.role === 'expert' ? '/riwayatexpert' : '/riwayat'}>
+              <span className={`hover:underline ${(pathname === '/riwayat' || pathname === '/riwayatexpert') ? 'text-[#1A83FB]' : ''}`} onClick={() => setMenuOpen(false)}>Riwayat</span>
+            </Link>
+            {user ? (
+              <>
+                <Link href={user.role === 'expert' ? '/profile-expert' : '/profile-user'}>
+                  <span className="block px-4 py-2 text-black hover:bg-gray-200 cursor-pointer" onClick={() => setMenuOpen(false)}>Profil</span>
+                </Link>
+                <button onClick={handleLogout} className="block w-full px-4 py-2 text-red-600 hover:bg-gray-200 cursor-pointer">Logout</button>
+              </>
+            ) : (
+              <Link href="/login">
+                <button className="bg-[#69CBF4] text-white px-6 py-1 rounded-lg hover:bg-[#4AABDE] transition text-lg font-sans font-semibold" onClick={() => setMenuOpen(false)}>Login</button>
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
       {user ? (
-        <div className="relative flex items-center space-x-4 mr-8" ref={dropdownRef}>
+        <div className="hidden md:flex relative items-center space-x-4" ref={dropdownRef}>
           <button onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center space-x-2 focus:outline-none relative">
             <Image src="/images/icon/ic_profile.png" alt="User Icon" width={30} height={30} className="rounded-full" />
             <span className="font-semibold">{user.name}</span>
           </button>
           {dropdownOpen && (
-            <div className="absolute right-0 mt-36 w-48 bg-white border rounded-lg shadow-lg py-2">
+            <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2">
               <Link href={user.role === 'expert' ? '/profile-expert' : '/profile-user'}>
                 <span className="block px-4 py-2 text-black hover:bg-gray-200 cursor-pointer">Profil</span>
               </Link>
@@ -107,7 +147,7 @@ export default function Navbar() {
         </div>
       ) : (
         <Link href="/login">
-          <button className="bg-[#69CBF4] text-white px-6 py-1 rounded-lg hover:bg-[#4AABDE] transition text-1x1 font-sans font-semibold mr-8">Login</button>
+          <button className="hidden md:block bg-[#69CBF4] text-white px-6 py-1 rounded-lg hover:bg-[#4AABDE] transition text-lg font-sans font-semibold">Login</button>
         </Link>
       )}
     </nav>

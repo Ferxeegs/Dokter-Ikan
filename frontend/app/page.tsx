@@ -2,17 +2,29 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Image from 'next/image';
+import Cookies from 'js-cookie';
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const router = useRouter();
 
   const handleOpenModal = (message: string) => {
     setModalMessage(message);
     setIsModalOpen(true);
+  };
+
+  const handleConsultationClick = () => {
+    const token = Cookies.get('token');
+    if (!token) {
+      handleOpenModal("Anda harus login terlebih dahulu untuk mengakses halaman konsultasi tenaga ahli.");
+    } else {
+      router.push('/userpost');
+    }
   };
 
   return (
@@ -29,17 +41,17 @@ export default function Home() {
         }}
       >
         <div className="ml-6 mt-4">
-          <h1 className="text-3xl font-bold mb-2 text-[#1A83FB] text-left font-lato">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-[#1A83FB] text-left font-lato">
             Solusi Cerdas Untuk Kesehatan Ikan Anda
           </h1>
-          <h2 className="text-lg mb-6 text-[#2C2C2C] text-left">
+          <h2 className="text-base sm:text-lg mb-6 text-[#2C2C2C] text-left">
             Konsultasi dengan Tenaga Ahli Ikan & Deteksi Penyakit Secara Instan Melalui Gambar
           </h2>
         </div>
 
-        <div className="flex justify-center gap-4 mb-8 mt-60">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8 mt-20 sm:mt-60">
           <button
-            className="flex flex-col items-center bg-gradient-to-b from-white to-[#BCEBFF] text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-64 mr-4">
+            className="flex flex-col items-center bg-gradient-to-b from-white to-[#BCEBFF] text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-full sm:w-64 mr-0 sm:mr-4 mb-4 sm:mb-0">
             <Link href="/fishdetection">
               <div className="flex flex-col items-center">
                 <Image src="/images/icon/ic_brain.png" alt="Konsultasi Icon" width={64} height={64} className="w-16 h-16 mb-4" />
@@ -52,7 +64,7 @@ export default function Home() {
           </button>
 
           <button
-            className="flex flex-col items-center bg-gradient-to-b from-white to-[#BCEBFF] text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-64 mr-4"
+            className="flex flex-col items-center bg-gradient-to-b from-white to-[#BCEBFF] text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-full sm:w-64 mr-0 sm:mr-4 mb-4 sm:mb-0"
             onClick={() => handleOpenModal("Fitur Deteksi Penyakit Ikan masih dalam tahap pengembangan.")}
           >
             <div className="flex flex-col items-center">
@@ -64,20 +76,21 @@ export default function Home() {
             </div>
           </button>
 
-          <button className="flex flex-col items-center bg-gradient-to-b from-white to-[#BCEBFF] text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-64 sm:w-72">
-            <Link href="/userpost">
-              <div className="flex flex-col items-center">
-                <Image src="/images/icon/ic_konsul.png" alt="Riwayat Icon" width={64} height={64} className="w-16 h-16 mb-4" />
-                <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">
-                  KONSULTASI TENAGA AHLI
-                </h3>
-                <p className="text-xs text-black text-center">
-                  Pembudidaya dapat berkonsultasi dengan tenaga ahli ikan secara daring melalui aplikasi.
-                  Konsultasi ini membantu pembudidaya mendapatkan saran dan solusi langsung dari ahli terkait
-                  kesehatan ikan, perawatan, dan resep obat.
-                </p>
-              </div>
-            </Link>
+          <button
+            className="flex flex-col items-center bg-gradient-to-b from-white to-[#BCEBFF] text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-full sm:w-64"
+            onClick={handleConsultationClick}
+          >
+            <div className="flex flex-col items-center">
+              <Image src="/images/icon/ic_konsul.png" alt="Riwayat Icon" width={64} height={64} className="w-16 h-16 mb-4" />
+              <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">
+                KONSULTASI TENAGA AHLI
+              </h3>
+              <p className="text-xs text-black text-center">
+                Pembudidaya dapat berkonsultasi dengan tenaga ahli ikan secara daring melalui aplikasi.
+                Konsultasi ini membantu pembudidaya mendapatkan saran dan solusi langsung dari ahli terkait
+                kesehatan ikan, perawatan, dan resep obat.
+              </p>
+            </div>
           </button>
         </div>
 
@@ -95,7 +108,7 @@ export default function Home() {
             </div>
           </div>
         )}
-        <p className="text-black mt-24 max-w-3xl mx-auto text-justify font-lato">
+        <p className="text-black mt-24 max-w-3xl mx-auto text-justify font-lato text-sm sm:text-base">
           Dokter Ikan adalah solusi digital inovatif untuk pemilik dan pembudidaya ikan, memanfaatkan teknologi AI untuk deteksi spesies 
           dan penyakit ikan. Aplikasi ini memudahkan pengguna dalam mendiagnosis masalah kesehatan ikan hanya dengan mengunggah foto, 
           serta menyediakan akses cepat ke obat yang direkomendasikan. Dengan integrasi fitur konsultasi online dengan tenaga ahli ikan, 

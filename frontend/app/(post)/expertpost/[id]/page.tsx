@@ -29,6 +29,7 @@ export default function ExpertPost() {
     fish_expert_specialization: string;
     fish_type: string;
     fish_length: string;
+    fish_weight: string;
     fish_age: string;
     fish_image: string;
     name: string;
@@ -51,7 +52,7 @@ export default function ExpertPost() {
   };
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
- const handleSubmit = async () => {
+  const handleSubmit = async () => {
     try {
       const token = Cookies.get("token");
       if (!token) {
@@ -153,7 +154,7 @@ export default function ExpertPost() {
     );
   }
 
-  const baseUrl =  `${API_BASE_URL}`;
+  const baseUrl = `${API_BASE_URL}`;
   const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${baseUrl}${image}`);
 
   const handleDeleteImage = async (url: string) => { // Terima URL gambar yang akan dihapus
@@ -162,11 +163,11 @@ export default function ExpertPost() {
       console.error("Token tidak ditemukan di cookies");
       return;
     }
-  
+
     try {
       // Ambil nama file dari URL gambar
       const fileName = url.split("/").pop();
-  
+
       // Kirim request ke backend untuk menghapus gambar dari server lokal
       const response = await fetch(`${API_BASE_URL}/delete-file`, {
         method: "DELETE",
@@ -178,7 +179,7 @@ export default function ExpertPost() {
           fileName: fileName, // Kirim nama file ke backend
         }),
       });
-  
+
       const responseData = await response.json();
       if (response.ok) {
         // Hapus gambar dari state imageUrls setelah berhasil dihapus dari server
@@ -206,11 +207,11 @@ export default function ExpertPost() {
 
       <main className="flex-1">
         <div className="ml-6 mt-32 font-sans">
-          <h1 className="text-2xl font-bold mb-2 text-[#1A83FB] text-center">
+          <h1 className="text-xl sm:text-2xl font-bold mb-2 text-[#1A83FB] text-center">
             Konsultasi Masalah Ikan Anda
           </h1>
-          <h2 className="text-base mb-6 font-semibold text-[#2C2C2C] text-center">
-            Masukkan keluhan Anda dan dapatkan solusi dari tenaga ahli.
+          <h2 className="text-xs sm:text-sm mb-6 font-semibold text-[#2C2C2C] text-center">
+            Masukkan keluhan Anda dan dapatkan solusi dari tenaga ahli
           </h2>
         </div>
 
@@ -219,7 +220,8 @@ export default function ExpertPost() {
             title={data.title} 
             description={data.description} 
             fishType={data.fish_type} 
-            fishLength={data.fish_length} 
+            fishLength={data.fish_length}
+            fishWeight={data.fish_weight}
             fishAge={data.fish_age} 
             fishImageUrls={fishImageUrls} 
             senderName={data.name}
@@ -272,7 +274,7 @@ export default function ExpertPost() {
                   <div key={index} className="w-24 h-24 border rounded-lg overflow-hidden mr-4 relative">
                     {/* Tombol silang di pojok kanan atas */}
                     <button
-                      className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
+                      className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition z-10"
                       onClick={() => handleDeleteImage(url)} // Hapus gambar berdasarkan URL
                     >
                       ✕
@@ -288,9 +290,9 @@ export default function ExpertPost() {
           ):null}
 
         {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
-        <div className="flex gap-12 justify-center mt-6 mx-6 font-sans">
+        <div className="flex flex-col md:flex-row gap-4 justify-center mt-6 mx-6 font-sans">
           <UploadFotoButton />
-          <UploadFileButton setImageUrls={setImageUrls} />
+          <UploadFileButton setImageUrls={setImageUrls} imageUrls={imageUrls} />
           <button
             onClick={handleSubmit}
             className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"

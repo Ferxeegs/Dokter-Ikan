@@ -48,8 +48,8 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
           setPrescriptionId(data?.prescription_id || null);
           setPrescriptionData(Array.isArray(data?.medicines) ? data.medicines : []);
         }
-      } catch (error) {
-        console.error("Error fetching prescription data:", error);
+      } catch  {
+       
       }
     };
 
@@ -81,59 +81,54 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
   }, [prescriptionData, chatEnabled]);
 
   const handlePayment = async () => {
-    if (!prescriptionId) {
-        alert("Gagal mendapatkan ID resep.");
-        return;
-    }
-
     setIsProcessing(true);
-
+  
     try {
-        // Cek apakah consultation_id sudah ada di tabel payment
-        const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`);
-
-        let paymentLookupData;
-        if (paymentLookupResponse.ok) {
-            paymentLookupData = await paymentLookupResponse.json();
+      // Cek apakah consultation_id sudah ada di tabel payment
+      const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`);
+  
+      let paymentLookupData;
+      if (paymentLookupResponse.ok) {
+        paymentLookupData = await paymentLookupResponse.json();
+      } else {
+        const errorData = await paymentLookupResponse.json();
+        if (errorData.error === "Payment not found for this consultation") {
+          paymentLookupData = null; // Simpan sebagai null untuk menandakan perlu membuat payment baru
         } else {
-            const errorData = await paymentLookupResponse.json();
-            if (errorData.error === "Payment not found for this consultation") {
-                paymentLookupData = null; // Simpan sebagai null untuk menandakan perlu membuat payment baru
-            } else {
-                throw new Error("Failed to check payment data");
-            }
+          throw new Error("Failed to check payment data");
         }
-
-        if (paymentLookupData && paymentLookupData.payment_id) {
-            // Jika pembayaran ditemukan, langsung lanjut ke halaman pembayaran
-            router.push(`/payment?consultation_id=${consultationId}`);
-        } else {
-            // Jika pembayaran tidak ditemukan, lakukan POST request untuk membuat payment baru
-            const response = await fetch(`${API_BASE_URL}/payments`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    consultation_id: consultationId,
-                    prescription_id: prescriptionId,
-                    total_fee: totalFee,
-                    payment_status: "pending",
-                }),
-            });
-
-            if (!response.ok) throw new Error("Failed to initiate payment");
-
-            // Setelah berhasil membuat payment, arahkan ke halaman payment
-            setTimeout(() => {
-                router.push(`/payment?consultation_id=${consultationId}`);
-            }, 2000);
-        }
+      }
+  
+      if (paymentLookupData && paymentLookupData.payment_id) {
+        // Jika pembayaran ditemukan, langsung lanjut ke halaman pembayaran
+        router.push(`/payment?consultation_id=${consultationId}`);
+      } else {
+        // Jika pembayaran tidak ditemukan, lakukan POST request untuk membuat payment baru
+        const response = await fetch(`${API_BASE_URL}/payments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            consultation_id: consultationId,
+            prescription_id: prescriptionId || null, // Gunakan null jika prescriptionId tidak tersedia
+            total_fee: totalFee,
+            payment_status: "pending",
+          }),
+        });
+  
+        if (!response.ok) throw new Error("Failed to initiate payment");
+  
+        // Setelah berhasil membuat payment, arahkan ke halaman payment
+        setTimeout(() => {
+          router.push(`/payment?consultation_id=${consultationId}`);
+        }, 2000);
+      }
     } catch (error) {
-        console.error("Error processing payment:", error);
-        alert("Terjadi kesalahan saat memproses pembayaran.");
+      console.error("Error processing payment:", error);
+      alert("Terjadi kesalahan saat memproses pembayaran.");
     } finally {
-        setIsProcessing(false);
+      setIsProcessing(false);
     }
-};
+  };
 
 
   return (

@@ -87,21 +87,21 @@ export default function RiwayatExpert() {
       >
         <button
           onClick={toggleModal}
-          className="absolute top-4 right-4 bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 transition z-5"
+          className="absolute top-4 right-4 bg-blue-500 text-white p-1 sm:p-2 rounded-full hover:bg-blue-600 transition z-1"
         >
           <Info className="w-5 h-5" />
         </button>
 
         <div className="ml-6 text-center">
-          <h1 className="text-3xl font-bold mb-2 text-[#1A83FB] font-lato">
-            Riwayat Konsultasi Anda
+        <h1 className="text-xl sm:text-3xl font-bold mb-2 text-[#1A83FB] font-lato">
+           Riwayat Konsultasi Anda
           </h1>
-          <h2 className="text-lg text-[#2C2C2C]">
+          <h2 className="text-sm sm:text-lg text-[#2C2C2C]">
             Halaman ini menampilkan daftar konsultasi yang pernah Anda tangani.
           </h2>
         </div>
 
-        <div className="flex justify-center gap-4 flex-wrap mt-6">
+        <div className="flex justify-center gap-4 flex-wrap mt-6 px-4">
           {consultations.length === 0 ? (
             <p className="text-gray-600">Tidak ada riwayat konsultasi.</p>
           ) : (
@@ -122,7 +122,7 @@ export default function RiwayatExpert() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-auto text-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md text-center">
             <h3 className="text-xl font-semibold text-gray-800">
               Keterangan Status Konsultasi
             </h3> 

@@ -95,36 +95,36 @@ export default function DashboardExpert() {
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Navbar />
 
-      <main className="flex-1 flex flex-col items-center py-10">
+      <main className="flex-1 flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8">
         {expertData ? (
           <div className="w-full max-w-4xl bg-white rounded-lg shadow-xl p-6 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 transition-all hover:shadow-2xl">
             <div className="relative">
               <Image
                 src={expertData.image_url}
                 alt="Profil Dokter"
-                width={160}
-                height={160}
+                width={140}
+                height={140}
                 className="w-40 h-40 rounded-full object-cover border-4 border-blue-500 shadow-md transition-transform hover:scale-105"
                 unoptimized={true}
               />
             </div>
             <div className="text-center md:text-left">
-              <h2 className="text-3xl font-extrabold text-blue-600">{expertData.name}</h2>
-              <p className="text-lg text-gray-600 mt-2">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-blue-600">{expertData.name}</h2>
+              <p className="text-base sm:text-lg text-gray-600 mt-2">
                 <span className="font-semibold">Spesialisasi:</span> {expertData.specialization}
               </p>
-              <p className="text-lg text-gray-500 mt-2">
+              <p className="text-base sm:text-lg text-gray-500 mt-2">
                 <span className="font-semibold">Pengalaman:</span> {expertData.experience} tahun
               </p>
             </div>
           </div>
         ) : (
-          <p className="text-xl text-gray-500">Memuat data...</p>
+          <p className="text-lg text-gray-500">Memuat data...</p>
         )}
 
         <div className="mt-10 text-center">
-          <h1 className="text-4xl font-bold text-blue-600">Dashboard Tenaga Ahli</h1>
-          <p className="text-lg text-gray-700">Berikut adalah riwayat konsultasi yang diajukan kepada Anda:</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-600">Dashboard Tenaga Ahli</h1>
+          <p className="text-lg sm:text-xl text-gray-700">Berikut adalah riwayat konsultasi yang diajukan kepada Anda:</p>
         </div>
 
         <div className="flex justify-center gap-4 flex-wrap my-10">

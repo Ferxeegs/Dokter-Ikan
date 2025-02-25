@@ -164,6 +164,7 @@ export const getConsultationHistory = async (req, res) => {
             "fish_type_id",
             "fish_age",
             "fish_length",
+            "fish_weight",
             "consultation_topic",
             "fish_image",
             "complaint",
@@ -225,6 +226,7 @@ export const getConsultation = async (req, res) => {
             'consultation_topic',
             'fish_type_id',
             'fish_length',
+            'fish_weight',
             'fish_age',
             'fish_image',
           ],
@@ -266,7 +268,7 @@ export const getConsultation = async (req, res) => {
     const fishLength = consultation.UserConsultation ? consultation.UserConsultation.fish_length : 'Tidak ada panjang ikan';
     const fishAge = consultation.UserConsultation ? consultation.UserConsultation.fish_age : 'Tidak ada umur ikan';
     const fishImage = consultation.UserConsultation ? consultation.UserConsultation.fish_image : '[]';
-
+    const fishWeight = consultation.UserConsultation ? consultation.UserConsultation.fish_weight : 'Tidak ada berat ikan';
     // Tambahkan chat_enabled, consultation_status, dan created_at
     const chatEnabled = consultation.chat_enabled;
     const consultationStatus = consultation.consultation_status;
@@ -281,6 +283,7 @@ export const getConsultation = async (req, res) => {
       fish_expert_specialization: fishExpertSpecialization,
       fish_type: fishTypeName,
       fish_length: fishLength,
+      fish_weight: fishWeight,
       fish_age: fishAge,
       fish_image: fishImage,
       answer_image: answerImage,

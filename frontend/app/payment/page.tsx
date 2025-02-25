@@ -46,8 +46,7 @@ const Payment = () => {
         const consultationData = await consultationResponse.json();
 
         const prescriptionResponse = await fetch(`${API_BASE_URL}/prescriptionsbyconsultation?consultation_id=${consultationId}`, { signal });
-        if (!prescriptionResponse.ok) throw new Error("Gagal mengambil data resep.");
-        const prescriptionData = await prescriptionResponse.json();
+        const prescriptionData = prescriptionResponse.ok ? await prescriptionResponse.json() : null;
 
         const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`, { signal });
         if (!paymentLookupResponse.ok) throw new Error("Gagal mengambil data ID pembayaran.");
@@ -120,19 +119,19 @@ const Payment = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-300 to-blue-100">
       <Navbar />
-      <main className="flex flex-col items-center justify-center py-12 px-6">
-        <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-8 border border-blue-400">
-          <h2 className="text-3xl font-extrabold text-blue-700 mb-6 text-center">Ringkasan Pembayaran</h2>
+      <main className="flex flex-col items-center justify-center py-12 px-4 sm:px-6">
+        <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-6 sm:p-8 border border-blue-400">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-blue-700 mb-6 text-center">Ringkasan Pembayaran</h2>
 
-          <div className="text-lg space-y-4 text-gray-700">
+          <div className="text-sm sm:text-base space-y-1 text-gray-700">
             <p><strong>Nama User:</strong> {paymentData.userName}</p>
             <p><strong>Nama Expert:</strong> {paymentData.expertName}</p>
             <p><strong>Tanggal & Jam:</strong> {paymentData.dateTime}</p>
           </div>
 
-          <hr className="my-6 border-blue-300" />
+          <hr className="my-4 border-blue-300" />
 
-          <div className="text-lg">
+          <div className="text-sm sm:text-lg">
             <h3 className="font-semibold text-blue-600">Daftar Obat</h3>
             <ul className="bg-blue-50 p-4 rounded-lg mt-2">
               {paymentData.medicines.length > 0 ? (
@@ -147,7 +146,7 @@ const Payment = () => {
               )}
             </ul>
 
-            <h3 className="font-semibold text-blue-600 mt-6">Biaya Tambahan</h3>
+            <h3 className="font-semibold text-blue-600 mt-4">Biaya Tambahan</h3>
             <ul className="bg-blue-50 p-4 rounded-lg mt-2">
               <li className="flex justify-between py-3 border-b last:border-none text-gray-800">
                 <span>Biaya Konsultasi</span>
@@ -168,7 +167,7 @@ const Payment = () => {
 
           <hr className="my-6 border-blue-400" />
 
-          <h3 className="text-2xl font-bold text-blue-800 text-center bg-blue-100 py-3 rounded-lg shadow-inner">
+          <h3 className="text-lg sm:text-xl font-bold text-blue-800 text-center bg-blue-100 py-3 rounded-lg shadow-inner">
             Total Biaya: Rp {paymentData.totalFee.toLocaleString()}
           </h3>
 

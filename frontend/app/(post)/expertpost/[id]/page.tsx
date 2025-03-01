@@ -291,7 +291,7 @@ export default function ExpertPost() {
 
         {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
         <div className="flex flex-col md:flex-row gap-4 justify-center mt-6 mx-6 font-sans">
-          <UploadFotoButton />
+          <UploadFotoButton setImageUrls={setImageUrls} />
           <UploadFileButton setImageUrls={setImageUrls} imageUrls={imageUrls} />
           <button
             onClick={handleSubmit}

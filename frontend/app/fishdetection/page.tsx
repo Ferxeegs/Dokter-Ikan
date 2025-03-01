@@ -13,6 +13,7 @@ interface Prediction {
 
 export default function FishDetection() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null); // Ref untuk input kamera
   const uploadBoxRef = useRef<HTMLDivElement | null>(null); // Ref untuk elemen box unggah gambar
   const [imageUrls, setImageUrls] = useState<string[]>([]); // Menyimpan URL gambar yang diupload
   const [isLoading, setIsLoading] = useState(false); // State untuk loading
@@ -22,6 +23,12 @@ export default function FishDetection() {
   const handleBrowseClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
+    }
+  };
+
+  const handleCameraClick = () => {
+    if (cameraInputRef.current) {
+      cameraInputRef.current.click();
     }
   };
 
@@ -114,6 +121,7 @@ export default function FishDetection() {
 
           {/* Button for Camera Scan */}
           <button
+            onClick={handleCameraClick} // Buka kamera saat tombol diklik
             className="flex items-center justify-center bg-white text-[#0795D2] px-6 py-3 border-2 border-[#0795D2] rounded-2xl shadow-lg hover:shadow-2xl transition w-full sm:w-64"
           >
             <span className="text-base">Pindai dengan Kamera</span>
@@ -165,6 +173,14 @@ export default function FishDetection() {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment" // Membuka kamera
                 className="hidden"
                 onChange={handleFileChange}
               />

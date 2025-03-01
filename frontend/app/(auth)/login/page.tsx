@@ -24,7 +24,7 @@ export default function Login() {
 
   // Fungsi untuk menyimpan token di cookies
   const saveToken = (token: string) => {
-    Cookies.set('token', token, { expires: 7, secure: false, sameSite: 'Strict' });
+    Cookies.set('token', token, { expires: 7, secure: true, sameSite: 'Strict' });
   };
 
   // Fungsi untuk menangani pengiriman formulir login

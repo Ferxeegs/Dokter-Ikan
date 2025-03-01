@@ -79,12 +79,12 @@ export default function Navbar() {
             alt="Home Icon"
             width={96}
             height={64}
-            className="w-28 h-12 md:w-40 md:h-16"
+            className="w-28 h-10 md:w-40 md:h-16"
           />
         </div>
       </Link>
 
-      <div className="hidden md:flex space-x-8 text-lg font-semibold font-sans">
+      <div className="hidden md:flex space-x-8 text-base font-semibold font-sans">
         <Link href="/">
           <span className={`hover:underline ${pathname === '/' ? 'text-[#1A83FB]' : ''}`}>Beranda</span>
         </Link>
@@ -117,7 +117,7 @@ export default function Navbar() {
             {user ? (
               <>
                 <Link href={user.role === 'expert' ? '/profile-expert' : '/profile-user'}>
-                  <span className="block px-4 py-2 text-black hover:bg-gray-200 cursor-pointer" onClick={() => setMenuOpen(false)}>Profil</span>
+                  <span className="block px-4 py-2 text-black text-base hover:bg-gray-200 cursor-pointer" onClick={() => setMenuOpen(false)}>Profil</span>
                 </Link>
                 <button onClick={handleLogout} className="block w-full px-4 py-2 text-red-600 hover:bg-gray-200 cursor-pointer">Logout</button>
               </>

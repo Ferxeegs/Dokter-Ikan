@@ -1,17 +1,13 @@
-import express from 'express';
+import express from "express";
 import {
-  getAllFishDiseases,
+  getFishDiseases,
   getFishDiseaseById,
-  createFishDisease,
-  updateFishDisease,
-} from '../controllers/FishDiseaseController.js';
+} from "../controllers/FishDiseaseController.js";
 
 const router = express.Router();
 
-router.get('/fish-diseases', getAllFishDiseases);
-router.get('/fish-diseases/:id', getFishDiseaseById);
-router.post('/fish-diseases', createFishDisease);
-router.put('/fish-diseases/:id', updateFishDisease);
+router.get("/fishdiseases", getFishDiseases); // Get all diseases
+router.get("/fishdiseases/:id", getFishDiseaseById); // Get disease by ID
 
 
 export default router;

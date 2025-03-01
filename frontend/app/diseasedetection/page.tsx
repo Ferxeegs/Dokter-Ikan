@@ -1,60 +1,48 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 
-export default function DiseaseDetection() {
-  const [showSpecies, setShowSpecies] = useState(false);  // State to toggle species list visibility
-  const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);  // State to store the selected species
+interface Symptom {
+  symptoms_id: number;
+  name: string;
+  code: string;
+  type: 'fisik' | 'perilaku';
+}
 
+export default function DiseaseDetection() {
   const [selectedPhysicalSymptoms, setSelectedPhysicalSymptoms] = useState<Set<string>>(new Set());
   const [selectedBehavioralSymptoms, setSelectedBehavioralSymptoms] = useState<Set<string>>(new Set());
+  const [physicalSymptoms, setPhysicalSymptoms] = useState<Symptom[]>([]);
+  const [behavioralSymptoms, setBehavioralSymptoms] = useState<Symptom[]>([]);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const species = [
-    'Ikan Koi',
-    'Ikan Lele',
-    'Ikan Nila',
-    'Ikan Mas',
-    'Ikan Gurame',
-    'Ikan Bawal',
-    'Ikan Patin',
-    'Ikan Betutu',
-  ];
+  useEffect(() => {
+    const fetchSymptoms = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/symptoms`);
+        const result = await response.json();
 
-  const physicalSymptoms = [
-    'Tubuh membengkak',
-    'Sirip koyak atau hilang',
-    'Kulit tampak pucat',
-    'Ada bercak-bercak pada tubuh',
-    'Terdapat lapisan lendir pada tubuh',
-    'Bintik-bintik putih di tubuh',
-    'Perubahan warna tubuh (menjadi kemerahan atau kehitaman)',
-    'Insang tampak berwarna merah atau bengkak',
-    'Kehilangan keseimbangan tubuh',
-    'Tanda-tanda luka atau borok pada tubuh',
-  ];
+        if (result.success && Array.isArray(result.data)) {
+          const physical = result.data.filter((symptom: Symptom) => symptom.type === 'fisik');
+          const behavioral = result.data.filter((symptom: Symptom) => symptom.type === 'perilaku');
 
-  const behavioralSymptoms = [
-    'Tenggelam atau berenang di permukaan terus-menerus',
-    'Kurang nafsu makan',
-    'Perubahan pola renang (bergerak secara tidak teratur)',
-    'Sering menggosokkan tubuh ke objek keras',
-    'Berenang dalam lingkaran atau melompat',
-    'Menjadi lebih agresif terhadap ikan lain',
-    'Perubahan pola pernapasan (lebih cepat atau lambat)',
-    'Berenang dengan posisi tubuh miring atau terbalik',
-    'Menghindari makanan atau penampakan manusia',
-    'Cenderung bersembunyi di sudut akuarium atau keramba',
-  ];
+          setPhysicalSymptoms(physical);
+          setBehavioralSymptoms(behavioral);
+        } else {
+          console.error('Data fetched is not an array:', result);
+        }
+      } catch (error) {
+        console.error('Error fetching symptoms:', error);
+      }
+    };
 
-  const handleSelectSpecies = (speciesName: string) => {
-    setSelectedSpecies(speciesName);
-    setShowSpecies(false);
-  };
+    fetchSymptoms();
+  }, [API_BASE_URL]);
 
-  const toggleSymptom = (symptom: string, type: 'physical' | 'behavioral') => {
-    if (type === 'physical') {
+  const toggleSymptom = (symptom: string, type: 'fisik' | 'perilaku') => {
+    if (type === 'fisik') {
       setSelectedPhysicalSymptoms(prev => {
         const newSelected = new Set(prev);
         if (newSelected.has(symptom)) {
@@ -77,13 +65,13 @@ export default function DiseaseDetection() {
     }
   };
 
-  const getButtonClass = (symptom: string, type: 'physical' | 'behavioral') => {
+  const getButtonClass = (symptom: string, type: 'fisik' | 'perilaku') => {
     const isSelected =
-      type === 'physical'
+      type === 'fisik'
         ? selectedPhysicalSymptoms.has(symptom)
         : selectedBehavioralSymptoms.has(symptom);
 
-    return `px-4 py-2 rounded-xl w-full sm:w-auto ${
+    return `px-2 py-1 rounded-lg text-xs ${
       isSelected ? 'bg-blue-300' : 'bg-[#D2EFFC]'
     } text-gray-700 hover:bg-blue-300`;
   };
@@ -103,60 +91,32 @@ export default function DiseaseDetection() {
       <Navbar />
 
       {/* Main Content */}
-      <div className="flex-grow items-center justify-center px-8 py-12 text-center">
+      <div className="flex-grow flex flex-col items-center justify-center px-4 py-8 text-center">
         {/* Title and Subtitle */}
-        <div className="ml-6 mt-28">
-          <h1 className="text-3xl font-bold mb-2 text-[#1A83FB] font-lato">
+        <div className="w-full max-w-2xl mx-auto mt-12">
+          <h1 className="text-lg sm:text-2xl font-bold mb-2 text-[#1A83FB] font-lato">
             Deteksi Penyakit Ikan dengan Expert System
           </h1>
-          <h2 className="text-lg mb-6 text-[#2C2C2C]">
+          <h2 className="text-sm sm:text-lg mb-6 text-[#2C2C2C]">
             Masukan gejala - gejala yang diderita oleh ikan seperti perubahan fisik dan perilaku ikan
           </h2>
         </div>
 
-        {/* Fish Species Selection Box */}
-        <div
-          className="bg-white shadow-lg rounded-lg p-4 mb-8 w-full sm:max-w-md mx-auto border-2 border-blue-500 cursor-pointer"
-          onClick={() => setShowSpecies(!showSpecies)}  // Toggle species list visibility
-        >
-          <h2 className="text-lg font-semibold text-center text-gray-700">Pilih Spesies Ikan</h2>
-          <p className="mt-2 text-center text-gray-600">
-            {selectedSpecies ? selectedSpecies : 'Klik untuk memilih spesies ikan'}
-          </p>
-
-          {/* Display species list if showSpecies is true */}
-          {showSpecies && (
-            <div className="mt-4">
-              <ul className="pl-1">
-                {species.map((speciesName, index) => (
-                  <li
-                    key={index}
-                    className="py-1 cursor-pointer text-gray-600 hover:text-blue-600"
-                    onClick={() => handleSelectSpecies(speciesName)}  // Set selected species
-                  >
-                    {speciesName}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
         {/* Single Box for Symptoms (Resize with Screen Width) */}
-        <div className="bg-white shadow-lg rounded-lg p-6 w-full mx-auto border-2 border-blue-500">
-          <h2 className="text-xl font-semibold text-center text-gray-700 mb-6">
+        <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 w-full max-w-4xl mx-auto border-2 border-blue-500">
+          <h2 className="text-sm sm:text-xl font-semibold text-center text-gray-700 mb-4 sm:mb-6">
             Pilih Gejala pada Ikan
           </h2>
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-700">Gejala Fisik</h3>
-            <div className="mt-4 flex flex-wrap justify-center gap-4">
-              {physicalSymptoms.map((symptom, idx) => (
+          <div className="mb-4 sm:mb-6">
+            <h3 className="text-sm sm:text-lg font-semibold text-gray-700">Gejala Fisik</h3>
+            <div className="mt-2 sm:mt-4 flex flex-wrap justify-center gap-2">
+              {physicalSymptoms.map((symptom) => (
                 <button
-                  key={idx}
-                  className={getButtonClass(symptom, 'physical')}
-                  onClick={() => toggleSymptom(symptom, 'physical')}
+                  key={symptom.symptoms_id}
+                  className={getButtonClass(symptom.name, 'fisik')}
+                  onClick={() => toggleSymptom(symptom.name, 'fisik')}
                 >
-                  {symptom}
+                  {symptom.name}
                 </button>
               ))}
             </div>
@@ -165,15 +125,15 @@ export default function DiseaseDetection() {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-gray-700">Gejala Perilaku</h3>
-            <div className="mt-4 flex flex-wrap justify-center gap-4">
-              {behavioralSymptoms.map((symptom, idx) => (
+            <h3 className="text-sm sm:text-lg font-semibold text-gray-700">Gejala Perilaku</h3>
+            <div className="mt-2 sm:mt-4 flex flex-wrap justify-center gap-2">
+              {behavioralSymptoms.map((symptom) => (
                 <button
-                  key={idx}
-                  className={getButtonClass(symptom, 'behavioral')}
-                  onClick={() => toggleSymptom(symptom, 'behavioral')}
+                  key={symptom.symptoms_id}
+                  className={getButtonClass(symptom.name, 'perilaku')}
+                  onClick={() => toggleSymptom(symptom.name, 'perilaku')}
                 >
-                  {symptom}
+                  {symptom.name}
                 </button>
               ))}
             </div>
@@ -183,9 +143,9 @@ export default function DiseaseDetection() {
         </div>
 
         {/* Button with Icon */}
-        <div className="mt-12 flex justify-center">
+        <div className="mt-8 sm:mt-12 flex justify-center">
           <button
-            className="flex items-center gap-2 px-6 py-3 bg-[#1A83FB] text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
+            className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-[#1A83FB] text-white text-base sm:text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
           >
             {/* Icon (example: SVG or Font Awesome icon) */}
             <svg
@@ -194,7 +154,7 @@ export default function DiseaseDetection() {
               viewBox="0 0 24 24"
               strokeWidth="2"
               stroke="currentColor"
-              className="w-6 h-6"
+              className="w-5 sm:w-6 h-5 sm:h-6"
             >
               <path
                 strokeLinecap="round"

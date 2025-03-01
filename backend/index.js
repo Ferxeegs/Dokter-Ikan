@@ -17,6 +17,9 @@ import PrescriptionMedicine from "./routes/PrescriptionMedicineRoute.js";
 import AuthRoutes from "./routes/AuthRoutes.js";
 import UploadRoute from "./routes/UploadRoute.js";
 import MessageRoutes from "./routes/MessageRoutes.js";
+import SymptomRoute from "./routes/SymptomRoute.js";
+import FishDiseaseRoute from "./routes/FishDiseaseRoute.js";
+
 
 dotenv.config();
 
@@ -45,6 +48,7 @@ app.use('/uploads', express.static('uploads'));
 // Gunakan route
 app.use(UserRoute);
 app.use(FishTypes);
+app.use(FishDiseaseRoute);
 app.use(FishExperts);
 app.use(UserConsultation);
 app.use(FishExpertAnswer);
@@ -57,7 +61,7 @@ app.use(PrescriptionMedicine);
 app.use(AuthRoutes)
 app.use(UploadRoute);
 app.use(MessageRoutes);
-
+app.use(SymptomRoute);
 
 // Menjalankan server
 app.listen(process.env.APP_PORT, () => {

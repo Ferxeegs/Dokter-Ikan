@@ -1,20 +1,24 @@
 import FishDisease from "../models/FishDiseaseModel.js";
-import FishType from "../models/FishTypeModel.js";
 
-// Fungsi untuk mendapatkan semua data penyakit ikan
-export const getAllFishDiseases = async (req, res) => {
+// Get all fish diseases
+export const getFishDiseases = async (req, res) => {
   try {
-    const diseases = await FishDisease.findAll({
-      include: [
-        {
-          model: FishType,
-          attributes: ['fish_type_id', 'name'] // Atribut yang ingin ditampilkan dari FishType
-        }
-      ]
-    });
-    res.status(200).json(diseases);
+    const diseases = await FishDisease.findAll();
+    res.status(200).json({ success: true, data: diseases });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data penyakit ikan', error: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// Get fish disease by ID
+export const getFishDiseaseById = async (req, res) => {
+  try {
+    const disease = await FishDisease.findByPk(req.params.id);
+    if (!disease) {
+      return res.status(404).json({ success: false, message: "Disease not found" });
+    }
+    res.status(200).json({ success: true, data: disease });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

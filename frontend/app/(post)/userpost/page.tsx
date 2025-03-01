@@ -366,7 +366,7 @@ export default function UserPost() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-12 justify-center mt-6 mx-6 font-sans">
-        <UploadFotoButton />
+        <UploadFotoButton setImageUrls={setImageUrls} />
         <UploadFileButton setImageUrls={setImageUrls} imageUrls={imageUrls} />
         <button
         onClick={handleSubmit}

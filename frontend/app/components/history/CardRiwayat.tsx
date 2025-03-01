@@ -172,6 +172,7 @@ export default function CardRiwayat() {
   };
 
   const handleCardClick = (consultationId: number) => {
+    console.log(`Navigating to consultation/${consultationId}`);
     router.push(`/consultation/${consultationId}`);
   };
 

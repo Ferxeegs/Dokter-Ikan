@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="bg-[rgba(105,203,244,0.26)] p-8 rounded-lg shadow-lg mx-4">
         <div className="flex flex-col items-start md:flex-row md:items-start md:ml-16">
           <div className="flex items-center md:mb-0 ml-[-4px] md:ml-[-20px]">
-            <Image src="/images/logo/logo_fdokterikan.png" alt="Home Icon" width={96} height={64} className="w-28 h-12 md:w-40 md:h-16" />
+            <Image src="/images/logo/logo_fdokterikan.png" alt="Home Icon" width={96} height={64} className="w-28 h-10 md:w-40 md:h-16" />
           </div>
         </div>
 
@@ -29,7 +29,7 @@ export default function Footer() {
             <div className="flex gap-2 mb-4">
               <Image src="/images/logo/logo_undip.png" alt="Partner 1" width={50} height={20} className="w-12 h-12" />
               <Image src="/images/logo/logo_cemebsacut.png" alt="Partner 2" width={120} height={50} className="w-30 h-12" />
-              <Image src="/images/logo/logo_rai.png" alt="Partner 3" width={50} height={50} className="w-12 h-12" />
+              <Image src="/images/logo/logo_RAI.png" alt="Partner 3" width={50} height={50} className="w-12 h-12" />
             </div>
             <p className="text-black text-sm font-semibold -mt-1">Follow Us:</p>
             <div className="flex gap-4 mb-4">

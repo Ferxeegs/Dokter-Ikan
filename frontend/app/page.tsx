@@ -65,8 +65,8 @@ export default function Home() {
 
           <button
             className="flex flex-col items-center bg-gradient-to-b from-white to-[#BCEBFF] text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-full sm:w-64 mr-0 sm:mr-4 mb-4 sm:mb-0"
-            onClick={() => handleOpenModal("Fitur Deteksi Penyakit Ikan masih dalam tahap pengembangan.")}
           >
+            <Link href="/diseasedetection">
             <div className="flex flex-col items-center">
               <Image src="/images/icon/ic_fish.png" alt="Artikel Icon" width={64} height={64} className="w-16 h-16 mb-4" />
               <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">DETEKSI PENYAKIT IKAN</h3>
@@ -74,6 +74,7 @@ export default function Home() {
                 Fitur ini digunakan menganalisis penyakit ikan yang telah di unggah. AI akan mendeteksi gejala penyakit, seperti perubahan warna, luka, atau tanda-tanda abnormal lainnya pada tubuh ikan.
               </p>
             </div>
+            </Link>
           </button>
 
           <button

@@ -1,4 +1,6 @@
 import PrescriptionMedicine from '../models/PrescriptionMedicineModel.js';
+import "regenerator-runtime/runtime";
+
 
 export const getAllPrescriptionMedicines = async (req, res) => {
   try {

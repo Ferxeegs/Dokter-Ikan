@@ -4,32 +4,59 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-import React, { Suspense } from 'react';
-import Slider from 'react-slick';
+import React, { useEffect, useState, useCallback } from 'react';
+import Slider, { Settings } from 'react-slick';
+import { useSearchParams } from 'next/navigation';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 interface DiseaseData {
   name: string;
   description: string;
-  image: string;
+  image: string | null;
 }
 
-const DetectionResult = () => {
-  const diseaseData: DiseaseData[] = [
-    {
-      name: 'Penyakit Sirip Merah',
-      description: 'Penyakit ini menyebabkan sirip ikan menjadi merah dan rusak. Penyebabnya adalah infeksi bakteri yang menyerang sirip ikan.',
-      image: '/path/to/image1.jpg',
-    },
-    {
-      name: 'Penyakit Kulit Putih',
-      description: 'Penyakit ini menyebabkan kulit ikan menjadi putih dan bersisik. Penyebabnya adalah infeksi jamur yang menyerang kulit ikan.',
-      image: '/path/to/image2.jpg',
-    }
-  ];
+const DetectionResultContent = () => {
+  const searchParams = useSearchParams();
+  const data = searchParams.get('data');
+  const [diseaseData, setDiseaseData] = useState<DiseaseData[]>([]);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const settings = {
+  const fetchDiseases = useCallback(async (diseases: string[]) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/fishdiseases`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ diseases }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setDiseaseData(result.data);
+      } else {
+        console.error('Failed to fetch diseases:', result.message);
+      }
+    } catch (error) {
+      console.error('Error fetching diseases:', error);
+    }
+  }, [API_BASE_URL]);
+
+  useEffect(() => {
+    if (data) {
+      try {
+        const parsedData = JSON.parse(data);
+        if (parsedData.success && parsedData.data && Array.isArray(parsedData.data.diagnoses)) {
+          const diseases = parsedData.data.diagnoses.map((diagnosis: { disease: string }) => diagnosis.disease);
+          fetchDiseases(diseases);
+        }
+      } catch (error) {
+        console.error('Failed to parse data:', error);
+      }
+    }
+  }, [data, fetchDiseases]);
+
+  const settings: Settings = {
     dots: true,
     infinite: false,
     speed: 500,
@@ -39,7 +66,7 @@ const DetectionResult = () => {
     prevArrow: <PrevArrow />,
   };
 
-  function NextArrow(props: any) {
+  function NextArrow(props: { className?: string; style?: React.CSSProperties; onClick?: () => void }) {
     const { className, style, onClick } = props;
     return (
       <button
@@ -52,7 +79,7 @@ const DetectionResult = () => {
     );
   }
 
-  function PrevArrow(props: any) {
+  function PrevArrow(props: { className?: string; style?: React.CSSProperties; onClick?: () => void }) {
     const { className, style, onClick } = props;
     return (
       <button
@@ -80,18 +107,23 @@ const DetectionResult = () => {
         <Slider {...settings}>
           {diseaseData.map((disease, index) => (
             <div key={index} className="flex flex-col items-center bg-gradient-to-r from-cyan-400 to-blue-600 p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
-              {/* Bagian gambar agar benar-benar di tengah */}
               <div className="flex justify-center items-center w-full">
-                <div className="w-48 h-48 relative">
-                  <Image
-                    src={disease.image}
-                    alt={disease.name}
-                    width={192} // Atur ukuran gambar agar tetap proporsional
-                    height={192}
-                    className="border-4 border-blue-300 shadow-lg object-cover rounded-lg mx-auto"
-                    unoptimized={true}
-                  />
-                </div>
+                {disease.image ? (
+                  <div className="w-48 h-48 relative">
+                    <Image
+                      src={disease.image}
+                      alt={disease.name}
+                      width={192}
+                      height={192}
+                      className="border-4 border-blue-300 shadow-lg object-cover rounded-lg mx-auto"
+                      unoptimized={true}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-48 h-48 relative bg-gray-200 border-4 border-blue-300 shadow-lg rounded-lg mx-auto flex items-center justify-center">
+                    <span className="text-gray-500">No Image</span>
+                  </div>
+                )}
               </div>
               <h3 className="text-lg sm:text-2xl font-semibold mt-4 text-white text-center">
                 {disease.name}
@@ -115,10 +147,10 @@ const DetectionResult = () => {
   );
 };
 
-const DetectionResultPage = () => (
-  <Suspense fallback={<div>Loading...</div>}>
-    <DetectionResult />
-  </Suspense>
+const DetectionResult = () => (
+  <React.Suspense fallback={<div>Loading...</div>}>
+    <DetectionResultContent />
+  </React.Suspense>
 );
 
-export default DetectionResultPage;
+export default DetectionResult;

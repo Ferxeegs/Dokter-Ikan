@@ -3,39 +3,34 @@ const { parse } = require('url');
 const next = require('next');
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = '0.0.0.0'; // Pastikan bisa diakses dari luar server
-const port = process.env.PORT || 8080; // Pastikan menggunakan PORT, bukan port (case-sensitive)
-
-const app = next({ dev });
+const hostname = 'localhost';
+const port = process.env.port || 8080;
+// when using middleware hostname and port must be provided below
+const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   createServer(async (req, res) => {
     try {
+      // Be sure to pass true as the second argument to url.parse.
+      // This tells it to parse the query portion of the URL.
       const parsedUrl = parse(req.url, true);
       const { pathname, query } = parsedUrl;
 
-      // Static Routes
       if (pathname === '/a') {
         await app.render(req, res, '/a', query);
       } else if (pathname === '/b') {
         await app.render(req, res, '/b', query);
-      } 
-      // Dynamic Routes
-      else if (pathname.match(/^\/consultation\/\d+$/)) {
-        await app.render(req, res, "/consultation/[id]", query);
-      } 
-      // Default Next.js Handling
-      else {
+      } else {
         await handle(req, res, parsedUrl);
       }
     } catch (err) {
       console.error('Error occurred handling', req.url, err);
       res.statusCode = 500;
-      res.end('Internal Server Error');
+      res.end('internal server error');
     }
-  }).listen(port, hostname, (err) => {
+  }).listen(port, (err) => {
     if (err) throw err;
-    console.log(`> Ready on http://${hostname}:${port}`);
+    console.log(`Ready on http://${hostname}:${port}`);
   });
 });

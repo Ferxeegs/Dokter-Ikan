@@ -1,26 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import jwtDecode from 'jwt-decode';
 import Cookies from 'js-cookie';
-import Navbar from '../../../components/layout/Navbar';
-import Footer from '../../../components/layout/Footer';
+import Navbar from '../../components/layout/Navbar';
+import Footer from '../../components/layout/Footer';
 import Complaint from '@/app/components/complaints/Complaint';
 import Answer from '@/app/components/answers/AnswerExpert';
 import UploadFotoButton from '@/app/components/uploads/UploadFoto';
 import UploadFileButton from '@/app/components/uploads/UploadFile';
 import ModalObat from '@/app/components/modals/ModalMedicine';
-import { useParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Modal from '@/app/components/modals/ModalPost';
 import ChatExpert from '@/app/components/chat/ChatExpert';
 import Image from 'next/image';
 
-type Params = {
-  id: string;
-};
 
-export default function ExpertPost() {
-  const { id } = useParams() as Params;
+function ExpertPostContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id') || ''; // Default to empty string if id is null
   const [data, setData] = useState<{
     title: string;
     description: string;
@@ -311,5 +309,13 @@ export default function ExpertPost() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function ExpertPost() {
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <ExpertPostContent />
+    </React.Suspense>
   );
 }

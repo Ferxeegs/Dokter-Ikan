@@ -74,11 +74,11 @@ export default function Navbar() {
     <nav className="flex items-center justify-between bg-white text-black font-bold p-4 sticky top-0 z-10">
       <Link href="/">
         <div className="flex items-center gap-2 md:gap-4">
-          <Image
+          <img
             src="/images/logo/logo_fdokterikan.png"
             alt="Home Icon"
-            width={96}
-            height={64}
+            // width={96}
+            // height={64}
             className="w-28 h-10 md:w-40 md:h-16"
           />
         </div>

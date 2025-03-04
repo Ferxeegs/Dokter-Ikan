@@ -53,7 +53,7 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({
   const router = useRouter(); 
   
   const handleClick = () => {
-    router.push(`/expertpost/${consultationId}`);
+    router.push(`/expertpost?id=${consultationId}`);
   };
 
   return (

@@ -2,6 +2,8 @@ import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
 import dotenv from "dotenv";
+import "regenerator-runtime/runtime";
+
 
 dotenv.config();
 

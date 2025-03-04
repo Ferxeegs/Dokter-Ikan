@@ -4,15 +4,16 @@ import Navbar from '@/app/components/layout/Navbar';
 import Footer from '@/app/components/layout/Footer';
 import Complaint from '@/app/components/complaints/Complaint';
 import Answer from '@/app/components/answers/Answer';
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import DetailResep from '@/app/components/prescriptions/DetailResep';
 import ChatConsultation from '@/app/components/chat/ChatConsultation';
 import ConsultationRules from '@/app/components/rules/ConsultationRules';
 import Cookies from 'js-cookie';
 
-export default function Consultation() {
-  const { id } = useParams();
+function ConsultationContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
   const consultationId = Array.isArray(id) ? id[0] : id;
 
   const [data, setData] = useState<{
@@ -23,11 +24,11 @@ export default function Consultation() {
     fish_expert_specialization: string;
     fish_type: string;
     fish_length: string;
-    fish_weight:string;
+    fish_weight: string;
     fish_age: string;
     fish_image: string;
     answer_image: string;
-    chat_enabled: boolean; // Tambahkan chat_enabled agar bisa dicek
+    chat_enabled: boolean;
     consultation_status: string;
     name: string;
     created_at: string;
@@ -53,7 +54,7 @@ export default function Consultation() {
         }
         const result = await response.json();
         setData(result);
-        setIsChatEnabled(result.chat_enabled); // Perbarui status chat
+        setIsChatEnabled(result.chat_enabled);
       } catch {
         setIsError(true);
       } finally {
@@ -88,12 +89,11 @@ export default function Consultation() {
     );
   }
 
-  // Add base URL for images
   const baseUrl = `${API_BASE_URL}`;
   const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${baseUrl}${image}`);
   let fishImageUrl: string[] = [];
   try {
-    fishImageUrl = data.answer_image && data.answer_image.startsWith('[') 
+    fishImageUrl = data.answer_image && data.answer_image.startsWith('[')
       ? JSON.parse(data.answer_image).map((image: string) => `${baseUrl}${image}`)
       : [];
   } catch {
@@ -116,7 +116,7 @@ export default function Consultation() {
         throw new Error("Gagal mengaktifkan chat");
       }
 
-      setIsChatEnabled(true); // Perbarui state agar UI berubah setelah berhasil update
+      setIsChatEnabled(true);
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error:", error.message);
@@ -216,7 +216,7 @@ export default function Consultation() {
                 <div className="flex justify-center gap-4 mt-4">
                   <button
                     onClick={async () => {
-                      await enableChat(); // Memanggil fungsi untuk update database
+                      await enableChat();
                       setIsChatEnabled(true);
                       setShowConfirmation(false);
                     }}
@@ -248,5 +248,13 @@ export default function Consultation() {
       {/* Footer */}
       <Footer />
     </div>
+  );
+}
+
+export default function Consultation() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ConsultationContent />
+    </Suspense>
   );
 }

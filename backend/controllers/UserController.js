@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import User from "../models/UserModel.js";
 import FishExperts from "../models/FishExpertsModel.js";
 import jwt from 'jsonwebtoken';
+import "regenerator-runtime/runtime";
+
 
 // Fungsi login pengguna
 export const loginUser = async (req, res) => {

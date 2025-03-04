@@ -1,4 +1,6 @@
 import Symptom from "../models/SymptomModel.js";
+import "regenerator-runtime/runtime";
+
 
 // Get all symptoms
 export const getSymptoms = async (req, res) => {

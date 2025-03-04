@@ -22,7 +22,6 @@ import FishDiseaseRoute from "./routes/FishDiseaseRoute.js";
 
 
 dotenv.config();
-
 const app = express();
 
 // Konfigurasi session
@@ -31,18 +30,17 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: {
-        secure: 'false'  // Atur sesuai kebutuhan (true jika menggunakan HTTPS)
+        secure: 'true'  // Atur sesuai kebutuhan (true jika menggunakan HTTPS)
     }
 }));
 
 // Konfigurasi CORS
 app.use(cors({
     credentials: true,
-    origin: 'http://localhost:3000'  // Sesuaikan dengan frontend kamu
+    origin: process.env.FRONTEND_URL || "*",  // Sesuaikan dengan frontend kamu
 }));
 
 app.use(express.json());
-
 app.use('/uploads', express.static('uploads'));
 
 // Gunakan route

@@ -1,6 +1,7 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 
@@ -17,6 +18,7 @@ export default function DiseaseDetection() {
   const [physicalSymptoms, setPhysicalSymptoms] = useState<Symptom[]>([]);
   const [behavioralSymptoms, setBehavioralSymptoms] = useState<Symptom[]>([]);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const router = useRouter();
 
   useEffect(() => {
     const fetchSymptoms = async () => {
@@ -41,39 +43,69 @@ export default function DiseaseDetection() {
     fetchSymptoms();
   }, [API_BASE_URL]);
 
-  const toggleSymptom = (symptom: string, type: 'fisik' | 'perilaku') => {
+  const toggleSymptom = (symptomCode: string, type: 'fisik' | 'perilaku') => {
     if (type === 'fisik') {
       setSelectedPhysicalSymptoms(prev => {
         const newSelected = new Set(prev);
-        if (newSelected.has(symptom)) {
-          newSelected.delete(symptom);
+        if (newSelected.has(symptomCode)) {
+          newSelected.delete(symptomCode);
         } else {
-          newSelected.add(symptom);
+          newSelected.add(symptomCode);
         }
         return newSelected;
       });
     } else {
       setSelectedBehavioralSymptoms(prev => {
         const newSelected = new Set(prev);
-        if (newSelected.has(symptom)) {
-          newSelected.delete(symptom);
+        if (newSelected.has(symptomCode)) {
+          newSelected.delete(symptomCode);
         } else {
-          newSelected.add(symptom);
+          newSelected.add(symptomCode);
         }
         return newSelected;
       });
     }
   };
 
-  const getButtonClass = (symptom: string, type: 'fisik' | 'perilaku') => {
+  const getButtonClass = (symptomCode: string, type: 'fisik' | 'perilaku') => {
     const isSelected =
       type === 'fisik'
-        ? selectedPhysicalSymptoms.has(symptom)
-        : selectedBehavioralSymptoms.has(symptom);
+        ? selectedPhysicalSymptoms.has(symptomCode)
+        : selectedBehavioralSymptoms.has(symptomCode);
 
     return `px-2 py-1 rounded-lg text-xs ${
       isSelected ? 'bg-blue-300' : 'bg-[#D2EFFC]'
     } text-gray-700 hover:bg-blue-300`;
+  };
+
+  const handleSubmit = async () => {
+    const selectedSymptoms = [
+      ...Array.from(selectedPhysicalSymptoms),
+      ...Array.from(selectedBehavioralSymptoms),
+    ];
+
+    console.log('Data yang dikirim:', { symptoms: selectedSymptoms });
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/diagnose`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ symptoms: selectedSymptoms }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log('Diagnosis result:', result);
+        // Navigate to result page with the diagnosis result
+        router.push(`/result-expert-system?data=${encodeURIComponent(JSON.stringify(result))}`);
+      } else {
+        console.error('Failed to diagnose:', result.message);
+      }
+    } catch (error) {
+      console.error('Error diagnosing:', error);
+    }
   };
 
   return (
@@ -113,8 +145,8 @@ export default function DiseaseDetection() {
               {physicalSymptoms.map((symptom) => (
                 <button
                   key={symptom.symptoms_id}
-                  className={getButtonClass(symptom.name, 'fisik')}
-                  onClick={() => toggleSymptom(symptom.name, 'fisik')}
+                  className={getButtonClass(symptom.code, 'fisik')}
+                  onClick={() => toggleSymptom(symptom.code, 'fisik')}
                 >
                   {symptom.name}
                 </button>
@@ -130,8 +162,8 @@ export default function DiseaseDetection() {
               {behavioralSymptoms.map((symptom) => (
                 <button
                   key={symptom.symptoms_id}
-                  className={getButtonClass(symptom.name, 'perilaku')}
-                  onClick={() => toggleSymptom(symptom.name, 'perilaku')}
+                  className={getButtonClass(symptom.code, 'perilaku')}
+                  onClick={() => toggleSymptom(symptom.code, 'perilaku')}
                 >
                   {symptom.name}
                 </button>
@@ -145,6 +177,7 @@ export default function DiseaseDetection() {
         {/* Button with Icon */}
         <div className="mt-8 sm:mt-12 flex justify-center">
           <button
+            onClick={handleSubmit}
             className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-[#1A83FB] text-white text-base sm:text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
           >
             {/* Icon (example: SVG or Font Awesome icon) */}

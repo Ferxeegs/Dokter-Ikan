@@ -1,4 +1,6 @@
 import Vendor from "../models/VendorModel.js";
+import "regenerator-runtime/runtime";
+
 
 // Fungsi untuk mendapatkan semua vendor
 export const getAllVendors = async (req, res) => {

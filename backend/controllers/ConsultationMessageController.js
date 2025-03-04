@@ -1,5 +1,7 @@
 import ConsultationMessage from "../models/ConsultationMessageModel.js";
 import Consultation from "../models/ConsultationModel.js";
+import "regenerator-runtime/runtime";
+
 
 // Kirim pesan dalam konsultasi
 export const sendMessage = async (req, res) => {

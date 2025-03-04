@@ -2,6 +2,8 @@ import fs from "fs";
 import axios from "axios";
 import multer from "multer";
 import FormData from "form-data";  // Import form-data
+import "regenerator-runtime/runtime";
+
 
 // Konfigurasi Multer untuk menyimpan file di folder 'uploads'
 const storage = multer.diskStorage({

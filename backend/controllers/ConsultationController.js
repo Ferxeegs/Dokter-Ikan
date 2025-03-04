@@ -5,6 +5,7 @@ import FishExpert from '../models/FishExpertsModel.js';
 import FishExpertAnswer from '../models/FishExpertAnswerModel.js';
 import jwt from "jsonwebtoken";
 import FishTypes from '../models/FishTypeModel.js';
+import "regenerator-runtime/runtime";
 
 
 // Fungsi untuk mendapatkan semua konsultasi
@@ -51,7 +52,6 @@ export const getConsultationById = async (req, res) => {
   }
 };
 
-
 // Fungsi untuk membuat konsultasi baru
 export const createConsultation = async (req, res) => {
   try {
@@ -94,8 +94,6 @@ export const createConsultation = async (req, res) => {
   }
 };
 
-
-
 // Fungsi untuk memperbarui konsultasi berdasarkan ID
 export const updateConsultation = async (req, res) => {
   try {
@@ -127,7 +125,7 @@ export const updateConsultation = async (req, res) => {
 };
 
 export const getConsultationHistory = async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  const token = req.headers.authorization ? req.headers.authorization.split(" ")[1] : null;
 
   if (!token) {
     return res.status(401).json({ message: "Token tidak ditemukan." });
@@ -297,7 +295,6 @@ export const getConsultation = async (req, res) => {
   }
 };
 
-
 export const enableChat = async (req, res) => {
   const { id } = req.params;
 
@@ -338,7 +335,3 @@ export const endConsultation = async (req, res) => {
     res.status(500).json({ error: "Terjadi kesalahan saat mengakhiri konsultasi" });
   }
 };
-
-
-
-

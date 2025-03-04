@@ -1,4 +1,6 @@
 import FishExpertAnswer from "../models/FishExpertAnswerModel.js";
+import "regenerator-runtime/runtime";
+
 
 // Fungsi untuk mendapatkan semua jawaban dari ahli ikan
 export const getAllFishExpertAnswers = async (req, res) => {

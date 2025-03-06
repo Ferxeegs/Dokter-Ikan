@@ -137,7 +137,7 @@ export default function Navbar() {
             <span className="font-semibold">{user.name}</span>
           </button>
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2">
+            <div className="absolute right-0 mt-36 w-48 bg-white border rounded-lg shadow-lg py-2">
               <Link href={user.role === 'expert' ? '/profile-expert' : '/profile-user'}>
                 <span className="block px-4 py-2 text-black hover:bg-gray-200 cursor-pointer">Profil</span>
               </Link>

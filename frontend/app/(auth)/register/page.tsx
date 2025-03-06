@@ -103,22 +103,23 @@ export default function Register() {
           backgroundPosition: 'top',
         }}
       >
-        {/* Lapisan transparan hanya untuk latar belakang */}
+        {/* Lapisan transparan dengan efek blur dan gambar lebih gelap */}
         <div
-          className="absolute inset-0 bg-white opacity-20"
+          className="absolute inset-0 bg-black opacity-50 backdrop-blur-sm"
           style={{ zIndex: 0 }}
         />
-
+        
         {/* Konten lainnya */}
         <div className="relative z-10 flex flex-col items-center justify-center px-6 py-8 mx-auto w-full md:h-screen lg:py-0">
           <div
             className="relative w-full bg-white rounded-lg shadow max-w-md xl:p-0"
             style={{
               backgroundColor: '#FFFFFF', // Menambahkan warna putih eksplisit
+              borderRadius: '1rem', // Membuat kotak putih bagian atas menjadi rounded
             }}
           >
             {/* Logo */}
-            <div className="flex items-center px-3 py-3 bg-white">
+            <div className="flex items-center px-3 py-3 bg-white rounded-t-lg">
               <Image
                 src="/images/logo/logo_fdokterikan.png"
                 alt="Dokter Ikan Logo"
@@ -139,7 +140,7 @@ export default function Register() {
                       htmlFor="email"
                       className="block mb-2 text-sm font-medium text-gray-900"
                     >
-                      Your Email
+                      Email Address
                     </label>
                     <input
                       type="email"
@@ -148,13 +149,13 @@ export default function Register() {
                       value={email}
                       onChange={handleChange}
                       className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                      placeholder="name@company.com"
+                      placeholder="Enter your email"
                       required
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mt-4"
+                    className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-2.5 text-center mt-4"
                   >
                     Send OTP
                   </button>
@@ -163,6 +164,9 @@ export default function Register() {
 
               {step === 2 && (
                 <form onSubmit={handleVerifyCode}>
+                  <div className="text-sm text-gray-600 mb-4">
+                    Please check your email for the OTP code.
+                  </div>
                   <div>
                     <label
                       htmlFor="otp"
@@ -182,7 +186,7 @@ export default function Register() {
                   </div>
                   <button
                     type="submit"
-                    className="w-full mt-4 text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                    className="w-full mt-4 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-semibold rounded-lg text-sm px-5 py-2.5 text-center"
                   >
                     Verify OTP
                   </button>
@@ -196,7 +200,7 @@ export default function Register() {
                       htmlFor="name"
                       className="block mb-2 text-sm font-medium text-gray-900"
                     >
-                      Your Name
+                      Username
                     </label>
                     <input
                       type="text"
@@ -205,7 +209,7 @@ export default function Register() {
                       value={name}
                       onChange={handleChange}
                       className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                      placeholder="Your full name"
+                      placeholder="Enter your username"
                       required
                     />
                   </div>
@@ -224,7 +228,7 @@ export default function Register() {
                         value={password}
                         onChange={handleChange}
                         className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-10"
-                        placeholder="••••••••"
+                        placeholder="Enter your password"
                         required
                       />
                       <button
@@ -238,7 +242,7 @@ export default function Register() {
                   </div>
                   <button
                     type="submit"
-                    className="w-full mt-4 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                    className="w-full mt-4 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-2.5 text-center"
                   >
                     Register
                   </button>

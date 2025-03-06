@@ -12,6 +12,7 @@ import Image from 'next/image';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false); // State untuk loading
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   
@@ -30,6 +31,7 @@ export default function Login() {
   // Fungsi untuk menangani pengiriman formulir login
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true); // Set loading menjadi true saat tombol ditekan
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
     const data = {
       email,
@@ -71,6 +73,8 @@ export default function Login() {
     } catch (error) {
       console.error('Error during login:', error);
       toast.error('Error occurred during login.');
+    } finally {
+      setLoading(false); // Set loading menjadi false setelah proses selesai
     }
   };
 
@@ -95,9 +99,9 @@ export default function Login() {
           backgroundPosition: 'top',
         }}
       >
-        {/* Lapisan transparan hanya untuk latar belakang */}
+        {/* Lapisan transparan dengan efek blur dan gambar lebih gelap */}
         <div
-          className="absolute inset-0 bg-white opacity-20"
+          className="absolute inset-0 bg-black opacity-50 backdrop-blur-sm"
           style={{ zIndex: 0 }}
         />
         
@@ -107,10 +111,11 @@ export default function Login() {
             className="relative w-full bg-white rounded-lg shadow max-w-md xl:p-0"
             style={{
               backgroundColor: '#FFFFFF', // Menambahkan warna putih eksplisit
+              borderRadius: '1rem', // Membuat kotak putih bagian atas menjadi rounded
             }}
           >
             {/* Logo */}
-            <div className="flex items-center px-3 py-3 bg-white">
+            <div className="flex items-center px-3 py-3 bg-white rounded-t-lg">
               <Image
                 src="/images/logo/logo_fdokterikan.png"
                 alt="Dokter Ikan Logo"
@@ -152,7 +157,7 @@ export default function Login() {
                     htmlFor="email"
                     className="block mb-2 text-sm font-medium text-gray-900"
                   >
-                    Your email
+                    Email Address
                   </label>
                   <input
                     type="email"
@@ -161,7 +166,7 @@ export default function Login() {
                     value={email}
                     onChange={handleChange}
                     className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    placeholder="name@company.com"
+                    placeholder="Enter your email"
                     required
                   />
                 </div>
@@ -180,7 +185,7 @@ export default function Login() {
                       value={password} 
                       onChange={handleChange} 
                       className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-10"
-                      placeholder="*********"
+                      placeholder="Enter your password"
                       required 
                     />
                     <button 
@@ -193,22 +198,7 @@ export default function Login() {
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-start">
-                    <div className="flex items-center h-5">
-                      <input
-                        id="remember"
-                        aria-describedby="remember"
-                        type="checkbox"
-                        className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300"
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label htmlFor="remember" className="text-gray-500">
-                        Remember me
-                      </label>
-                    </div>
-                  </div>
+                <div className="flex items-center justify-start">
                   <a
                     href="/forgotpassword"
                     className="text-sm font-medium text-blue-600 hover:underline"
@@ -218,9 +208,10 @@ export default function Login() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                  className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-2.5 text-center"
+                  disabled={loading} // Disable tombol saat loading
                 >
-                  Sign in
+                  {loading ? 'Signing In...' : 'Sign In'} {/* Tampilkan teks loading */}
                 </button>
                 <p className="text-sm font-light text-gray-500">
                   Don’t have an account yet?{' '}

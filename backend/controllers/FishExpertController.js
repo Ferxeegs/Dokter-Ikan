@@ -1,7 +1,6 @@
 import FishExperts from "../models/FishExpertsModel.js";
 import bcrypt from 'bcryptjs';
-import "regenerator-runtime/runtime";
-
+import "regenerator-runtime/runtime.js";
 
 // Mendapatkan semua data Fish Experts
 export const getAllFishExperts = async (req, res) => {

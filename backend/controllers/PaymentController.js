@@ -1,8 +1,7 @@
 import Payment from '../models/PaymentModel.js';
 import Prescription from '../models/PrescriptionModel.js';
 import Consultation from '../models/ConsultationModel.js'; // Relasi ke Consultation
-import "regenerator-runtime/runtime";
-
+import "regenerator-runtime/runtime.js";
 
 // Mendapatkan semua pembayaran
 export const getAllPayments = async (req, res) => {

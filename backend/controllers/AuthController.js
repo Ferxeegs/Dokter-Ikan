@@ -7,8 +7,7 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import PasswordReset from '../models/PasswordResetModel.js';
 import crypto from 'crypto';
-import "regenerator-runtime/runtime";
-
+import "regenerator-runtime/runtime.js";
 
 dotenv.config();
 

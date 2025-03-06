@@ -5,8 +5,7 @@ import FishExpert from '../models/FishExpertsModel.js';
 import FishExpertAnswer from '../models/FishExpertAnswerModel.js';
 import jwt from "jsonwebtoken";
 import FishTypes from '../models/FishTypeModel.js';
-import "regenerator-runtime/runtime";
-
+import "regenerator-runtime/runtime.js";
 
 // Fungsi untuk mendapatkan semua konsultasi
 export const getAllConsultations = async (req, res) => {

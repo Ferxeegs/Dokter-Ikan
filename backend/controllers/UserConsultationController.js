@@ -2,8 +2,7 @@ import UserConsultation from "../models/UserConsultationModel.js";
 import { validationResult } from "express-validator"; // Untuk validasi input
 import db from "../config/Database.js";
 import jwt from "jsonwebtoken"; 
-import "regenerator-runtime/runtime";
-
+import "regenerator-runtime/runtime.js";
 
 // Fungsi untuk mendapatkan semua data konsultasi
 export const getAllUserConsultations = async (req, res) => {

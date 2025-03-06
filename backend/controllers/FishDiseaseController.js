@@ -1,7 +1,6 @@
 import FishDisease from "../models/FishDiseaseModel.js";
 import axios from "axios";
-import "regenerator-runtime/runtime";
-
+import "regenerator-runtime/runtime.js";
 
 // Get all fish diseases
 export const getFishDiseases = async (req, res) => {

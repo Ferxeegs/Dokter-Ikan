@@ -3,8 +3,7 @@ import Consultation from '../models/ConsultationModel.js';
 import FishExperts from '../models/FishExpertsModel.js';
 import PrescriptionMedicine from '../models/PrescriptionMedicineModel.js';
 import Medicine from '../models/MedicineModel.js';
-import "regenerator-runtime/runtime";
-
+import "regenerator-runtime/runtime.js";
 
 // Fungsi untuk mendapatkan semua resep medis
 export const getAllPrescriptions = async (req, res) => {

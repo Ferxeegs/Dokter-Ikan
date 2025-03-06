@@ -1,6 +1,5 @@
 import Medicine from "../models/MedicineModel.js";
-import "regenerator-runtime/runtime";
-
+import "regenerator-runtime/runtime.js";
 
 // Fungsi untuk mendapatkan semua data obat
 export const getAllMedicines = async (req, res) => {

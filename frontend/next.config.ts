@@ -5,6 +5,11 @@ const withPWA = require("next-pwa")({
 
 const nextConfig = {
   reactStrictMode: true,
+  trailingSlash: false,
+  images: {
+    domains: ["res.cloudinary.com"],
+    unoptimized: true,
+  },
 };
 
 module.exports = withPWA(nextConfig);

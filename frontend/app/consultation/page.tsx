@@ -89,12 +89,12 @@ function ConsultationContent() {
     );
   }
 
-  const baseUrl = `${API_BASE_URL}`;
-  const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${baseUrl}${image}`);
+ 
+  const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${image}`);
   let fishImageUrl: string[] = [];
   try {
     fishImageUrl = data.answer_image && data.answer_image.startsWith('[')
-      ? JSON.parse(data.answer_image).map((image: string) => `${baseUrl}${image}`)
+      ? JSON.parse(data.answer_image).map((image: string) => `${image}`)
       : [];
   } catch {
     fishImageUrl = [];

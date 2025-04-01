@@ -49,7 +49,7 @@ const ComplaintPost: React.FC<ComplaintProps> = ({
         {title || 'Judul keluhan akan muncul di sini'}
       </h3>
 
-      <div className="text-sm text-gray-700 mb-4">
+      <div className="text-sm text-gray-700 mb-4 text-justify">
         <p><strong>Jenis Ikan:</strong> {fishType || 'Jenis ikan belum diisi'}</p>
         <p><strong>Panjang Ikan:</strong> {fishLength ? `${fishLength} cm` : 'Panjang ikan belum diisi'}</p>
         <p><strong>Berat Ikan:</strong> {fishWeight ? `${fishWeight} g` : 'Berat ikan belum diisi'}</p>
@@ -63,12 +63,12 @@ const ComplaintPost: React.FC<ComplaintProps> = ({
           fishImageUrls.map((url, index) => (
             <div key={index} className="w-24 h-24 relative">
               <Image
-                src={`${API_BASE_URL}${url}`}
+                src={url}
                 alt={`Fish Image ${index + 1}`}
                 layout="fill"
                 objectFit="cover"
                 className="rounded-lg cursor-pointer"
-                onClick={() => openModal(`${API_BASE_URL}${url}`)} 
+                // onClick={() => openModal({url})} 
                 unoptimized={true}
               />
             </div>

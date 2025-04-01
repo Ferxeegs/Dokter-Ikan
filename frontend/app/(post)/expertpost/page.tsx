@@ -1,20 +1,24 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import jwtDecode from 'jwt-decode';
 import Cookies from 'js-cookie';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import Complaint from '@/app/components/complaints/Complaint';
 import Answer from '@/app/components/answers/AnswerExpert';
-import UploadFotoButton from '@/app/components/uploads/UploadFoto';
-import UploadFileButton from '@/app/components/uploads/UploadFile';
+import UploadFile from '@/app/components/uploads/UploadFile';
 import ModalObat from '@/app/components/modals/ModalMedicine';
 import { useSearchParams } from 'next/navigation';
 import Modal from '@/app/components/modals/ModalPost';
 import ChatExpert from '@/app/components/chat/ChatExpert';
 import Image from 'next/image';
 
+
+type ImageUrl = {
+  url: string;
+  public_id: string;
+};
 
 function ExpertPostContent() {
   const searchParams = useSearchParams();
@@ -39,8 +43,20 @@ function ExpertPostContent() {
   const [isModalPostOpen, setIsModalPostOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputText, setInputText] = useState('');
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [images, setImages] = useState<{ url: string; publicId: string }[]>([]);
+  const [, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
+
+  const handleUploadSuccess = useCallback((uploadedImages: { url: string; public_id: string }[]) => {
+    // Map the images to ensure consistent property names
+    const formattedImages = uploadedImages.map((img: { url: string; public_id: string }) => ({
+      url: img.url,
+      publicId: img.public_id, // Convert from public_id to publicId
+    }));
+
+    setImages((prevImages) => [...prevImages, ...formattedImages]);
+  }, []);
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -74,7 +90,7 @@ function ExpertPostContent() {
           body: JSON.stringify({
             fishExpert_id,
             answer: inputText,
-            image: JSON.stringify(imageUrls),
+            image: JSON.stringify(images.map((image) => image.url)),
             timestamp,
           }),
         }
@@ -152,42 +168,41 @@ function ExpertPostContent() {
     );
   }
 
-  const baseUrl = `${API_BASE_URL}`;
-  const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${baseUrl}${image}`);
+  const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${image}`);
 
-  const handleDeleteImage = async (url: string) => { // Terima URL gambar yang akan dihapus
-    const token = Cookies.get("token");
-    if (!token) {
-      console.error("Token tidak ditemukan di cookies");
+  const handleDeleteImage = async (publicId: string) => {
+    if (!publicId) {
+      alert("No public_id provided");
       return;
     }
 
-    try {
-      // Ambil nama file dari URL gambar
-      const fileName = url.split("/").pop();
+    if (!API_BASE_URL) {
+      alert("API URL tidak ditemukan");
+      return;
+    }
 
-      // Kirim request ke backend untuk menghapus gambar dari server lokal
-      const response = await fetch(`${API_BASE_URL}/delete-file`, {
-        method: "DELETE",
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/delete`, {
+        method: 'DELETE',
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          fileName: fileName, // Kirim nama file ke backend
-        }),
+        body: JSON.stringify({ public_id: publicId }), // Kirim publicId ke server
       });
 
-      const responseData = await response.json();
+      const data = await response.json();
       if (response.ok) {
-        // Hapus gambar dari state imageUrls setelah berhasil dihapus dari server
-        setImageUrls(imageUrls.filter((imageUrl) => imageUrl !== url)); // Filter gambar yang tidak dihapus   
+        alert(data.message || 'Image deleted successfully');
+        setImages((prevImages) => prevImages.filter((image) => image.publicId !== publicId)); // Hapus gambar dari state
       } else {
-        console.error("Error menghapus gambar:", responseData);
+        alert(data.message || 'Failed to delete image');
       }
     } catch (error) {
-      console.error("Error saat menghapus gambar:", error);
+      console.error('Error deleting image:', error);
+      alert('Error deleting image');
     }
+    setLoading(false);
   };
 
   return (
@@ -214,14 +229,14 @@ function ExpertPostContent() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-center gap-8 mt-20 mx-6 font-sans">
-          <Complaint 
-            title={data.title} 
-            description={data.description} 
-            fishType={data.fish_type} 
+          <Complaint
+            title={data.title}
+            description={data.description}
+            fishType={data.fish_type}
             fishLength={data.fish_length}
             fishWeight={data.fish_weight}
-            fishAge={data.fish_age} 
-            fishImageUrls={fishImageUrls} 
+            fishAge={data.fish_age}
+            fishImageUrls={fishImageUrls}
             senderName={data.name}
             consultationDate={data.created_at}
           />
@@ -233,22 +248,22 @@ function ExpertPostContent() {
           />
         </div>
         {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
-        <div className="flex justify-center mt-6">
-          <button
-            className="bg-[rgba(105,203,244,0.4)] text-black px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold flex items-center gap-2"
-            onClick={toggleModal}
-          >
-            <Image src="/images/icon/ic_obat.png" alt="Icon" width={24} height={24} />
-            <div className="flex flex-col text-left font-sans">
-              <span className="font-light text-xs italic">Ayo bantu klien lebih lanjut</span>
-              <span className="font-bold text-sm">Berikan resep obat disini!</span>
-            </div>
-          </button>
-        </div>
-        ):null}
+          <div className="flex justify-center mt-6">
+            <button
+              className="bg-[rgba(105,203,244,0.4)] text-black px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold flex items-center gap-2"
+              onClick={toggleModal}
+            >
+              <Image src="/images/icon/ic_obat.png" alt="Icon" width={24} height={24} />
+              <div className="flex flex-col text-left font-sans">
+                <span className="font-light text-xs italic">Ayo bantu klien lebih lanjut</span>
+                <span className="font-bold text-sm">Berikan resep obat disini!</span>
+              </div>
+            </button>
+          </div>
+        ) : null}
         <ModalObat isOpen={isModalOpen} toggleModal={toggleModal} consultationId={id} />
         {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
-        <div className="flex flex-col w-full p-4 border-2 border-[#0795D2] rounded-lg shadow-md mt-8 max-w-5xl mx-auto justify-center">
+          <div className="flex flex-col w-full p-4 border-2 border-[#0795D2] rounded-lg shadow-md mt-8 max-w-5xl mx-auto justify-center">
             <div className="flex items-center">
               <Image
                 src="/images/icon/ic_profile.png"
@@ -265,42 +280,41 @@ function ExpertPostContent() {
                 onChange={(e) => setInputText(e.target.value)}
               />
             </div>
-            {/* Menampilkan gambar yang diupload */}
-            {imageUrls.length > 0 && (
-              <div className="relative mt-4 flex justify-start ml-24">
-                {imageUrls.map((url: string, index: number) => (
-                  <div key={index} className="w-24 h-24 border rounded-lg overflow-hidden mr-4 relative">
-                    {/* Tombol silang di pojok kanan atas */}
+            <div className="flex flex-wrap gap-4 mt-4">
+                {images.length > 0 && images.map((image) => (
+                  <div key={image.publicId} className="relative w-32 h-32 rounded-lg border overflow-hidden">
+                    <img src={image.url} alt="Preview" className="w-full h-full object-cover" />
                     <button
-                      className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition z-10"
-                      onClick={() => handleDeleteImage(url)} // Hapus gambar berdasarkan URL
+                      onClick={() => handleDeleteImage(image.publicId)}
+                      className="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
+                      type="button"
                     >
                       ✕
                     </button>
-
-                    {/* Gambar yang diupload */}
-                    <Image src={`${API_BASE_URL}${url}`} alt="Uploaded" layout="fill" objectFit="cover" unoptimized={true}/>
                   </div>
                 ))}
               </div>
-            )}
           </div>
-          ):null}
+        ) : null}
 
         {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
-        <div className="flex flex-col md:flex-row gap-4 justify-center mt-6 mx-6 font-sans">
-          <UploadFotoButton setImageUrls={setImageUrls} />
-          <UploadFileButton setImageUrls={setImageUrls} imageUrls={imageUrls} />
-          <button
-            onClick={handleSubmit}
-            className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
-          >
-            <Image src="/images/icon/ic_send.png" alt="Kirim" width={16} height={16} />
-            <span>Kirim</span>
-          </button>
-          {isModalPostOpen && <Modal message={modalMessage} onClose={handleCloseModal} />}
-        </div>
-        ):null}
+          <div className="flex flex-col md:flex-row gap-4 justify-center mt-6 mx-6 font-sans">
+            {API_BASE_URL && (
+              <UploadFile
+                uploadUrl={`${API_BASE_URL}/uploadcloud`}
+                onUploadSuccess={handleUploadSuccess}
+              />
+            )}
+            <button
+              onClick={handleSubmit}
+              className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-6 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"
+            >
+              <Image src="/images/icon/ic_send.png" alt="Kirim" width={16} height={16} />
+              <span>Kirim</span>
+            </button>
+            {isModalPostOpen && <Modal message={modalMessage} onClose={handleCloseModal} />}
+          </div>
+        ) : null}
 
         <div className="mt-10 mx-auto w-full max-w-4xl px-4">
           <ChatExpert consultationId={id} />

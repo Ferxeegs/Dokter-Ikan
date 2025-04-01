@@ -84,7 +84,7 @@ export default function Navbar() {
         </div>
       </Link>
 
-      <div className="hidden md:flex space-x-8 text-base font-semibold font-sans">
+      <div className="hidden md:flex space-x-8 text-sm sm:text-base font-semibold font-lato">
         <Link href="/">
           <span className={`hover:underline ${pathname === '/' ? 'text-[#1A83FB]' : ''}`}>Beranda</span>
         </Link>
@@ -103,7 +103,7 @@ export default function Navbar() {
       </div>
 
       {menuOpen && (
-        <div className="md:hidden absolute top-16 left-0 w-full bg-white shadow-lg z-10">
+        <div className="md:hidden absolute top-16 left-0 w-full bg-white shadow-lg text-sm z-10 font-lato">
           <div className="flex flex-col items-center space-y-4 py-4">
             <Link href="/">
               <span className={`hover:underline ${pathname === '/' ? 'text-[#1A83FB]' : ''}`} onClick={() => setMenuOpen(false)}>Beranda</span>
@@ -123,7 +123,7 @@ export default function Navbar() {
               </>
             ) : (
               <Link href="/login">
-                <button className="bg-[#69CBF4] text-white px-6 py-1 rounded-lg hover:bg-[#4AABDE] transition text-lg font-sans font-semibold" onClick={() => setMenuOpen(false)}>Login</button>
+                <button className="bg-[#69CBF4] text-white px-6 py-1 rounded-lg hover:bg-[#4AABDE] transition text-l font-sans font-semibold" onClick={() => setMenuOpen(false)}>Login</button>
               </Link>
             )}
           </div>

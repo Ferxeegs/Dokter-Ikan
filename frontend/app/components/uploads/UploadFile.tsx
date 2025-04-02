@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 
 interface UploadFileProps {
@@ -8,15 +8,18 @@ interface UploadFileProps {
   onUploadSuccess: (images: { url: string; public_id: string }[]) => void;
   isLoading: boolean;
   onUploadStart: () => void;
+  onUploadEnd: () => void; // Tambahkan prop untuk menghentikan loading
 }
 
 export default function UploadFile({ 
   uploadUrl, 
   onUploadSuccess, 
   isLoading, 
-  onUploadStart 
+  onUploadStart, 
+  onUploadEnd // Tambahkan prop untuk menghentikan loading
 }: UploadFileProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [showErrorModal, setShowErrorModal] = useState(false); // State untuk modal error
 
   // Handle button click to trigger file input
   const handleButtonClick = () => {
@@ -44,11 +47,14 @@ export default function UploadFile({
       if (response.ok) {
         onUploadSuccess(data.images);
       } else {
-        alert("Upload failed: " + data.message);
+        setShowErrorModal(true); // Tampilkan modal error
       }
     } catch (error) {
       console.error("Error uploading images:", error);
-      alert("Error uploading images");
+      setShowErrorModal(true); // Tampilkan modal error
+    } finally {
+      // Hentikan loading setelah selesai
+      onUploadEnd(); // Pastikan loading dihentikan di sini
     }
   };
 
@@ -61,7 +67,7 @@ export default function UploadFile({
         disabled={isLoading}
       >
         <Image src="/images/icon/ic_file.png" alt="File" width={16} height={16} />
-        <span>{isLoading ? "Uploading..." : "Upload Files"}</span>
+        <span>{isLoading ? "Loading..." : "Upload File"}</span>
       </button>
 
       {/* Hidden File Input */}
@@ -73,6 +79,22 @@ export default function UploadFile({
         multiple
         style={{ display: "none" }}
       />
+
+      {/* Modal Error */}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-lg font-bold text-red-600 mb-4">Terjadi Kesalahan</h2>
+            <p className="text-sm text-gray-700 mb-4">Terjadi kesalahan saat upload. Silahkan coba lagi.</p>
+            <button
+              onClick={() => setShowErrorModal(false)}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

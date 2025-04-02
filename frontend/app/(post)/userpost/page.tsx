@@ -9,6 +9,7 @@ import Answer from '@/app/components/answers/Answer';
 import jwt_decode from 'jwt-decode';
 import Cookies from 'js-cookie';
 import Modal from '@/app/components/modals/ModalPost';
+import { ClipLoader } from "react-spinners";
 
 type FishType = {
   id: number;
@@ -65,7 +66,7 @@ export default function UserPost() {
 
   const fetchFishTypes = useCallback(async () => {
     if (!API_BASE_URL) return; // Don't attempt fetch if BASE_URL is undefined
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/fish-types`);
       const data = await response.json();
@@ -118,7 +119,7 @@ export default function UserPost() {
       fish_length: String(panjang),
       fish_weight: String(berat),
       consultation_topic: judul,
-      fish_image: JSON.stringify(images.map((image) => image.url)),      complaint: inputText,
+      fish_image: JSON.stringify(images.map((image) => image.url)), complaint: inputText,
       consultation_status: 'Waiting',
     };
 
@@ -179,6 +180,10 @@ export default function UserPost() {
     setIsModalOpen(!isModalOpen);
   };
 
+  const handleUploadStart = useCallback(() => {
+    setLoading(true);
+  }, []);
+
   const handleJenisIkanClick = () => {
     setIsDropdownOpen(!isDropdownOpen); // Toggle dropdown visibility
   };
@@ -217,7 +222,6 @@ export default function UserPost() {
 
       const data = await response.json();
       if (response.ok) {
-        alert(data.message || 'Image deleted successfully');
         setImages((prevImages) => prevImages.filter((image) => image.publicId !== publicId)); // Hapus gambar dari state
       } else {
         alert(data.message || 'Failed to delete image');
@@ -235,8 +239,9 @@ export default function UserPost() {
       url: img.url,
       publicId: img.public_id, // Convert from public_id to publicId
     }));
-  
+
     setImages((prevImages) => [...prevImages, ...formattedImages]);
+    setLoading(false); // Stop loading when upload is complete
   }, []);
 
   return (
@@ -356,19 +361,28 @@ export default function UserPost() {
                   onChange={(e) => setInputText(e.target.value)}
                 />
               </div>
-              <div className="flex flex-wrap gap-4 mt-4">
-                {images.length > 0 && images.map((image) => (
-                  <div key={image.publicId} className="relative w-32 h-32 rounded-lg border overflow-hidden">
-                    <img src={image.url} alt="Preview" className="w-full h-full object-cover" />
-                    <button
-                      onClick={() => handleDeleteImage(image.publicId)}
-                      className="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
-                      type="button"
-                    >
-                      ✕
-                    </button>
+              <div className="flex flex-wrap gap-4 mt-4 relative min-h-[100px] ml-24">
+                {/* Loading indicator centered in the image preview area */}
+                {loading && (
+                  <div className="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center bg-white bg-opacity-50 z-10 rounded-lg">
+                    <ClipLoader color="#69CBF4" size={50} />
                   </div>
-                ))}
+                )}
+
+                {images.length > 0 &&
+                  images.map((image) => (
+                    <div key={image.publicId} className="relative w-32 h-32 rounded-lg border overflow-hidden">
+                      <img src={image.url} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => handleDeleteImage(image.publicId)}
+                        className="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
+                        type="button"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))
+                }
               </div>
             </div>
           </div>
@@ -379,6 +393,8 @@ export default function UserPost() {
             <UploadFile
               uploadUrl={`${API_BASE_URL}/uploadcloud`}
               onUploadSuccess={handleUploadSuccess}
+              isLoading={loading}
+              onUploadStart={handleUploadStart}
             />
           )}
           <button
@@ -397,10 +413,10 @@ export default function UserPost() {
           </div>
         )}
       </main>
-      
+
       {/* Modal moved outside of render flow to avoid potential state updates during render */}
       {showModal && <Modal message={modalMessage} onClose={() => setShowModal(false)} />}
-      
+
       <Footer />
     </div>
   );

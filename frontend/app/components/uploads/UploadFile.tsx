@@ -1,15 +1,21 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import Image from "next/image";
 
 interface UploadFileProps {
   uploadUrl: string;
-  onUploadSuccess: (images: { url: string; public_id: string }[]) => void; // Mengirim array gambar ke parent
+  onUploadSuccess: (images: { url: string; public_id: string }[]) => void;
+  isLoading: boolean;
+  onUploadStart: () => void;
 }
 
-export default function UploadFile({ uploadUrl, onUploadSuccess }: UploadFileProps) {
-  const [loading, setLoading] = useState(false);
+export default function UploadFile({ 
+  uploadUrl, 
+  onUploadSuccess, 
+  isLoading, 
+  onUploadStart 
+}: UploadFileProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Handle button click to trigger file input
@@ -23,9 +29,11 @@ export default function UploadFile({ uploadUrl, onUploadSuccess }: UploadFilePro
     if (!files || files.length === 0) return;
 
     const formData = new FormData();
-    Array.from(files).forEach((file) => formData.append("files", file)); // Tambahkan semua file ke FormData
+    Array.from(files).forEach((file) => formData.append("files", file));
 
-    setLoading(true);
+    // Notify parent that upload is starting
+    onUploadStart();
+    
     try {
       const response = await fetch(uploadUrl, {
         method: "POST",
@@ -34,7 +42,7 @@ export default function UploadFile({ uploadUrl, onUploadSuccess }: UploadFilePro
 
       const data = await response.json();
       if (response.ok) {
-        onUploadSuccess(data.images); // Pass array of images (url & publicId) to parent
+        onUploadSuccess(data.images);
       } else {
         alert("Upload failed: " + data.message);
       }
@@ -42,7 +50,6 @@ export default function UploadFile({ uploadUrl, onUploadSuccess }: UploadFilePro
       console.error("Error uploading images:", error);
       alert("Error uploading images");
     }
-    setLoading(false);
   };
 
   return (
@@ -51,9 +58,10 @@ export default function UploadFile({ uploadUrl, onUploadSuccess }: UploadFilePro
       <button
         className="bg-white text-[#69CBF4] px-6 py-2 rounded-lg hover:bg-[#f0f0f0] transition text-sm font-semibold w-full md:w-auto border-2 border-[#69CBF4] flex items-center justify-center space-x-2"
         onClick={handleButtonClick}
+        disabled={isLoading}
       >
         <Image src="/images/icon/ic_file.png" alt="File" width={16} height={16} />
-        <span>Upload Files</span>
+        <span>{isLoading ? "Uploading..." : "Upload Files"}</span>
       </button>
 
       {/* Hidden File Input */}
@@ -62,12 +70,9 @@ export default function UploadFile({ uploadUrl, onUploadSuccess }: UploadFilePro
         ref={fileInputRef}
         onChange={handleFileChange}
         accept="image/*"
-        multiple // Tambahkan atribut multiple untuk mendukung banyak file
+        multiple
         style={{ display: "none" }}
       />
-
-      {/* Loading Indicator */}
-      {loading && <p>Uploading...</p>}
     </div>
   );
 }

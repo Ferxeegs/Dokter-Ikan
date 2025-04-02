@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 interface ComplaintProps {
@@ -24,21 +24,65 @@ const Complaint: React.FC<ComplaintProps> = ({
   senderName,
   consultationDate,
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-  // Fungsi untuk membuka modal dan menampilkan gambar yang dipilih
-  const openModal = (image: string) => {
-    console.log("Gambar diklik:", image); // Debugging
-    setSelectedImage(image);
-    setIsModalOpen(true);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Fungsi untuk membuka lightbox dan menampilkan gambar yang dipilih
+  const openLightbox = (index: number) => {
+    setCurrentImageIndex(index);
+    setLightboxOpen(true);
+    // Nonaktifkan scroll saat lightbox terbuka
+    document.body.style.overflow = 'hidden';
   };
 
-  // Fungsi untuk menutup modal
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedImage(null);
+  // Fungsi untuk menutup lightbox
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    // Aktifkan kembali scroll saat lightbox tertutup
+    document.body.style.overflow = 'auto';
   };
+
+  // Fungsi untuk navigasi ke gambar sebelumnya
+  const prevImage = () => {
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === 0 ? fishImageUrls.length - 1 : prevIndex - 1
+    );
+  };
+
+  // Fungsi untuk navigasi ke gambar berikutnya
+  const nextImage = () => {
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === fishImageUrls.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  // Tambahkan keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!lightboxOpen) return;
+      
+      switch (e.key) {
+        case 'Escape':
+          closeLightbox();
+          break;
+        case 'ArrowLeft':
+          prevImage();
+          break;
+        case 'ArrowRight':
+          nextImage();
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      // Pastikan scroll diaktifkan kembali saat komponen unmount
+      document.body.style.overflow = 'auto';
+    };
+  }, [lightboxOpen]);
 
   const formattedDate = new Intl.DateTimeFormat('id-ID', { 
     day: '2-digit', 
@@ -62,24 +106,31 @@ const Complaint: React.FC<ComplaintProps> = ({
         <p><strong>Panjang Ikan:</strong> {fishLength ? `${fishLength} cm` : 'Panjang ikan belum diisi'}</p>
         <p><strong>Berat Ikan:</strong> {fishWeight ? `${fishWeight} g` : 'Berat ikan belum diisi'}</p>
       </div>
+      
       <p className="text-xs sm:text-sm text-gray-700 text-justify mb-4">
         {description || 'Deskripsi akan muncul di sini setelah Anda mengirimkan keluhan.'}
       </p>
 
-      {/* Menampilkan gambar-gambar kecil */}
-      <div className="flex space-x-2 overflow-x-auto">
+      {/* Menampilkan gambar-gambar thumbnail */}
+      <div className="flex flex-wrap gap-2 mb-4">
         {fishImageUrls.length > 0 ? (
           fishImageUrls.map((url, index) => (
-            <div key={index} className="w-20 h-20 sm:w-24 sm:h-24 relative cursor-pointer">
+            <div 
+              key={index} 
+              className="w-20 h-20 sm:w-24 sm:h-24 relative cursor-pointer transition-transform hover:scale-105 hover:shadow-md rounded-lg overflow-hidden"
+              onClick={() => openLightbox(index)}
+            >
               <Image
                 src={url}
                 alt={`Fish Image ${index + 1}`}
                 layout="fill"
                 objectFit="cover"
                 className="rounded-lg"
-                onClick={() => openModal(url)}
                 unoptimized
               />
+              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                <span className="text-white opacity-0 hover:opacity-100 text-xs font-bold">Lihat</span>
+              </div>
             </div>
           ))
         ) : (
@@ -93,34 +144,82 @@ const Complaint: React.FC<ComplaintProps> = ({
         <span className="block text-xs text-gray-600">{formattedDate || 'Tanggal Konsultasi'}</span>
       </div>
 
-      {/* Modal untuk menampilkan gambar yang diperbesar */}
-      {isModalOpen && selectedImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              console.log("Klik di luar modal, menutup modal.");
-              closeModal();
-            }
-          }}
-        >
-          <div className="relative bg-white p-4 rounded-lg shadow-lg max-w-[80vw] max-h-[80vh] flex items-center justify-center">
-            <button
-              onClick={closeModal}
-              className="absolute top-1 right-1 bg-red-500 text-white text-xs p-1 rounded-full w-4 h-4 flex items-center justify-center"
-            >
-              ✕
-            </button>
-            <div className="relative w-[300px] h-[300px] sm:w-[600px] sm:h-[600px] flex items-center justify-center">
+      {/* Lightbox untuk menampilkan gambar yang diperbesar */}
+      {lightboxOpen && fishImageUrls.length > 0 && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex flex-col items-center justify-center p-4">
+          {/* Tombol tutup */}
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 text-white bg-red-600 rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 transition-colors z-50"
+            aria-label="Tutup lightbox"
+          >
+            ✕
+          </button>
+          
+          {/* Kontainer utama gambar */}
+          <div className="relative w-full h-full max-w-4xl max-h-screen flex items-center justify-center">
+            <div className="relative w-full h-full flex items-center justify-center">
               <Image
-                src={selectedImage}
-                alt="Selected Fish"
+                src={fishImageUrls[currentImageIndex]}
+                alt={`Gambar ikan ${currentImageIndex + 1}`}
                 layout="fill"
                 objectFit="contain"
                 unoptimized
               />
             </div>
+            
+            {/* Navigasi gambar */}
+            {fishImageUrls.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 sm:left-4 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-opacity"
+                  aria-label="Gambar sebelumnya"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 sm:right-4 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-opacity"
+                  aria-label="Gambar berikutnya"
+                >
+                  ›
+                </button>
+              </>
+            )}
           </div>
+          
+          {/* Indikator jumlah gambar */}
+          {fishImageUrls.length > 1 && (
+            <div className="absolute bottom-4 left-0 right-0 text-center text-white">
+              <span className="px-4 py-1 bg-black bg-opacity-50 rounded-full text-sm">
+                {currentImageIndex + 1} / {fishImageUrls.length}
+              </span>
+            </div>
+          )}
+          
+          {/* Mini thumbnail navigator */}
+          {fishImageUrls.length > 1 && (
+            <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-2 px-4 overflow-x-auto py-2">
+              {fishImageUrls.map((url, index) => (
+                <div 
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`w-12 h-12 relative cursor-pointer rounded-md overflow-hidden border-2 ${
+                    index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
+                  }`}
+                >
+                  <Image
+                    src={url}
+                    alt={`Thumbnail ${index + 1}`}
+                    layout="fill"
+                    objectFit="cover"
+                    unoptimized
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

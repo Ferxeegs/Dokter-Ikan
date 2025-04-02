@@ -204,6 +204,10 @@ function ExpertPostContent() {
     }
     setLoading(false);
   };
+  
+   const handleUploadStart = useCallback(() => {
+      setLoading(true);
+    }, []);
 
   return (
     <div
@@ -281,19 +285,19 @@ function ExpertPostContent() {
               />
             </div>
             <div className="flex flex-wrap gap-4 mt-4">
-                {images.length > 0 && images.map((image) => (
-                  <div key={image.publicId} className="relative w-32 h-32 rounded-lg border overflow-hidden">
-                    <img src={image.url} alt="Preview" className="w-full h-full object-cover" />
-                    <button
-                      onClick={() => handleDeleteImage(image.publicId)}
-                      className="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
-                      type="button"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
+              {images.length > 0 && images.map((image) => (
+                <div key={image.publicId} className="relative w-32 h-32 rounded-lg border overflow-hidden">
+                  <img src={image.url} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => handleDeleteImage(image.publicId)}
+                    className="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
+                    type="button"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         ) : null}
 
@@ -303,6 +307,8 @@ function ExpertPostContent() {
               <UploadFile
                 uploadUrl={`${API_BASE_URL}/uploadcloud`}
                 onUploadSuccess={handleUploadSuccess}
+                isLoading={loading}
+                onUploadStart={handleUploadStart}
               />
             )}
             <button

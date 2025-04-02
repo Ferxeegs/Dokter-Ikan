@@ -8,21 +8,24 @@ import Footer from '../../components/layout/Footer';
 import Complaint from '@/app/components/complaints/Complaint';
 import Answer from '@/app/components/answers/AnswerExpert';
 import UploadFile from '@/app/components/uploads/UploadFile';
+import UploadFotoButton from '@/app/components/uploads/UploadFoto';
 import ModalObat from '@/app/components/modals/ModalMedicine';
 import { useSearchParams } from 'next/navigation';
 import Modal from '@/app/components/modals/ModalPost';
 import ChatExpert from '@/app/components/chat/ChatExpert';
 import Image from 'next/image';
 
-
-type ImageUrl = {
-  url: string;
-  public_id: string;
-};
-
 function ExpertPostContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id') || ''; // Default to empty string if id is null
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [isModalPostOpen, setIsModalPostOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inputText, setInputText] = useState('');
+  const [images, setImages] = useState<{ url: string; publicId: string }[]>([]);
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState<{
     title: string;
     description: string;
@@ -37,16 +40,6 @@ function ExpertPostContent() {
     name: string;
     created_at: string;
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [isModalPostOpen, setIsModalPostOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [inputText, setInputText] = useState('');
-  const [images, setImages] = useState<{ url: string; publicId: string }[]>([]);
-  const [, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-
 
   const handleUploadSuccess = useCallback((uploadedImages: { url: string; public_id: string }[]) => {
     // Map the images to ensure consistent property names
@@ -204,10 +197,14 @@ function ExpertPostContent() {
     }
     setLoading(false);
   };
-  
-   const handleUploadStart = useCallback(() => {
-      setLoading(true);
-    }, []);
+
+  const handleUploadStart = useCallback(() => {
+    setLoading(true);
+  }, []);
+
+  const handleUploadEnd = useCallback(() => {
+    setLoading(false);
+  }, []);
 
   return (
     <div
@@ -303,12 +300,20 @@ function ExpertPostContent() {
 
         {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
           <div className="flex flex-col md:flex-row gap-4 justify-center mt-6 mx-6 font-sans">
+            <UploadFotoButton
+              onUploadSuccess={handleUploadSuccess}
+              isLoading={loading}
+              onUploadStart={handleUploadStart}
+              onUploadEnd={handleUploadEnd}
+            />
+
             {API_BASE_URL && (
               <UploadFile
                 uploadUrl={`${API_BASE_URL}/uploadcloud`}
                 onUploadSuccess={handleUploadSuccess}
                 isLoading={loading}
                 onUploadStart={handleUploadStart}
+                onUploadEnd={handleUploadEnd}
               />
             )}
             <button

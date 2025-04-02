@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import UploadFile from '@/app/components/uploads/UploadFile';
+import UploadFotoButton from '@/app/components/uploads/UploadFoto';
 import ComplaintPost from '@/app/components/complaints/Complaintpost';
 import Answer from '@/app/components/answers/Answer';
 import jwt_decode from 'jwt-decode';
@@ -182,6 +183,10 @@ export default function UserPost() {
 
   const handleUploadStart = useCallback(() => {
     setLoading(true);
+  }, []);
+
+  const handleUploadEnd = useCallback(() => {
+    setLoading(false);
   }, []);
 
   const handleJenisIkanClick = () => {
@@ -389,14 +394,23 @@ export default function UserPost() {
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 md:gap-12 justify-center mt-6 mx-6 font-sans">
+          <UploadFotoButton
+            onUploadSuccess={handleUploadSuccess}
+            isLoading={loading}
+            onUploadStart={handleUploadStart}
+            onUploadEnd={handleUploadEnd}
+          />
+
           {API_BASE_URL && (
             <UploadFile
               uploadUrl={`${API_BASE_URL}/uploadcloud`}
               onUploadSuccess={handleUploadSuccess}
               isLoading={loading}
               onUploadStart={handleUploadStart}
+              onUploadEnd={handleUploadEnd}
             />
           )}
+
           <button
             onClick={handleSubmit}
             className="bg-gradient-to-r from-[#BCEBFF] to-[#1A83FB] text-white px-4 py-2 rounded-lg hover:bg-[#4AABDE] transition text-sm font-semibold w-full md:w-auto flex items-center justify-center space-x-2"

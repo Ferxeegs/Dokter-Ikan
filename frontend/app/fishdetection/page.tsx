@@ -193,7 +193,7 @@ export default function FishDetection() {
         </div>
 
         {/* Menampilkan gambar yang diunggah */}
-        {imageUrls.length > 0 && (
+        {/* {imageUrls.length > 0 && (
           <div className="mt-6">
             <h3 className="text-lg font-semibold text-blue-700 mb-2">Gambar yang Diupload:</h3>
             <ul className="space-y-2">
@@ -204,7 +204,7 @@ export default function FishDetection() {
               ))}
             </ul>
           </div>
-        )}
+        )} */}
 
         {/* Loading Indicator */}
         {isLoading && (

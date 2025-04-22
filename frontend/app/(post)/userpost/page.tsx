@@ -28,7 +28,7 @@ export default function UserPost() {
   const [berat, setBerat] = useState('');
   const [umur, setUmur] = useState('');
   const [message] = useState('');
-  const [userId, setUserId] = useState<number | null>(null);
+  const [, setUserId] = useState<number | null>(null);
   const [fishtypes, setFishtypes] = useState<FishType[]>([]); // Type for fishtypes state
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Status dropdown
   const [fishTypeId, setFishTypeId] = useState<number | null>(null);

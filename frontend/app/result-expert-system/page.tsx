@@ -28,7 +28,7 @@ const DetectionResultContent = () => {
   const data = searchParams.get('data');
   const [diseaseData, setDiseaseData] = useState<DiseaseData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [, setActiveIndex] = useState(0);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const fetchDiseases = useCallback(async (diseases: string[]) => {

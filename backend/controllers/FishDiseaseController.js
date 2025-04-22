@@ -2,6 +2,8 @@ import FishDisease from "../models/FishDiseaseModel.js";
 import axios from "axios";
 import "regenerator-runtime/runtime.js";
 
+
+const DIAGNOSE_API_URL = process.env.DIAGNOSE_API_URL; // URL untuk sistem pakar
 // Get all fish diseases
 export const getFishDiseases = async (req, res) => {
   try {
@@ -22,7 +24,7 @@ export const diagnoseFish = async (req, res) => {
     }
 
     // Kirim data ke Flask API di port 5000
-    const response = await axios.post("http://localhost:5000/diagnose", {
+    const response = await axios.post(DIAGNOSE_API_URL, {
       symptoms, // Kirim daftar kode gejala
     });
 

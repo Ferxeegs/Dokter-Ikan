@@ -41,6 +41,14 @@ function ExpertPostContent() {
     created_at: string;
   } | null>(null);
 
+  const handleUploadStart = useCallback(() => {
+    setLoading(true);
+  }, []);
+
+  const handleUploadEnd = useCallback(() => {
+    setLoading(false);
+  }, []);
+  
   const handleUploadSuccess = useCallback((uploadedImages: { url: string; public_id: string }[]) => {
     // Map the images to ensure consistent property names
     const formattedImages = uploadedImages.map((img: { url: string; public_id: string }) => ({
@@ -197,14 +205,6 @@ function ExpertPostContent() {
     }
     setLoading(false);
   };
-
-  const handleUploadStart = useCallback(() => {
-    setLoading(true);
-  }, []);
-
-  const handleUploadEnd = useCallback(() => {
-    setLoading(false);
-  }, []);
 
   return (
     <div

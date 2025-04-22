@@ -4,7 +4,7 @@ import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import React, { useState, useRef } from "react";
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+
 
 interface Prediction {
   image_url: string;
@@ -15,7 +15,7 @@ export default function FishDetection() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null); // Ref untuk input kamera
   const uploadBoxRef = useRef<HTMLDivElement | null>(null); // Ref untuk elemen box unggah gambar
-  const [imageUrls, setImageUrls] = useState<string[]>([]); // Menyimpan URL gambar yang diupload
+  const [, setImageUrls] = useState<string[]>([]); // Menyimpan URL gambar yang diupload
   const [isLoading, setIsLoading] = useState(false); // State untuk loading
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const router = useRouter();
@@ -192,19 +192,6 @@ export default function FishDetection() {
           </div>
         </div>
 
-        {/* Menampilkan gambar yang diunggah */}
-        {/* {imageUrls.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold text-blue-700 mb-2">Gambar yang Diupload:</h3>
-            <ul className="space-y-2">
-              {imageUrls.map((url, index) => (
-                <li key={index} className="text-sm text-gray-700">
-                  <Image src={url} alt={`Uploaded Image ${index + 1}`} width={500} height={500} className="w-full h-auto rounded-lg" />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )} */}
 
         {/* Loading Indicator */}
         {isLoading && (

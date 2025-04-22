@@ -157,7 +157,7 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
             prescriptionData.map((item, index) => (
               <div
                 key={item.id ?? `medicine-${index}`}
-                className="flex items-center p-4 bg-gradient-to-r from-[#DCF5FF] to-[#80B7F5] rounded-lg shadow hover:scale-105 transition-transform duration-300"
+                className="flex items-center p-4 bg-gradient-to-r from-[#DCF5FF] to-[#80B7F5] rounded-lg shadow transition-transform duration-300"
               >
                 <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center overflow-hidden">
                   {item.image ? (

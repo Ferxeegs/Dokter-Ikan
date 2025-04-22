@@ -121,7 +121,7 @@ const DetectionResult = () => {
       </div>
 
       {/* Hasil Deteksi */}
-      <main className="relative z-10 max-w-4xl mx-auto pt-8 pb-12 px-4 sm:px-0">
+      <main className="relative z-1 max-w-4xl mx-auto pt-8 pb-12 px-4 sm:px-0">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

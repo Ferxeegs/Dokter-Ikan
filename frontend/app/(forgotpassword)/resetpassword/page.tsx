@@ -62,18 +62,33 @@ const ResetPassword = () => {
       <section
         className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center relative"
         style={{
-          backgroundImage: "url('/homebg.png')",
+          backgroundImage: "url('/bg_login.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'top',
         }}
       >
-        <div className="absolute inset-0 bg-white opacity-20" style={{ zIndex: 0 }} />
+        <div
+          className="absolute inset-0 bg-black opacity-50 backdrop-blur-sm"
+          style={{ zIndex: 0 }}
+        />
 
         <div className="relative z-10 flex flex-col items-center justify-center px-6 py-8 mx-auto w-full md:h-screen lg:py-0">
-          <div className="relative w-full bg-white rounded-lg shadow max-w-md xl:p-0">
-            <div className="flex items-center px-3 py-3 bg-white">
-              <Image src="/images/logo/logo_dokterikan512.png" alt="Dokter Ikan Logo" width={40} height={40} />
-              <Image src="/images/logo/logo_dokterikan.png" alt="Dokter Ikan Logo" width={60} height={24} />
+          <div
+            className="relative w-full bg-white rounded-lg shadow max-w-md xl:p-0"
+            style={{
+              backgroundColor: '#FFFFFF', // Menambahkan warna putih eksplisit
+              borderRadius: '1rem', // Membuat kotak putih bagian atas menjadi rounded
+            }}
+          >
+            {/* Logo */}
+            <div className="flex items-center px-3 py-3 bg-white rounded-t-lg">
+              <Image
+                src="/images/logo/logo_fdokterikan.png"
+                alt="Dokter Ikan Logo"
+                width={128}
+                height={128}
+                className="w-15 h-15"
+              />
             </div>
 
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">

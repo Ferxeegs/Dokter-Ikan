@@ -53,7 +53,7 @@ export default function RiwayatExpert() {
           const data: ConsultationData[] = await response.json();
           const filteredData = data
             .filter((consultation: ConsultationData) => consultation.fishExpert_id === expertId)
-            .sort((a: ConsultationData, b: ConsultationData) => 
+            .sort((a: ConsultationData, b: ConsultationData) =>
               new Date(b.UserConsultation.createdAt).getTime() - new Date(a.UserConsultation.createdAt).getTime()
             );
 
@@ -93,8 +93,8 @@ export default function RiwayatExpert() {
         </button>
 
         <div className="ml-6 text-center">
-        <h1 className="text-xl sm:text-3xl font-bold mb-2 text-[#1A83FB] font-lato">
-           Riwayat Konsultasi Anda
+          <h1 className="text-xl sm:text-3xl font-bold mb-2 text-[#1A83FB] font-lato">
+            Riwayat Konsultasi Anda
           </h1>
           <h2 className="text-sm sm:text-lg text-[#2C2C2C]">
             Halaman ini menampilkan daftar konsultasi yang pernah Anda tangani.
@@ -125,7 +125,7 @@ export default function RiwayatExpert() {
           <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md text-center">
             <h3 className="text-xl font-semibold text-gray-800">
               Keterangan Status Konsultasi
-            </h3> 
+            </h3>
             <ul className="mt-4 text-left text-gray-700">
               <li className="mb-3">
                 <span className="bg-yellow-300 text-black text-sm font-semibold italic px-4 py-1 rounded-3xl">

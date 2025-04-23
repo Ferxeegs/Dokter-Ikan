@@ -26,7 +26,7 @@ const Complaint: React.FC<ComplaintProps> = ({
 }) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
+
   // Fungsi untuk membuka lightbox dan menampilkan gambar yang dipilih
   const openLightbox = (index: number) => {
     setCurrentImageIndex(index);
@@ -44,14 +44,14 @@ const Complaint: React.FC<ComplaintProps> = ({
 
   // Fungsi untuk navigasi ke gambar sebelumnya
   const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => 
+    setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? fishImageUrls.length - 1 : prevIndex - 1
     );
   };
 
   // Fungsi untuk navigasi ke gambar berikutnya
   const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => 
+    setCurrentImageIndex((prevIndex) =>
       prevIndex === fishImageUrls.length - 1 ? 0 : prevIndex + 1
     );
   };
@@ -60,7 +60,7 @@ const Complaint: React.FC<ComplaintProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!lightboxOpen) return;
-      
+
       switch (e.key) {
         case 'Escape':
           closeLightbox();
@@ -84,14 +84,14 @@ const Complaint: React.FC<ComplaintProps> = ({
     };
   }, [lightboxOpen]);
 
-  const formattedDate = new Intl.DateTimeFormat('id-ID', { 
-    day: '2-digit', 
-    month: 'long', 
-    year: 'numeric', 
-    hour: '2-digit', 
-    minute: '2-digit', 
+  const formattedDate = new Intl.DateTimeFormat('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
     second: '2-digit',
-    timeZoneName: 'short' 
+    timeZoneName: 'short'
   }).format(new Date(consultationDate));
 
   return (
@@ -106,7 +106,7 @@ const Complaint: React.FC<ComplaintProps> = ({
         <p><strong>Panjang Ikan:</strong> {fishLength ? `${fishLength} cm` : 'Panjang ikan belum diisi'}</p>
         <p><strong>Berat Ikan:</strong> {fishWeight ? `${fishWeight} g` : 'Berat ikan belum diisi'}</p>
       </div>
-      
+
       <p className="text-xs sm:text-sm text-gray-700 text-justify mb-4">
         {description || 'Deskripsi akan muncul di sini setelah Anda mengirimkan keluhan.'}
       </p>
@@ -115,8 +115,8 @@ const Complaint: React.FC<ComplaintProps> = ({
       <div className="flex flex-wrap gap-2 mb-4">
         {fishImageUrls.length > 0 ? (
           fishImageUrls.map((url, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="w-20 h-20 sm:w-24 sm:h-24 relative cursor-pointer transition-transform hover:scale-105 hover:shadow-md rounded-lg overflow-hidden"
               onClick={() => openLightbox(index)}
             >
@@ -155,7 +155,7 @@ const Complaint: React.FC<ComplaintProps> = ({
           >
             ✕
           </button>
-          
+
           {/* Kontainer utama gambar */}
           <div className="relative w-full h-full max-w-4xl max-h-screen flex items-center justify-center">
             <div className="relative w-full h-full flex items-center justify-center">
@@ -167,7 +167,7 @@ const Complaint: React.FC<ComplaintProps> = ({
                 unoptimized
               />
             </div>
-            
+
             {/* Navigasi gambar */}
             {fishImageUrls.length > 1 && (
               <>
@@ -188,7 +188,7 @@ const Complaint: React.FC<ComplaintProps> = ({
               </>
             )}
           </div>
-          
+
           {/* Indikator jumlah gambar */}
           {fishImageUrls.length > 1 && (
             <div className="absolute bottom-4 left-0 right-0 text-center text-white">
@@ -197,17 +197,16 @@ const Complaint: React.FC<ComplaintProps> = ({
               </span>
             </div>
           )}
-          
+
           {/* Mini thumbnail navigator */}
           {fishImageUrls.length > 1 && (
             <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-2 px-4 overflow-x-auto py-2">
               {fishImageUrls.map((url, index) => (
-                <div 
+                <div
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-12 h-12 relative cursor-pointer rounded-md overflow-hidden border-2 ${
-                    index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
-                  }`}
+                  className={`w-12 h-12 relative cursor-pointer rounded-md overflow-hidden border-2 ${index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
+                    }`}
                 >
                   <Image
                     src={url}

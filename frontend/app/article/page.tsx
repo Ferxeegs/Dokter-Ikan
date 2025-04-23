@@ -83,7 +83,7 @@ export default function ArticlesPage() {
             </div>
           ))}
         </div>
-        
+
         {/* Pagination Buttons */}
         <div className="flex justify-center mt-6 space-x-4 items-center">
           <button

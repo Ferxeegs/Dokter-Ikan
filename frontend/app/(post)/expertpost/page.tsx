@@ -14,6 +14,8 @@ import { useSearchParams } from 'next/navigation';
 import Modal from '@/app/components/modals/ModalPost';
 import ChatExpert from '@/app/components/chat/ChatExpert';
 import Image from 'next/image';
+import { ClipLoader } from "react-spinners";
+
 
 function ExpertPostContent() {
   const searchParams = useSearchParams();
@@ -48,7 +50,7 @@ function ExpertPostContent() {
   const handleUploadEnd = useCallback(() => {
     setLoading(false);
   }, []);
-  
+
   const handleUploadSuccess = useCallback((uploadedImages: { url: string; public_id: string }[]) => {
     // Map the images to ensure consistent property names
     const formattedImages = uploadedImages.map((img: { url: string; public_id: string }) => ({
@@ -194,7 +196,6 @@ function ExpertPostContent() {
 
       const data = await response.json();
       if (response.ok) {
-        alert(data.message || 'Image deleted successfully');
         setImages((prevImages) => prevImages.filter((image) => image.publicId !== publicId)); // Hapus gambar dari state
       } else {
         alert(data.message || 'Failed to delete image');
@@ -281,19 +282,28 @@ function ExpertPostContent() {
                 onChange={(e) => setInputText(e.target.value)}
               />
             </div>
-            <div className="flex flex-wrap gap-4 mt-4">
-              {images.length > 0 && images.map((image) => (
-                <div key={image.publicId} className="relative w-32 h-32 rounded-lg border overflow-hidden">
-                  <img src={image.url} alt="Preview" className="w-full h-full object-cover" />
-                  <button
-                    onClick={() => handleDeleteImage(image.publicId)}
-                    className="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
-                    type="button"
-                  >
-                    ✕
-                  </button>
+            <div className="flex flex-wrap gap-4 mt-4 relative min-h-[100px] ml-24">
+              {/* Loading indicator centered in the image preview area */}
+              {loading && (
+                <div className="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center bg-white bg-opacity-50 z-1 rounded-lg">
+                  <ClipLoader color="#69CBF4" size={50} />
                 </div>
-              ))}
+              )}
+
+              {images.length > 0 &&
+                images.map((image) => (
+                  <div key={image.publicId} className="relative w-32 h-32 rounded-lg border overflow-hidden">
+                    <img src={image.url} alt="Preview" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => handleDeleteImage(image.publicId)}
+                      className="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-700 transition"
+                      type="button"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))
+              }
             </div>
           </div>
         ) : null}
@@ -301,6 +311,7 @@ function ExpertPostContent() {
         {!data?.answer || data.answer === "Belum ada jawaban dari ahli ikan" ? (
           <div className="flex flex-col md:flex-row gap-4 justify-center mt-6 mx-6 font-sans">
             <UploadFotoButton
+              uploadUrl={`${API_BASE_URL}/uploadcloudexpert`}
               onUploadSuccess={handleUploadSuccess}
               isLoading={loading}
               onUploadStart={handleUploadStart}
@@ -309,7 +320,7 @@ function ExpertPostContent() {
 
             {API_BASE_URL && (
               <UploadFile
-                uploadUrl={`${API_BASE_URL}/uploadcloud`}
+                uploadUrl={`${API_BASE_URL}/uploadcloudexpert`}
                 onUploadSuccess={handleUploadSuccess}
                 isLoading={loading}
                 onUploadStart={handleUploadStart}

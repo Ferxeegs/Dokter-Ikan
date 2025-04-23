@@ -89,7 +89,7 @@ function ConsultationContent() {
     );
   }
 
- 
+
   const fishImageUrls = JSON.parse(data.fish_image || '[]').map((image: string) => `${image}`);
   let fishImageUrl: string[] = [];
   try {

@@ -2,17 +2,19 @@ import React, { useRef, useState } from "react";
 import Image from "next/image";
 
 interface UploadFotoButtonProps {
+  uploadUrl: string;
   onUploadSuccess: (images: { url: string; public_id: string }[]) => void;
   isLoading: boolean;
   onUploadStart: () => void;
   onUploadEnd: () => void;
 }
 
-export default function UploadFotoButton({ 
-  onUploadSuccess, 
-  isLoading, 
-  onUploadStart, 
-  onUploadEnd 
+export default function UploadFotoButton({
+  uploadUrl,
+  onUploadSuccess,
+  isLoading,
+  onUploadStart,
+  onUploadEnd
 }: UploadFotoButtonProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -35,7 +37,7 @@ export default function UploadFotoButton({
     onUploadStart();
 
     try {
-      const response = await fetch(`${API_BASE_URL}/uploadcloud`, {
+      const response = await fetch(uploadUrl, {
         method: "POST",
         body: formData,
       });

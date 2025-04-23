@@ -72,7 +72,7 @@ export default function UploadPaymentProof() {
     if (!files || files.length === 0) return;
 
     const formData = new FormData();
- 
+
     Array.from(files).forEach((file) => formData.append("files", file));
 
     try {
@@ -103,7 +103,7 @@ export default function UploadPaymentProof() {
 
     const paymentMethod = selectedBank; // Menggunakan bank yang dipilih sebagai metode pembayaran
     const paymentProof = imageUrls.join(","); // Menggunakan URL gambar sebagai bukti pembayaran
-  
+
     const response = await fetch(`${API_BASE_URL}/payments/${paymentId}`, {
       method: "PUT", // Menggunakan PATCH atau PUT untuk update data
       headers: {
@@ -114,7 +114,7 @@ export default function UploadPaymentProof() {
         payment_proof: paymentProof,
       }),
     });
-  
+
     const result = await response.json();
     if (response.ok) {
       setModalOpen(true); // Tampilkan modal saat pembayaran berhasil diperbarui
@@ -163,17 +163,17 @@ export default function UploadPaymentProof() {
 
         {/* Menampilkan file yang diupload */}
         {imageUrls.length > 0 && (
-        <div className="mt-6">
+          <div className="mt-6">
             <h3 className="text-lg font-semibold text-blue-700 mb-2">Bukti Pembayaran yang Diupload:</h3>
             <ul className="space-y-2">
-            {imageUrls.map((url, index) => (
+              {imageUrls.map((url, index) => (
                 <li key={index} className="text-sm text-gray-700">
-                {/* Menampilkan gambar jika URL gambar ada */}
-                <Image src={`${API_BASE_URL}${url}`} alt={`Uploaded Image ${index + 1}`} width={500} height={500} className="w-full h-auto rounded-lg" unoptimized={true}/>
+                  {/* Menampilkan gambar jika URL gambar ada */}
+                  <Image src={`${API_BASE_URL}${url}`} alt={`Uploaded Image ${index + 1}`} width={500} height={500} className="w-full h-auto rounded-lg" unoptimized={true} />
                 </li>
-            ))}
+              ))}
             </ul>
-        </div>
+          </div>
         )}
 
         <button

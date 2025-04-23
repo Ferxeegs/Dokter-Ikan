@@ -79,7 +79,7 @@ export default function EditProfile() {
   const handleProvinceChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
     setFormData({ ...formData, province: id, city: '', district: '', village: '' });
-    
+
     try {
       const response = await fetch(`https://api.binderbyte.com/wilayah/kabupaten?api_key=${API_KEY}&id_provinsi=${id}`);
       const data = await response.json();

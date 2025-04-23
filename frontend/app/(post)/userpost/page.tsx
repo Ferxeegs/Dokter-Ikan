@@ -369,7 +369,7 @@ export default function UserPost() {
               <div className="flex flex-wrap gap-4 mt-4 relative min-h-[100px] ml-24">
                 {/* Loading indicator centered in the image preview area */}
                 {loading && (
-                  <div className="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center bg-white bg-opacity-50 z-10 rounded-lg">
+                  <div className="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center bg-white bg-opacity-50 z-1 rounded-lg">
                     <ClipLoader color="#69CBF4" size={50} />
                   </div>
                 )}
@@ -395,6 +395,7 @@ export default function UserPost() {
 
         <div className="flex flex-col md:flex-row gap-4 md:gap-12 justify-center mt-6 mx-6 font-sans">
           <UploadFotoButton
+            uploadUrl={`${API_BASE_URL}/uploadclouduser`}
             onUploadSuccess={handleUploadSuccess}
             isLoading={loading}
             onUploadStart={handleUploadStart}
@@ -403,7 +404,7 @@ export default function UserPost() {
 
           {API_BASE_URL && (
             <UploadFile
-              uploadUrl={`${API_BASE_URL}/uploadcloud`}
+              uploadUrl={`${API_BASE_URL}/uploadclouduser`}
               onUploadSuccess={handleUploadSuccess}
               isLoading={loading}
               onUploadStart={handleUploadStart}

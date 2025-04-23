@@ -139,7 +139,7 @@ export default function FishDetection() {
           <p className="text-left text-lg font-semibold text-gray-700 mb-4">
             Upload Image for AI Analysis
           </p>
-          
+
           <div
             ref={uploadBoxRef} // Tambahkan ref ke div box unggah gambar
             className="w-full max-w-md mx-auto border-dashed border-2 border-gray-300 rounded-lg"

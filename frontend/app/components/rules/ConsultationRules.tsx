@@ -90,9 +90,8 @@ const ConsultationRules: React.FC<ConsultationRulesProps> = ({ consultationId, o
               <button
                 onClick={endConsultation}
                 disabled={isLoading}
-                className={`px-4 py-2 flex items-center gap-2 bg-red-500 text-white rounded-lg shadow-md transition-all ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600 hover:scale-110"
-                }`}
+                className={`px-4 py-2 flex items-center gap-2 bg-red-500 text-white rounded-lg shadow-md transition-all ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600 hover:scale-110"
+                  }`}
               >
                 {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : <XCircle className="w-5 h-5" />}
                 {isLoading ? "Mengakhiri..." : "Akhiri Konsultasi"}
@@ -105,9 +104,8 @@ const ConsultationRules: React.FC<ConsultationRulesProps> = ({ consultationId, o
       {/* Modal Notifikasi */}
       {notification.type && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-20">
-          <div className={`p-6 rounded-lg shadow-lg max-w-sm text-center transition-all duration-300 ${
-            notification.type === "success" ? "bg-green-100 border-green-500" : "bg-red-100 border-red-500"
-          } border-l-4`}>
+          <div className={`p-6 rounded-lg shadow-lg max-w-sm text-center transition-all duration-300 ${notification.type === "success" ? "bg-green-100 border-green-500" : "bg-red-100 border-red-500"
+            } border-l-4`}>
             <div className="flex items-center justify-center gap-3">
               {notification.type === "success" ? (
                 <CheckCircle className="w-6 h-6 text-green-500" />

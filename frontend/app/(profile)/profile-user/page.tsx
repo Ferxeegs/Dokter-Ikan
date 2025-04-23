@@ -61,14 +61,20 @@ export default function Profile() {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 to-blue-400 p-4 sm:p-8">
         <div className="max-w-4xl w-full bg-white/30 backdrop-blur-lg shadow-2xl rounded-xl p-4 sm:p-8 border border-white/40">
-          <div className="relative flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <div className="relative">
-              <Image src={user.image || '/default-avatar.png'} alt="Profile Picture" width={96} height={96} className="rounded-full border-2 border-gray-300 shadow-md" unoptimized />
-              <div className="absolute bottom-0 right-0 bg-blue-600 p-1 rounded-full cursor-pointer">
-                <Image src="/images/icon/ic_foto.png" alt="Edit" width={16} height={16} />
-              </div>
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300 shadow-md">
+              <Image
+                src={user.image || '/default-avatar.png'}
+                alt="Profile Picture"
+                width={96}
+                height={96}
+                className="object-cover w-full h-full"
+                unoptimized
+              />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">{user.name}</h2>
+            <div className="absolute bottom-0 right-0 bg-blue-600 p-1 rounded-full cursor-pointer">
+              <Image src="/images/icon/ic_foto.png" alt="Edit" width={16} height={16} />
+            </div>
           </div>
 
           <div className="mt-6 border-b border-gray-300 flex space-x-4 overflow-x-auto">

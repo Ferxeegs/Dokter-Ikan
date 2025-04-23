@@ -106,11 +106,10 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
               className={`flex ${msg.sender_role === "user" ? "justify-end" : "justify-start"} mb-2`}
             >
               <div
-                className={`p-3 rounded-lg max-w-xs text-sm ${
-                  msg.sender_role === "user"
+                className={`p-3 rounded-lg max-w-xs text-sm ${msg.sender_role === "user"
                     ? "bg-[#1A83FB] text-white shadow-md"
                     : "bg-gray-200 text-gray-900 shadow-sm"
-                }`}
+                  }`}
               >
                 <span className="block font-bold text-xs mb-1">
                   {msg.sender_role === "user" ? "Anda" : "Ahli Ikan"}

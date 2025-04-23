@@ -48,8 +48,8 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
           setPrescriptionId(data?.prescription_id || null);
           setPrescriptionData(Array.isArray(data?.medicines) ? data.medicines : []);
         }
-      } catch  {
-       
+      } catch {
+
       }
     };
 
@@ -82,11 +82,11 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
 
   const handlePayment = async () => {
     setIsProcessing(true);
-  
+
     try {
       // Cek apakah consultation_id sudah ada di tabel payment
       const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`);
-  
+
       let paymentLookupData;
       if (paymentLookupResponse.ok) {
         paymentLookupData = await paymentLookupResponse.json();
@@ -98,7 +98,7 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
           throw new Error("Failed to check payment data");
         }
       }
-  
+
       if (paymentLookupData && paymentLookupData.payment_id) {
         // Jika pembayaran ditemukan, langsung lanjut ke halaman pembayaran
         router.push(`/payment?consultation_id=${consultationId}`);
@@ -114,9 +114,9 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
             payment_status: "pending",
           }),
         });
-  
+
         if (!response.ok) throw new Error("Failed to initiate payment");
-  
+
         // Setelah berhasil membuat payment, arahkan ke halaman payment
         setTimeout(() => {
           router.push(`/payment?consultation_id=${consultationId}`);
@@ -133,9 +133,8 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
 
   return (
     <div
-      className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${
-        isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`}
+      className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
       onClick={toggleModal}
     >
       <div
@@ -161,7 +160,7 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
               >
                 <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center overflow-hidden">
                   {item.image ? (
-                    <Image src={item.image} alt={item.title} width={80} height={80} className="object-cover rounded-lg" unoptimized={true}/>
+                    <Image src={item.image} alt={item.title} width={80} height={80} className="object-cover rounded-lg" unoptimized={true} />
                   ) : (
                     <span className="text-xs text-gray-500 text-center">Gambar Tidak Tersedia</span>
                   )}
@@ -182,9 +181,8 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
         <button
           onClick={handlePayment}
           disabled={isProcessing}
-          className={`text-center mt-auto py-2 px-4 rounded-full shadow-lg transition duration-300 ${
-            isProcessing ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"
-          }`}
+          className={`text-center mt-auto py-2 px-4 rounded-full shadow-lg transition duration-300 ${isProcessing ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"
+            }`}
         >
           {isProcessing ? "Memproses..." : "Ke menu pembayaran"}
         </button>

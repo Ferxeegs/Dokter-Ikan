@@ -20,32 +20,32 @@ export default function ChangePassword() {
 
   const handleChangePassword = async () => {
     setMessage('');
-  
+
     if (!currentPassword || !newPassword || !confirmPassword) {
       setMessage('Semua kolom harus diisi!');
       return;
     }
-  
+
     if (newPassword !== confirmPassword) {
       setMessage('Konfirmasi kata sandi tidak cocok.');
       return;
     }
-  
+
     setLoading(true);
-  
+
     try {
       const token = Cookies.get('token');
       if (!token) {
         throw new Error('Token tidak ditemukan, silakan login ulang.');
       }
-  
+
       // Decode token untuk mendapatkan role
       const decodedToken = JSON.parse(atob(token.split('.')[1]));
       const role = decodedToken.role;
-  
+
       // Tentukan endpoint berdasarkan role
       const endpoint = role === 'expert' ? 'update-expert-password' : 'update-password';
-  
+
       const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
         method: 'PUT',
         headers: {
@@ -57,13 +57,13 @@ export default function ChangePassword() {
           newPassword: newPassword,
         }),
       });
-  
+
       const result = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(result.message || 'Gagal mengubah kata sandi.');
       }
-  
+
       setMessage('Kata sandi berhasil diubah!');
       setCurrentPassword('');
       setNewPassword('');

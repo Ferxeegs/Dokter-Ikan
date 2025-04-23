@@ -89,11 +89,11 @@ const ComplaintPost: React.FC<ComplaintProps> = ({
         <p><strong>Berat Ikan:</strong> {fishWeight ? `${fishWeight} g` : 'Berat ikan belum diisi'}</p>
         <p><strong>Umur Ikan:</strong> {fishAge ? `${fishAge} bulan` : 'Umur ikan belum diisi'}</p>
       </div>
-      
+
       <p className="text-sm text-gray-700 text-justify mb-4">
         {description || 'Deskripsi akan muncul di sini setelah Anda mengirimkan keluhan.'}
       </p>
-      
+
       {/* Thumbnail Gambar */}
       <div className="flex flex-wrap gap-2 mb-4">
         {fishImageUrls.length > 0 ? (
@@ -179,9 +179,8 @@ const ComplaintPost: React.FC<ComplaintProps> = ({
                 <div
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-12 h-12 relative cursor-pointer rounded-md overflow-hidden border-2 ${
-                    index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
-                  }`}
+                  className={`w-12 h-12 relative cursor-pointer rounded-md overflow-hidden border-2 ${index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
+                    }`}
                 >
                   <Image
                     src={url}

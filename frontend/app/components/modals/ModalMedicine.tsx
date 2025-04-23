@@ -134,9 +134,8 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
             {filteredMedicines.map((item) => (
               <div
                 key={item.medicine_id}
-                className={`flex items-center p-4 bg-gradient-to-r from-[#DCF5FF] to-[#80B7F5] rounded-lg shadow cursor-pointer ${
-                  selectedMedicines.includes(item.medicine_id) ? 'border-2 border-blue-500' : ''
-                }`}
+                className={`flex items-center p-4 bg-gradient-to-r from-[#DCF5FF] to-[#80B7F5] rounded-lg shadow cursor-pointer ${selectedMedicines.includes(item.medicine_id) ? 'border-2 border-blue-500' : ''
+                  }`}
                 onClick={() => handleSelectMedicine(item.medicine_id)}
               >
                 <Image

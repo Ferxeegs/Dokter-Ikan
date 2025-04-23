@@ -50,8 +50,8 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({
   createdAt,
   consultationStatus,
 }) => {
-  const router = useRouter(); 
-  
+  const router = useRouter();
+
   const handleClick = () => {
     router.push(`/expertpost?id=${consultationId}`);
   };

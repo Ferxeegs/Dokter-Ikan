@@ -4,7 +4,7 @@ import multer from "multer";
 // Setup multer untuk menyimpan file di buffer memory
 const uploadcloud = multer({ storage: multer.memoryStorage() }).array("files", 10); // Bisa upload hingga 10 file
 
-const uploadImages = async (req, res) => {
+const uploadImagesUser = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: "No files uploaded" });
@@ -14,7 +14,41 @@ const uploadImages = async (req, res) => {
     const uploadPromises = req.files.map((file) => {
       return new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
-          { folder: "dokter_ikan" },
+          { folder: "userpost" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve({
+              url: result.secure_url,
+              public_id: result.public_id,
+            });
+          }
+        ).end(file.buffer);
+      });
+    });
+
+    const uploadedImages = await Promise.all(uploadPromises);
+
+    // Log data yang dikirimkan ke frontend
+    console.log("Uploaded images:", uploadedImages);
+
+    res.json({ images: uploadedImages });
+  } catch (error) {
+    console.error("Error uploading images:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const uploadImagesExpert = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "No files uploaded" });
+    }
+
+    // Upload semua file ke Cloudinary
+    const uploadPromises = req.files.map((file) => {
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "expertpost" },
           (error, result) => {
             if (error) reject(error);
             else resolve({
@@ -61,4 +95,4 @@ const deleteImage = async (req, res) => {
   }
 };
 
-export { uploadcloud, uploadImages, deleteImage };
+export { uploadcloud, uploadImagesUser, uploadImagesExpert, deleteImage };

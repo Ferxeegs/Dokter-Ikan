@@ -64,14 +64,14 @@ const Payment = () => {
 
         const formattedDateTime = paymentDetail?.createdAt
           ? new Date(paymentDetail.createdAt).toLocaleString("id-ID", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-              hour12: false,
-            })
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          })
           : "Waktu Tidak Diketahui";
 
         if (isMounted) {
@@ -80,7 +80,7 @@ const Payment = () => {
             expertName: consultationData?.fish_expert_name || "Expert Tidak Diketahui",
             medicines: Array.isArray(prescriptionData?.medicines) ? prescriptionData.medicines : [],
             dateTime: formattedDateTime,
-            totalFee: (paymentDetail?.total_fee || 0) + (paymentDetail?.shipping_fee || 0),
+            totalFee: (paymentDetail?.total_fee || 0),
             chatEnabled: consultationData?.chat_enabled || false,
             shippingFee: paymentDetail?.shipping_fee || 0,
           });
@@ -183,9 +183,9 @@ const Payment = () => {
             Pilih Metode Pembayaran
           </button>
           {consultationId && (
-            <PaymentModal 
-              isOpen={isModalOpen} 
-              onClose={() => setModalOpen(false)} 
+            <PaymentModal
+              isOpen={isModalOpen}
+              onClose={() => setModalOpen(false)}
               consultationId={consultationId}
             />
           )}

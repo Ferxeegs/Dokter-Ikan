@@ -6,9 +6,6 @@ import "regenerator-runtime/runtime.js";
 
 dotenv.config();
 
-const MODEL_API_URL = process.env.MODEL_API_URL;
-
-
 // Tentukan folder penyimpanan file
 const UPLOADS_DIR = 'uploads';
 

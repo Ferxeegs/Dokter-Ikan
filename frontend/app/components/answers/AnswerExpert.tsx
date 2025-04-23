@@ -13,7 +13,7 @@ const Answer: React.FC<AnswerProps> = ({ answer, name, specialization }) => {
       <h3 className="text-xl font-bold text-black mb-4 text-center">
         Jawaban Tenaga Ahli
       </h3>
-      
+
       {/* Jawaban Tenaga Ahli */}
       <p className="text-sm text-gray-700 text-justify mb-8">
         {answer || 'Jawaban akan muncul di sini setelah tenaga ahli memberikan respons.'}

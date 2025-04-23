@@ -11,11 +11,11 @@ interface UploadFileProps {
   onUploadEnd: () => void; // Tambahkan prop untuk menghentikan loading
 }
 
-export default function UploadFile({ 
-  uploadUrl, 
-  onUploadSuccess, 
-  isLoading, 
-  onUploadStart, 
+export default function UploadFile({
+  uploadUrl,
+  onUploadSuccess,
+  isLoading,
+  onUploadStart,
   onUploadEnd // Tambahkan prop untuk menghentikan loading
 }: UploadFileProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -36,7 +36,7 @@ export default function UploadFile({
 
     // Notify parent that upload is starting
     onUploadStart();
-    
+
     try {
       const response = await fetch(uploadUrl, {
         method: "POST",
@@ -53,8 +53,7 @@ export default function UploadFile({
       console.error("Error uploading images:", error);
       setShowErrorModal(true); // Tampilkan modal error
     } finally {
-      // Hentikan loading setelah selesai
-      onUploadEnd(); // Pastikan loading dihentikan di sini
+      onUploadEnd();
     }
   };
 

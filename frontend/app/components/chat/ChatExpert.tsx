@@ -106,11 +106,10 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
               className={`flex ${msg.sender_role === "expert" ? "justify-end" : "justify-start"} mb-2`}
             >
               <div
-                className={`p-3 rounded-lg max-w-xs text-sm ${
-                  msg.sender_role === "expert"
+                className={`p-3 rounded-lg max-w-xs text-sm ${msg.sender_role === "expert"
                     ? "bg-blue-600 text-white shadow-md"
                     : "bg-gray-200 text-gray-900 shadow-sm"
-                }`}
+                  }`}
               >
                 <span className="block font-bold text-xs mb-1">
                   {msg.sender_role === "expert" ? "Anda (Expert)" : "User"}

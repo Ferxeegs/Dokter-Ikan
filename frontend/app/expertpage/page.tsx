@@ -77,7 +77,7 @@ export default function DashboardExpert() {
           const data: ConsultationData[] = await response.json();
           const filteredData = data
             .filter((consultation: ConsultationData) => consultation.fishExpert_id === expertId)
-            .sort((a: ConsultationData, b: ConsultationData) => 
+            .sort((a: ConsultationData, b: ConsultationData) =>
               new Date(b.UserConsultation.createdAt).getTime() - new Date(a.UserConsultation.createdAt).getTime()
             );
 

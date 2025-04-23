@@ -80,9 +80,8 @@ export default function DiseaseDetection() {
         ? selectedPhysicalSymptoms.has(symptomCode)
         : selectedBehavioralSymptoms.has(symptomCode);
 
-    return `px-3 py-2 rounded-lg text-sm ${
-      isSelected ? 'bg-blue-500 text-white font-medium shadow-md transform scale-105' : 'bg-[#D2EFFC]'
-    } text-gray-700 hover:bg-blue-400 hover:text-white transition-all duration-200 mb-2`;
+    return `px-3 py-2 rounded-lg text-sm ${isSelected ? 'bg-blue-500 text-white font-medium shadow-md transform scale-105' : 'bg-[#D2EFFC]'
+      } text-gray-700 hover:bg-blue-400 hover:text-white transition-all duration-200 mb-2`;
   };
 
   const handleSubmit = async () => {
@@ -142,7 +141,7 @@ export default function DiseaseDetection() {
       {/* Main Content */}
       <div className="flex-grow flex flex-col items-center justify-center px-4 py-8 text-center">
         {/* Title and Subtitle */}
-        <motion.div 
+        <motion.div
           className="w-full max-w-2xl mx-auto mt-12"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -157,7 +156,7 @@ export default function DiseaseDetection() {
         </motion.div>
 
         {/* Symptoms Box */}
-        <motion.div 
+        <motion.div
           className="bg-white shadow-xl rounded-2xl p-6 sm:p-8 w-full max-w-4xl mx-auto border-2 border-blue-500"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -227,7 +226,7 @@ export default function DiseaseDetection() {
         </motion.div>
 
         {/* Button with Icon */}
-        <motion.div 
+        <motion.div
           className="mt-10 sm:mt-14 flex justify-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -236,9 +235,8 @@ export default function DiseaseDetection() {
           <button
             onClick={handleSubmit}
             disabled={isLoading || isFetching}
-            className={`flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-[#1A83FB] text-white text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-300 ${
-              isLoading || isFetching ? 'opacity-70 cursor-not-allowed' : ''
-            }`}
+            className={`flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-[#1A83FB] text-white text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-300 ${isLoading || isFetching ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
           >
             {isLoading ? (
               <>

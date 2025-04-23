@@ -108,7 +108,7 @@ export default function Register() {
           className="absolute inset-0 bg-black opacity-50 backdrop-blur-sm"
           style={{ zIndex: 0 }}
         />
-        
+
         {/* Konten lainnya */}
         <div className="relative z-10 flex flex-col items-center justify-center px-6 py-8 mx-auto w-full md:h-screen lg:py-0">
           <div

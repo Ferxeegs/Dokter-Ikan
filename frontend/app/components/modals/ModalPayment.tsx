@@ -55,9 +55,9 @@ export default function PaymentModal({ isOpen, onClose, consultationId }: Paymen
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       id="modal-overlay"
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50" 
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50"
       onClick={handleCloseModal}
     >
       <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 overflow-y-auto" onClick={(e) => e.stopPropagation()}>

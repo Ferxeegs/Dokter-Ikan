@@ -170,9 +170,8 @@ const Answer: React.FC<AnswerProps> = ({
                 <div
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-12 h-12 relative cursor-pointer rounded-md overflow-hidden border-2 ${
-                    index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
-                  }`}
+                  className={`w-12 h-12 relative cursor-pointer rounded-md overflow-hidden border-2 ${index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
+                    }`}
                 >
                   <Image
                     src={url}

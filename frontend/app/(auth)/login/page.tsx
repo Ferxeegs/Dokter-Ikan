@@ -15,7 +15,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false); // State untuk loading
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  
+
   // Fungsi untuk menangani perubahan input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -90,7 +90,7 @@ export default function Login() {
         <meta name="description" content="Login Page" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-  
+
       <section
         className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center relative"
         style={{
@@ -104,7 +104,7 @@ export default function Login() {
           className="absolute inset-0 bg-black opacity-50 backdrop-blur-sm"
           style={{ zIndex: 0 }}
         />
-        
+
         {/* Konten lainnya */}
         <div className="relative z-10 flex flex-col items-center justify-center px-6 py-8 mx-auto w-full md:h-screen lg:py-0">
           <div
@@ -124,7 +124,7 @@ export default function Login() {
                 className="w-15 h-15"
               />
             </div>
-  
+
             {/* Tombol silang */}
             <button
               onClick={handleBackToHome}
@@ -146,7 +146,7 @@ export default function Login() {
                 />
               </svg>
             </button>
-  
+
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
               <h1 className="text-lg font-bold leading-tight tracking-tight text-gray-900 md:text-lg">
                 Sign in to your account
@@ -178,18 +178,18 @@ export default function Login() {
                     Password
                   </label>
                   <div className="relative flex items-center">
-                    <input 
-                      type={showPassword ? 'text' : 'password'} 
-                      name="password" 
-                      id="password" 
-                      value={password} 
-                      onChange={handleChange} 
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      id="password"
+                      value={password}
+                      onChange={handleChange}
                       className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-10"
                       placeholder="Enter your password"
-                      required 
+                      required
                     />
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       className="absolute right-3 text-gray-500"
                       style={{ top: '50%', transform: 'translateY(-50%)' }}
                       onClick={() => setShowPassword(!showPassword)}

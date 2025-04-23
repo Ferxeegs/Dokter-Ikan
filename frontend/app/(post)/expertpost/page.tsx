@@ -40,6 +40,7 @@ function ExpertPostContent() {
     fish_age: string;
     fish_image: string;
     name: string;
+    chat_enabled: boolean;
     created_at: string;
   } | null>(null);
 
@@ -144,6 +145,7 @@ function ExpertPostContent() {
           throw new Error('Gagal memuat data');
         }
         const result = await response.json();
+        console.log(result);
         setData(result);
       } catch {
         setIsError(true);
@@ -339,7 +341,7 @@ function ExpertPostContent() {
         ) : null}
 
         <div className="mt-10 mx-auto w-full max-w-4xl px-4">
-          <ChatExpert consultationId={id} />
+          {data.chat_enabled === true  && <ChatExpert consultationId={id} />}
         </div>
       </main>
 

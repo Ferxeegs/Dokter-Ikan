@@ -17,7 +17,6 @@ export default function UploadFotoButton({
   onUploadEnd
 }: UploadFotoButtonProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const [showErrorModal, setShowErrorModal] = useState(false);
 
   const handleButtonClick = () => {

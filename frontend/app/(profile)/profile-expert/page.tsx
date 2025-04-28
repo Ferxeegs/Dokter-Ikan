@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import Navbar from '@/app/components/layout/Navbar';
 import Footer from '@/app/components/layout/Footer';
@@ -22,6 +22,8 @@ export default function ProfileExpert() {
   const [fishExpert, setFishExpert] = useState<FishExpert | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'password'>('info');
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   useEffect(() => {
     const fetchExpertData = async () => {
@@ -52,6 +54,51 @@ export default function ProfileExpert() {
     fetchExpertData();
   }, [API_BASE_URL]);
 
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const token = Cookies.get('token');
+    const formData = new FormData();
+    formData.append('files', file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/uploadcloudprofileuser`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const newImageUrl = result.images[0].url;
+
+        // Update user image di frontend
+        setFishExpert((prev) => prev ? { ...prev, image: newImageUrl } : prev);
+
+        // Update image di database
+        await fetch(`${API_BASE_URL}/update-image-expert`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ image_url: newImageUrl }),
+        });
+      } else {
+        console.error('Upload failed.');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
+  };
+
   if (!fishExpert) {
     return <p className="text-center mt-10 text-gray-800">Loading...</p>;
   }
@@ -61,19 +108,31 @@ export default function ProfileExpert() {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 to-blue-400 p-8">
         <div className="max-w-4xl w-full bg-white/30 backdrop-blur-lg shadow-2xl rounded-xl p-8 border border-white/40">
-          <div className="relative flex items-center space-x-6">
-            <div className="relative">
-              <Image
-                src={fishExpert.image || '/default-avatar.png'}
-                alt="Profile Picture"
-                width={96}
-                height={96}
-                className="rounded-full border-2 border-gray-300 shadow-md object-cover"
-                unoptimized
-              />
-              <div className="absolute bottom-0 right-0 bg-blue-600 p-1 rounded-full cursor-pointer">
+          <div className="flex items-center gap-4">
+            <div className="relative w-24 h-24">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300 shadow-md">
+                <Image
+                  src={fishExpert.image || '/default-avatar.png'}
+                  alt="Profile Picture"
+                  width={96}
+                  height={96}
+                  className="object-cover w-full h-full"
+                  unoptimized
+                />
+              </div>
+              <div
+                onClick={handleImageClick}
+                className="absolute bottom-0 right-0 translate-x-1/5 translate-y-1/5 bg-blue-600 p-1 rounded-full cursor-pointer border-2 border-white"
+              >
                 <Image src="/images/icon/ic_foto.png" alt="Edit" width={16} height={16} />
               </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
             </div>
             <h2 className="text-3xl font-bold text-gray-900">{fishExpert.name}</h2>
           </div>

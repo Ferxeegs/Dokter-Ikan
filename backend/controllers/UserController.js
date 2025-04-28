@@ -267,3 +267,20 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const updateProfileImage = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // atau SECRET yang kamu pakai
+    const userId = decoded.id; // Pastikan token bawa id user
+
+    const { image } = req.body;
+
+    await User.update({ image }, { where: { user_id: userId } });
+
+    res.json({ message: "Profile picture updated successfully!" });
+  } catch (error) {
+    console.error("Error updating profile image:", error);
+    res.status(500).json({ error: error.message });
+  }
+};

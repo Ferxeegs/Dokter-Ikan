@@ -1,5 +1,6 @@
 import FishExperts from "../models/FishExpertsModel.js";
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import "regenerator-runtime/runtime.js";
 
 // Mendapatkan semua data Fish Experts
@@ -22,49 +23,6 @@ export const getFishExpertById = async (req, res) => {
     res.status(200).json(expert);
   } catch (error) {
     res.status(500).json({ message: "Gagal mengambil data Fish Expert", error });
-  }
-};
-
-// Menambahkan Fish Expert baru
-export const createFishExpert = async (req, res) => {
-  try {
-    const { name, email, password, phone_number, specialization, experience } = req.body;
-
-    // Cek apakah email sudah terdaftar
-    const existingExpert = await FishExperts.findOne({ where: { email } });
-    if (existingExpert) {
-      return res.status(400).json({ message: "Email sudah terdaftar" });
-    }
-
-    // Enkripsi password sebelum disimpan ke database
-    const hashedPassword = await bcrypt.hash(password, 10); // 10 adalah jumlah salt rounds
-
-    // Membuat entri baru di tabel FishExperts
-    const newExpert = await FishExperts.create({
-      name,
-      email,
-      password: hashedPassword, // Simpan password yang sudah dienkripsi
-      phone_number,
-      specialization,
-      experience,
-      image_url
-    });
-
-    res.status(201).json({
-      message: "Fish Expert berhasil ditambahkan",
-      data: {
-        id: newExpert.fishExperts_id,
-        name: newExpert.name,
-        email: newExpert.email,
-        phone_number: newExpert.phone_number,
-        specialization: newExpert.specialization,
-        experience: newExpert.experience,
-        image: newExpert.image_url,
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Gagal menambahkan Fish Expert", error: error.message });
   }
 };
 
@@ -111,5 +69,48 @@ export const updateFishExpertPassword = async (req, res) => {
   } catch (error) {
     console.error("Error updating fish expert password:", error);
     res.status(500).json({ message: "Terjadi kesalahan pada server." });
+  }
+};
+
+
+export const updateProfileExpert = async (req, res) => {
+  try {
+    const fishExpertId = req.user.id; // Asumsikan user ID disimpan di req.user setelah autentikasi
+    const { name, phone_number, specialization, experience } = req.body;
+
+    const user = await FishExperts.findByPk(fishExpertId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.name = name || user.name;
+    user.phone_number = phone_number || user.phone_number;
+    user.specialization = specialization || user.specialization;
+    user.experience = experience || user.experience;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Profile updated successfully', user });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const updateProfileImage = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // atau SECRET yang kamu pakai
+    const fishExpertId = decoded.id;
+
+    const { image_url } = req.body;
+
+    await FishExperts.update({ image_url }, { where: { fishExperts_id: fishExpertId } });
+
+    res.json({ message: "Profile picture updated successfully!" });
+  } catch (error) {
+    console.error("Error updating profile image:", error);
+    res.status(500).json({ error: error.message });
   }
 };

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -16,7 +16,6 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Dokter Ikan",
   description: "Aplikasi untuk deteksi penyakit ikan dan konsultasi.",
-  themeColor: "#00AEEF",
   manifest: "/manifest.json",
   icons: [
     {
@@ -33,6 +32,11 @@ export const metadata: Metadata = {
     title: "Dokter Ikan",
     statusBarStyle: "default",
   },
+};
+
+// ✅ Ini tambahan yang benar
+export const viewport: Viewport = {
+  themeColor: "#00AEEF",
 };
 
 export default function RootLayout({

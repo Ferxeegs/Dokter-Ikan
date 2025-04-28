@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { Info } from "lucide-react"; // Menggunakan ikon dari lucide-react
+import { Info } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import CardRiwayat from "../components/history/CardRiwayat";
@@ -27,15 +27,15 @@ export default function Riwayat() {
           paddingTop: "5rem",
         }}
       >
-        {/* Tombol ikon berada di pojok kanan atas */}
         <button
           onClick={toggleModal}
-          className="absolute top-4 right-4 bg-blue-500 text-white p-1 sm:p-2 rounded-full hover:bg-blue-600 transition z-1"
+          className="absolute top-4 right-4 bg-blue-500 text-white p-1 sm:p-2 rounded-full hover:bg-blue-600 transition z-1 shadow-md"
+          aria-label="Informasi status konsultasi"
         >
           <Info className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
 
-        <div className="ml-6 text-center px-4 sm:px-0">
+        <div className="text-center px-4 sm:px-0 max-w-3xl mx-auto">
           <h1 className="text-xl sm:text-3xl font-bold mb-2 text-[#1A83FB] font-lato">
             Riwayat Konsultasi
           </h1>
@@ -44,41 +44,41 @@ export default function Riwayat() {
           </h2>
         </div>
 
-        <div className="flex justify-center gap-4 flex-wrap mt-6 px-4 sm:px-0">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6">
           <CardRiwayat />
         </div>
       </main>
 
       {/* Modal untuk menampilkan status konsultasi */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 sm:w-auto text-center">
-            <h3 className="text-sm sm:text-lg font-semibold text-gray-800">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md text-center">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Keterangan Status Konsultasi
             </h3>
-            <ul className="mt-4 text-left text-gray-700">
-              <li className="mb-3 text-sm sm:text-lg">
+            <ul className="space-y-4 text-left text-gray-700">
+              <li className="flex items-center gap-3">
                 <span className="bg-yellow-300 text-black text-xs sm:text-sm font-semibold italic px-4 py-1 rounded-3xl">
                   Waiting
                 </span>
-                - Proses pencarian tenaga ahli
+                <span>Proses pencarian tenaga ahli</span>
               </li>
-              <li className="mb-3 text-sm sm:text-lg">
+              <li className="flex items-center gap-3">
                 <span className="bg-green-400 text-white text-xs sm:text-sm font-semibold italic px-4 py-1 rounded-3xl">
                   In Consultation
                 </span>
-                - Sesi konsultasi masih dibuka
+                <span>Sesi konsultasi masih dibuka</span>
               </li>
-              <li className="text-sm sm:text-lg">
+              <li className="flex items-center gap-3">
                 <span className="bg-gray-400 text-white text-xs sm:text-sm font-semibold italic px-4 py-1 rounded-3xl">
                   Closed
                 </span>
-                - Sesi konsultasi telah berakhir
+                <span>Sesi konsultasi telah berakhir</span>
               </li>
             </ul>
             <button
               onClick={toggleModal}
-              className="mt-4 px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-lg bg-red-500 text-white rounded-lg hover:bg-red-600"
+              className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition shadow-md"
             >
               Tutup
             </button>

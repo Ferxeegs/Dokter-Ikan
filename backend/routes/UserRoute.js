@@ -7,7 +7,8 @@ import {
   loginUser,
   getMe,
   updatePassword,
-  updateProfile
+  updateProfile,
+  updateProfileImage
 } from "../controllers/UserController.js";
 import { authenticate } from "../middlewares/authMiddleware.js"; // Impor middleware authenticate
 
@@ -24,6 +25,6 @@ router.put('/users/:id', authenticate, updateUser); // Memperbarui pengguna berd
 router.get('/me', authenticate, getMe);
 router.put('/update-password', authenticate, updatePassword);
 router.put('/update-profile', authenticate, updateProfile);
-
+router.patch('/update-image-user', authenticate, updateProfileImage); // Memperbarui gambar profil pengguna (diperlukan autentikasi)
 
 export default router;

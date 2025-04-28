@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/app/components/layout/Navbar';
 import Footer from '@/app/components/layout/Footer';
+import NotificationModal from '@/app/components/modals/ModalUpdateProfile';
 
 interface User {
   name: string;
@@ -38,7 +39,8 @@ export default function EditProfile() {
   const [cities, setCities] = useState<Region[]>([]);
   const [districts, setDistricts] = useState<Region[]>([]);
   const [villages, setVillages] = useState<Region[]>([]);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const API_KEY = '35556323781a23d5a2b2bd1841f1eaf31f339f44c877fbae8c5f42dc6f19ddf8';
   const router = useRouter();
@@ -130,13 +132,21 @@ export default function EditProfile() {
       });
 
       if (response.ok) {
-        alert('Profil berhasil diperbarui!');
-        router.push('/profile');
+        setModalMessage('Profil berhasil diperbarui!');
+        setIsModalOpen(true);
+        setTimeout(() => {
+          setIsModalOpen(false);
+          router.push('/profile-user');
+        }, 2000);
       } else {
-        alert('Gagal memperbarui profil.');
+        const errorData = await response.json();
+        setModalMessage(`Gagal memperbarui profil: ${errorData.message}`);
+        setIsModalOpen(true);
       }
     } catch (error) {
       console.error('Error updating profile:', error);
+      setModalMessage('Terjadi kesalahan saat memperbarui profil.');
+      setIsModalOpen(true);
     }
   };
 
@@ -167,6 +177,19 @@ export default function EditProfile() {
                 value={formData.email}
                 className="w-full p-2 text-gray-700 border rounded-lg bg-gray-200"
                 disabled
+              />
+            </div>
+            <div>
+              <label htmlFor="phone_number" className="block text-gray-900 font-semibold mb-2">Nomor Telepon</label>
+              <input
+                type="tel"
+                id="phone_number"
+                name="phone_number"
+                value={formData.phone_number || ''}
+                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                className="w-full p-2 text-gray-700 border rounded-lg"
+                placeholder="Masukkan nomor telepon"
+                required
               />
             </div>
             <div>
@@ -247,6 +270,11 @@ export default function EditProfile() {
         </div>
       </div>
       <Footer />
+       <NotificationModal
+              isOpen={isModalOpen}
+              message={modalMessage}
+              onClose={() => setIsModalOpen(false)}
+            />
     </>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import jwt_decode from "jwt-decode";
 import Cookies from "js-cookie";
 import Image from 'next/image';
+import { ChevronLeft, ChevronRight, Calendar, Clock, User } from "lucide-react";
 
 // Menambahkan tipe untuk data konsultasi yang mencakup hasil join dari beberapa tabel
 interface Consultation {
@@ -61,6 +62,13 @@ interface ApiResponse {
 export default function CardRiwayat() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [userName, setUserName] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(6);
+  
   const router = useRouter();
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -82,10 +90,12 @@ export default function CardRiwayat() {
 
   const fetchConsultations = useCallback(async () => {
     if (!token) {
-      console.error("Token tidak ditemukan!");
+      setError("Token tidak ditemukan. Silakan login kembali.");
+      setLoading(false);
       return;
     }
 
+    setLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/consultation`, {
         method: "GET",
@@ -123,15 +133,25 @@ export default function CardRiwayat() {
             fish_expert_answer: item["FishExpertAnswer.answer"],
             fish_expert_answer_created_at: item["FishExpertAnswer.created_at"],
           }));
+          
+          // Sort by most recent first
+          transformedData.sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+          
           setConsultations(transformedData);
+          setError(null);
         } else {
-          console.error("Data tidak ditemukan dalam response");
+          setError("Data tidak ditemukan dalam response");
         }
       } else {
-        console.error("Response error:", response.statusText);
+        setError(`Error: ${response.statusText}`);
       }
     } catch (error) {
+      setError("Terjadi kesalahan saat mengambil data konsultasi");
       console.error("Fetch error:", error);
+    } finally {
+      setLoading(false);
     }
   }, [API_BASE_URL, token]);
 
@@ -140,6 +160,9 @@ export default function CardRiwayat() {
     if (user) {
       setUserName(user.name);
       fetchConsultations();
+    } else {
+      setLoading(false);
+      setError("Silakan login untuk melihat riwayat konsultasi");
     }
   }, [token, fetchConsultations]);
 
@@ -175,55 +198,200 @@ export default function CardRiwayat() {
     router.push(`/consultation?id=${consultationId}`);
   };
 
-  return (
-    <div className="flex flex-wrap w-full justify-center my-16 px-4">
-      {consultations.length === 0 ? (
-        <p className="text-center">Tidak ada riwayat konsultasi yang ditemukan.</p>
-      ) : (
-        consultations.map((consultation) => {
-          const {
-            consultation_id,
-            complaint,
-            created_at,
-            consultation_topic,
-            consultation_status,
-          } = consultation;
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = consultations.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(consultations.length / itemsPerPage);
 
-          return (
-            <button
-              key={consultation.user_consultation_id}
-              className="overflow-hidden flex flex-col w-full bg-white border-blue-400 border-2 text-white px-4 py-6 sm:px-8 sm:py-10 rounded-xl shadow-lg hover:shadow-2xl transition mx-2 my-2 max-w-md"
-              onClick={() => handleCardClick(consultation_id)} // Tambahkan event onClick
-            >
-              <div className="flex flex-row">
-                <Image
-                  src={"images/icon/ic_profile.png"}
-                  alt="Konsultasi Icon"
-                  width={64}
-                  height={64}
-                  className="mb-4 rounded-full mr-4 bg-white w-8 h-8 md:w-12 md:h-12"
-                  unoptimized={true}
-                />
-                <div className="flex flex-col text-black text-xs sm:text-sm justify-center text-left min-w-32">
-                  <p className="font-bold text-xs sm:text-base">{userName || "Loading..."}</p>
-                  <p className="font-lato">{formatDate(created_at)}</p>
-                  <p className="font-lato">{formatTime(created_at)} WIB</p>
-                </div>
-                <span
-                  className={`flex my-auto text-xs sm:text-sm font-semibold italic ml-4 sm:ml-8 px-2 sm:px-4 py-1 rounded-3xl text-center ${getStatusColor(consultation_status)}`}
-                >
-                  {consultation_status}
+  // Change page
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const goToPreviousPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center w-full py-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex justify-center items-center w-full py-20">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm">
+          <p>{error}</p>
+          <button 
+            onClick={() => fetchConsultations()} 
+            className="mt-3 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full">
+      {consultations.length === 0 ? (
+        <div className="flex flex-col items-center justify-center bg-blue-50 rounded-lg p-8 my-8 shadow-sm">
+          <Image 
+            src="/images/no-data.svg" 
+            alt="Tidak ada data" 
+            width={150} 
+            height={150} 
+            className="mb-4" 
+            unoptimized={true}
+          />
+          <p className="text-gray-600 text-lg">Belum ada riwayat konsultasi.</p>
+          <button 
+            onClick={() => router.push('/konsultasi')} 
+            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition shadow"
+          >
+            Mulai Konsultasi Baru
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Card Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-8">
+            {currentItems.map((consultation) => (
+              <button
+                key={consultation.user_consultation_id}
+                className="relative overflow-hidden flex flex-col bg-white border-l-4 border-blue-400 text-left px-4 py-4 rounded-lg shadow-md hover:shadow-lg transition group h-full"
+                style={{ borderLeftWidth: '6px' }}
+                onClick={() => handleCardClick(consultation.consultation_id)}
+              >
+                {/* Status Badge */}
+                <span className={`absolute top-3 right-3 text-xs font-semibold italic px-3 py-1 rounded-full ${getStatusColor(consultation.consultation_status)}`}>
+                  {consultation.consultation_status}
                 </span>
+                
+                {/* User Info */}
+                <div className="flex items-center mb-4 mt-1">
+                  <div className="bg-blue-100 p-2 rounded-full mr-3">
+                    <User className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-800">{userName || "Loading..."}</p>
+                  </div>
+                </div>
+                
+                {/* Date & Time */}
+                <div className="flex items-center text-xs text-gray-500 mb-4">
+                  <Calendar className="w-3 h-3 mr-1" />
+                  <span className="mr-3">{formatDate(consultation.created_at)}</span>
+                  <Clock className="w-3 h-3 mr-1" />
+                  <span>{formatTime(consultation.created_at)} WIB</span>
+                </div>
+                
+                {/* Topic & Complaint */}
+                <div className="flex-grow">
+                  <h2 className="text-base font-bold text-blue-600 mb-2 line-clamp-1">
+                    {consultation.consultation_topic}
+                  </h2>
+                  <p className="text-sm text-gray-600 line-clamp-3">
+                    {consultation.complaint || "Keluhan tidak tersedia"}
+                  </p>
+                </div>
+                
+                {/* View Details Button */}
+                <div className="mt-4 pt-2 border-t border-gray-100 flex justify-end">
+                  <span className="text-xs text-blue-500 group-hover:underline flex items-center">
+                    Lihat Detail
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+          
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center space-x-2 my-8">
+              <button
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 rounded-md flex items-center ${
+                  currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                }`}
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                <span>Prev</span>
+              </button>
+              
+              <div className="flex space-x-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => {
+                  // Show first page, current page, last page, and one page before and after current
+                  if (
+                    number === 1 ||
+                    number === totalPages ||
+                    number === currentPage ||
+                    number === currentPage - 1 ||
+                    number === currentPage + 1
+                  ) {
+                    return (
+                      <button
+                        key={number}
+                        onClick={() => paginate(number)}
+                        className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                          currentPage === number
+                            ? 'bg-blue-500 text-white font-medium'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {number}
+                      </button>
+                    );
+                  }
+                  
+                  // Show ellipsis if needed
+                  if (
+                    (number === 2 && currentPage > 3) ||
+                    (number === totalPages - 1 && currentPage < totalPages - 2)
+                  ) {
+                    return <span key={number} className="w-8 h-8 flex items-center justify-center">...</span>;
+                  }
+                  
+                  return null;
+                })}
               </div>
-              <div className="text-wrap max-w-60 break-words text-right text-black font-bold mt-4 ml-20">
-                <h1 className="text-xs sm:text-lg flex">{consultation_topic}</h1>
-                <p className="text-justify text-xs sm:text-sm font-thin text-black mt-1">
-                  {complaint ? complaint.substring(0, 100) : "Keluhan tidak tersedia"}...
-                </p>
-              </div>
-            </button>
-          );
-        })
+              
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1 rounded-md flex items-center ${
+                  currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                }`}
+              >
+                <span>Next</span>
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </button>
+            </div>
+          )}
+          
+          {/* Items per page selector */}
+          <div className="flex justify-end items-center text-sm text-gray-500 mb-8">
+            <span className="mr-2">Tampilkan:</span>
+            <select 
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1); // Reset to first page when changing items per page
+              }}
+              className="border border-gray-300 rounded-md px-2 py-1 bg-white"
+            >
+              <option value={6}>6</option>
+              <option value={12}>12</option>
+              <option value={24}>24</option>
+            </select>
+            <span className="ml-2">per halaman</span>
+          </div>
+        </>
       )}
     </div>
   );

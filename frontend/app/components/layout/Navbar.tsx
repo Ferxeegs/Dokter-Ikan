@@ -85,8 +85,8 @@ export default function Navbar() {
       </Link>
 
       <div className="hidden md:flex space-x-8 text-sm sm:text-base font-semibold font-lato">
-        <Link href="/">
-          <span className={`hover:underline ${pathname === '/' ? 'text-[#1A83FB]' : ''}`}>Beranda</span>
+        <Link href={user?.role === 'expert' ? '/expertpage' : '/'}>
+          <span className={`hover:underline ${(pathname === '/' || pathname === '/expertpage') ? 'text-[#1A83FB]' : ''}`}>Beranda</span>
         </Link>
         <Link href="/article">
           <span className={`hover:underline ${pathname === '/article' ? 'text-[#1A83FB]' : ''}`}>Artikel</span>

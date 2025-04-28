@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import Image from 'next/image';
+import { Calendar, Clock, User, ChevronRight} from "lucide-react";
 
 interface ConsultationCardProps {
   consultationId: string;
@@ -13,36 +13,7 @@ interface ConsultationCardProps {
   consultationStatus: string;
 }
 
-// Fungsi untuk memformat tanggal
-const formatDate = (dateString: string): string => {
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
-  return new Date(dateString).toLocaleDateString("id-ID", options);
-};
-
-// Fungsi untuk memformat waktu
-const formatTime = (dateString: string): string => {
-  return new Date(dateString).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-};
-
-// Fungsi untuk menentukan warna status berdasarkan status konsultasi
-const getStatusColor = (status: string): string => {
-  switch (status) {
-    case "Waiting":
-      return "bg-yellow-300 text-black";
-    case "In Consultation":
-      return "bg-green-400 text-white";
-    case "Closed":
-      return "bg-gray-400 text-white";
-    default:
-      return "bg-blue-400 text-white";
-  }
-};
-
-const ConsultationCard: React.FC<ConsultationCardProps> = ({
+const CardRiwayatExpert: React.FC<ConsultationCardProps> = ({
   consultationId,
   userName,
   consultationTopic,
@@ -56,44 +27,83 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({
     router.push(`/expertpost?id=${consultationId}`);
   };
 
+  // Fungsi untuk memformat tanggal
+  const formatDate = (dateString: string): string => {
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return new Date(dateString).toLocaleDateString("id-ID", options);
+  };
+
+  // Fungsi untuk memformat waktu
+  const formatTime = (dateString: string): string => {
+    return new Date(dateString).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  // Fungsi untuk menentukan warna status berdasarkan status konsultasi
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case "Waiting":
+        return "bg-yellow-300 text-black";
+      case "In Consultation":
+        return "bg-green-400 text-white";
+      case "Closed":
+        return "bg-gray-400 text-white";
+      default:
+        return "bg-blue-400 text-white";
+    }
+  };
+
   return (
     <button
-      className="overflow-hidden flex flex-col w-full bg-white border-blue-400 border-2 text-white px-4 py-6 sm:px-8 sm:py-10 rounded-xl shadow-lg hover:shadow-2xl transition mx-2 my-2 max-w-md"
+      className="relative overflow-hidden flex flex-col bg-white border-l-4 border-blue-400 text-left px-4 py-4 rounded-lg shadow-md hover:shadow-lg transition group h-full"
+      style={{ borderLeftWidth: '6px' }}
       onClick={handleClick}
     >
-      {/* Header Card */}
-      <div className="flex flex-row items-center">
-        <Image
-          src={"images/icon/ic_profile.png"}
-          alt="Konsultasi Icon"
-          width={64}
-          height={64}
-          className="mb-4 rounded-full mr-4 bg-white w-8 h-8 md:w-12 md:h-12"
-          unoptimized={true}
-        />
-        <div className="flex flex-col text-black text-xs sm:text-sm justify-center text-left min-w-32">
-          <p className="font-bold">{userName}</p>
-          <p className="font-lato">{formatDate(createdAt)}</p>
-          <p className="font-lato">{formatTime(createdAt)} WIB</p>
+      {/* Status Badge */}
+      <span className={`absolute top-3 right-3 text-xs font-semibold italic px-3 py-1 rounded-full ${getStatusColor(consultationStatus)}`}>
+        {consultationStatus}
+      </span>
+      
+      {/* User Info */}
+      <div className="flex items-center mb-4 mt-1">
+        <div className="bg-blue-100 p-2 rounded-full mr-3">
+          <User className="w-5 h-5 text-blue-500" />
         </div>
-        <span
-          className={`flex my-auto text-xs sm:text-sm font-semibold italic ml-auto px-2 sm:px-4 py-1 rounded-3xl text-center ${getStatusColor(
-            consultationStatus
-          )}`}
-        >
-          {consultationStatus}
-        </span>
+        <div>
+          <p className="font-bold text-gray-800">{userName}</p>
+        </div>
       </div>
-
-      {/* Body Card */}
-      <div className="text-wrap break-words text-right text-black font-bold mt-4 ml-16 sm:ml-20">
-        <h1 className="text-base sm:text-lg">{consultationTopic}</h1>
-        <p className="text-justify text-xs sm:text-sm font-thin text-black mt-1">
-          {complaint.substring(0, 100)}...
+      
+      {/* Date & Time */}
+      <div className="flex items-center text-xs text-gray-500 mb-4">
+        <Calendar className="w-3 h-3 mr-1" />
+        <span className="mr-3">{formatDate(createdAt)}</span>
+        <Clock className="w-3 h-3 mr-1" />
+        <span>{formatTime(createdAt)} WIB</span>
+      </div>
+      
+      {/* Topic & Complaint */}
+      <div className="flex-grow">
+        <h2 className="text-base font-bold text-blue-600 mb-2 line-clamp-1">
+          {consultationTopic}
+        </h2>
+        <p className="text-sm text-gray-600 line-clamp-3">
+          {complaint || "Keluhan tidak tersedia"}
         </p>
+      </div>
+      
+      {/* View Details Button */}
+      <div className="mt-4 pt-2 border-t border-gray-100 flex justify-end">
+        <span className="text-xs text-blue-500 group-hover:underline flex items-center">
+          Lihat Detail
+          <ChevronRight className="w-4 h-4 ml-1" />
+        </span>
       </div>
     </button>
   );
 };
 
-export default ConsultationCard;
+export default CardRiwayatExpert;

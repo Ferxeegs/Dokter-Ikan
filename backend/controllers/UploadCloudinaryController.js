@@ -37,6 +37,39 @@ const uploadImagesUser = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const uploadProfileUser = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "No files uploaded" });
+    }
+
+    // Upload semua file ke Cloudinary
+    const uploadPromises = req.files.map((file) => {
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "user" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve({
+              url: result.secure_url,
+              public_id: result.public_id,
+            });
+          }
+        ).end(file.buffer);
+      });
+    });
+
+    const uploadedImages = await Promise.all(uploadPromises);
+
+    // Log data yang dikirimkan ke frontend
+    console.log("Uploaded images:", uploadedImages);
+
+    res.json({ images: uploadedImages });
+  } catch (error) {
+    console.error("Error uploading images:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
 
 const uploadImagesExpert = async (req, res) => {
   try {
@@ -71,6 +104,41 @@ const uploadImagesExpert = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const uploadProfileExpert = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "No files uploaded" });
+    }
+
+    // Upload semua file ke Cloudinary
+    const uploadPromises = req.files.map((file) => {
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "expert" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve({
+              url: result.secure_url,
+              public_id: result.public_id,
+            });
+          }
+        ).end(file.buffer);
+      });
+    });
+
+    const uploadedImages = await Promise.all(uploadPromises);
+
+    // Log data yang dikirimkan ke frontend
+    console.log("Uploaded images:", uploadedImages);
+
+    res.json({ images: uploadedImages });
+  } catch (error) {
+    console.error("Error uploading images:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const uploadPaymentProof = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
@@ -128,4 +196,4 @@ const deleteImage = async (req, res) => {
   }
 };
 
-export { uploadcloud, uploadImagesUser, uploadImagesExpert, uploadPaymentProof, deleteImage };
+export { uploadcloud, uploadImagesUser, uploadImagesExpert, uploadPaymentProof, uploadProfileUser, uploadProfileExpert, deleteImage };

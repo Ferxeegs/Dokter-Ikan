@@ -45,7 +45,7 @@ export default function UploadFile({
 
       const data = await response.json();
       if (response.ok) {
-        onUploadSuccess(data.images);
+        onUploadSuccess(data.data.images);
       } else {
         setShowErrorModal(true); // Tampilkan modal error
       }

@@ -65,8 +65,8 @@ export default function RiwayatExpert() {
           const response = await fetch(`${API_BASE_URL}/consultations`);
           if (!response.ok) throw new Error("Failed to fetch consultations");
           
-          const data: ConsultationData[] = await response.json();
-          const filteredData = data
+          const data = await response.json();
+          const filteredData = data.data
             .filter((consultation: ConsultationData) => consultation.fishExpert_id === expertId)
             .sort((a: ConsultationData, b: ConsultationData) =>
               new Date(b.UserConsultation.createdAt).getTime() - new Date(a.UserConsultation.createdAt).getTime()

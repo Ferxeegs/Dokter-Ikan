@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Send } from "lucide-react";
+import Cookies from "js-cookie";
 
 interface Message {
   sender_role: string;
   message: string;
+  created_at: string;
 }
 
 interface ChatConsultationProps {
@@ -21,14 +23,19 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
 
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/messages/${consultationId}`);
+      const token = Cookies.get("token");
+      const response = await fetch(`${API_BASE_URL}/messages/${consultationId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Gagal mengambil pesan");
       }
       const data = await response.json();
 
-      if (JSON.stringify(messages) !== JSON.stringify(data.messages)) {
-        setMessages(data.messages);
+      if (JSON.stringify(messages) !== JSON.stringify(data.data)) {
+        setMessages(data.data); // Sesuaikan dengan struktur respons controller
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -48,9 +55,13 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
     setIsLoading(true);
 
     try {
+      const token = Cookies.get("token");
       const response = await fetch(`${API_BASE_URL}/messages/send`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           consultation_id: consultationId,
           sender_role: "user",
@@ -59,7 +70,8 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
       });
 
       if (!response.ok) {
-        throw new Error("Gagal mengirim pesan");
+        const result = await response.json();
+        throw new Error(result.message || "Gagal mengirim pesan");
       }
 
       setNewMessage("");
@@ -106,10 +118,11 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
               className={`flex ${msg.sender_role === "user" ? "justify-end" : "justify-start"} mb-2`}
             >
               <div
-                className={`p-3 rounded-lg max-w-xs text-sm ${msg.sender_role === "user"
+                className={`p-3 rounded-lg max-w-xs text-sm ${
+                  msg.sender_role === "user"
                     ? "bg-[#1A83FB] text-white shadow-md"
                     : "bg-gray-200 text-gray-900 shadow-sm"
-                  }`}
+                }`}
               >
                 <span className="block font-bold text-xs mb-1">
                   {msg.sender_role === "user" ? "Anda" : "Ahli Ikan"}

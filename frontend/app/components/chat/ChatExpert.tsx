@@ -27,8 +27,8 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
       }
       const data = await response.json();
 
-      if (JSON.stringify(messages) !== JSON.stringify(data.messages)) {
-        setMessages(data.messages);
+      if (JSON.stringify(messages) !== JSON.stringify(data.data)) {
+        setMessages(data.data);
       }
     } catch (error) {
       console.error("Error fetching messages:", error);

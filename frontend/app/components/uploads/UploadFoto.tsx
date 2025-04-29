@@ -45,7 +45,7 @@ export default function UploadFotoButton({
 
       if (response.ok) {
         // Use the same callback format as UploadFile
-        onUploadSuccess(result.images);
+        onUploadSuccess(result.data.images);
       } else {
         setShowErrorModal(true);
       }

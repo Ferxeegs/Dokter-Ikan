@@ -7,9 +7,9 @@ import "regenerator-runtime/runtime.js";
 export const getAllFishExperts = async (req, res) => {
   try {
     const experts = await FishExperts.findAll();
-    res.status(200).json(experts);
+    return res.success("Berhasil mengambil data Fish Experts", experts);
   } catch (error) {
-    res.status(500).json({ message: "Gagal mengambil data Fish Experts", error });
+    return res.fail("Gagal mengambil data Fish Experts", error, 500);
   }
 };
 
@@ -18,14 +18,13 @@ export const getFishExpertById = async (req, res) => {
   try {
     const expert = await FishExperts.findByPk(req.params.id);
     if (!expert) {
-      return res.status(404).json({ message: "Fish Expert tidak ditemukan" });
+      return res.fail("Fish Expert tidak ditemukan", null, 404);
     }
-    res.status(200).json(expert);
+    return res.success("Berhasil mengambil data Fish Expert", expert);
   } catch (error) {
-    res.status(500).json({ message: "Gagal mengambil data Fish Expert", error });
+    return res.fail("Gagal mengambil data Fish Expert", error, 500);
   }
 };
-
 
 export const updateFishExpertPassword = async (req, res) => {
   try {
@@ -37,24 +36,24 @@ export const updateFishExpertPassword = async (req, res) => {
 
     // Validasi input
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ message: "Semua kolom harus diisi." });
+      return res.fail("Semua kolom harus diisi.");
     }
 
     // Ambil data fishExpert dari database
     const fishExpert = await FishExperts.findByPk(fishExpertId);
     if (!fishExpert) {
-      return res.status(404).json({ message: "Fish Expert tidak ditemukan." });
+      return res.fail("Fish Expert tidak ditemukan.", null, 404);
     }
 
     // Pastikan password lama yang disimpan di database ada
     if (!fishExpert.password) {
-      return res.status(500).json({ message: "Password lama tidak ditemukan di database." });
+      return res.fail("Password lama tidak ditemukan di database.", null, 500);
     }
 
     // Cek apakah password lama cocok
     const isMatch = await bcrypt.compare(currentPassword, fishExpert.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Kata sandi saat ini salah." });
+      return res.fail("Kata sandi saat ini salah.");
     }
 
     // Hash password baru
@@ -65,13 +64,12 @@ export const updateFishExpertPassword = async (req, res) => {
     fishExpert.password = hashedPassword;
     await fishExpert.save();
 
-    res.json({ message: "Kata sandi berhasil diperbarui." });
+    return res.success("Kata sandi berhasil diperbarui.");
   } catch (error) {
     console.error("Error updating fish expert password:", error);
-    res.status(500).json({ message: "Terjadi kesalahan pada server." });
+    return res.fail("Terjadi kesalahan pada server.", error, 500);
   }
 };
-
 
 export const updateProfileExpert = async (req, res) => {
   try {
@@ -81,7 +79,7 @@ export const updateProfileExpert = async (req, res) => {
     const user = await FishExperts.findByPk(fishExpertId);
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.fail('User not found', null, 404);
     }
 
     user.name = name || user.name;
@@ -91,10 +89,10 @@ export const updateProfileExpert = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ message: 'Profile updated successfully', user });
+    return res.success('Profile updated successfully', user);
   } catch (error) {
     console.error('Error updating profile:', error);
-    res.status(500).json({ message: 'Server error' });
+    return res.fail('Server error', error, 500);
   }
 };
 
@@ -108,9 +106,9 @@ export const updateProfileImage = async (req, res) => {
 
     await FishExperts.update({ image_url }, { where: { fishExperts_id: fishExpertId } });
 
-    res.json({ message: "Profile picture updated successfully!" });
+    return res.success("Profile picture updated successfully!");
   } catch (error) {
     console.error("Error updating profile image:", error);
-    res.status(500).json({ error: error.message });
+    return res.fail("Error updating profile image", error.message, 500);
   }
 };

@@ -49,16 +49,16 @@ export default function Login() {
 
       if (response.ok) {
         const result = await response.json();
-        saveToken(result.token); // Simpan token di cookies
-        toast.success('Login successful! Redirecting...');
+        saveToken(result.data.token); // Simpan token di cookies
+        toast.success('Login berhasil! Mengarahkan...');
         // Arahkan berdasarkan peran
         setTimeout(() => {
-          if (result.user.role === 'user') {
+          if (result.data.user.role === 'user') {
             router.push('/'); // Halaman home untuk pengguna
-          } else if (result.user.role === 'expert') {
+          } else if (result.data.user.role === 'expert') {
             router.push('/expertpage'); // Halaman untuk expert
           } else {
-            toast.error('Unknown role. Please contact support.');
+            toast.error('Peran tidak dikenal. Silakan hubungi dukungan.');
           }
         }, 2000);
       } else {
@@ -67,12 +67,12 @@ export default function Login() {
         if (result.message) {
           toast.error(result.message);
         } else {
-          toast.error('Login failed, please try again.');
+          toast.error('Login gagal, silakan coba lagi.');
         }
       }
     } catch (error) {
       console.error('Error during login:', error);
-      toast.error('Error occurred during login.');
+      toast.error('Terjadi kesalahan saat login.');
     } finally {
       setLoading(false); // Set loading menjadi false setelah proses selesai
     }

@@ -71,7 +71,7 @@ export default function UserPost() {
     try {
       const response = await fetch(`${API_BASE_URL}/fish-types`);
       const data = await response.json();
-      const transformedData = data.map((fish: { fish_type_id: number; name: string }) => ({
+      const transformedData = data.data.map((fish: { fish_type_id: number; name: string }) => ({
         id: fish.fish_type_id, // Ubah fish_type_id ke id
         name: fish.name, // Tambahkan properti name
       }));
@@ -268,7 +268,7 @@ export default function UserPost() {
             Posting Keluhan Anda Disini!
           </h1>
           <h2 className="text-sm sm:text-base mb-6 font-semibold text-[#2C2C2C]">
-            Masukan gejala - gejala yang diderita oleh ikan seperti perubahan pada fisik dan perilaku ikan
+            Masukan keluhan diderita oleh ikan seperti perubahan pada fisik dan perilaku ikan
           </h2>
         </div>
 

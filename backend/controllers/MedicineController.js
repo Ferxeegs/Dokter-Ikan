@@ -5,9 +5,9 @@ import "regenerator-runtime/runtime.js";
 export const getAllMedicines = async (req, res) => {
   try {
     const medicines = await Medicine.findAll();
-    res.status(200).json(medicines);
+    return res.success("Berhasil mengambil data obat", medicines);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data obat', error });
+    return res.fail("Gagal mengambil data obat", error, 500);
   }
 };
 
@@ -16,11 +16,11 @@ export const getMedicineById = async (req, res) => {
   try {
     const medicine = await Medicine.findByPk(req.params.id);
     if (!medicine) {
-      return res.status(404).json({ message: 'Obat tidak ditemukan' });
+      return res.fail("Obat tidak ditemukan", null, 404);
     }
-    res.status(200).json(medicine);
+    return res.success("Berhasil mengambil data obat", medicine);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data obat', error });
+    return res.fail("Gagal mengambil data obat", error, 500);
   }
 };
 
@@ -38,7 +38,7 @@ export const createMedicine = async (req, res) => {
 
     // Validasi harga harus angka positif
     if (price < 0) {
-      return res.status(400).json({ message: 'Harga tidak boleh negatif' });
+      return res.fail("Harga tidak boleh negatif");
     }
 
     // Membuat data baru di tabel Medicine
@@ -52,16 +52,10 @@ export const createMedicine = async (req, res) => {
     });
 
     // Mengirim respons jika berhasil
-    res.status(201).json({
-      message: 'Obat berhasil ditambahkan',
-      data: newMedicine
-    });
+    return res.success("Obat berhasil ditambahkan", newMedicine);
   } catch (error) {
     // Mengirim respons jika terjadi error
-    res.status(500).json({
-      message: 'Gagal menambahkan obat',
-      error: error.message
-    });
+    return res.fail("Gagal menambahkan obat", error.message, 500);
   }
 };
 
@@ -70,7 +64,7 @@ export const updateMedicine = async (req, res) => {
   try {
     const medicine = await Medicine.findByPk(req.params.id);
     if (!medicine) {
-      return res.status(404).json({ message: 'Obat tidak ditemukan' });
+      return res.fail("Obat tidak ditemukan", null, 404);
     }
 
     const {
@@ -84,7 +78,7 @@ export const updateMedicine = async (req, res) => {
 
     // Validasi harga tidak boleh negatif
     if (price < 0) {
-      return res.status(400).json({ message: 'Harga tidak boleh negatif' });
+      return res.fail("Harga tidak boleh negatif");
     }
 
     await medicine.update({
@@ -96,12 +90,9 @@ export const updateMedicine = async (req, res) => {
       medicine_image
     });
 
-    res.status(200).json({
-      message: 'Obat berhasil diperbarui',
-      data: medicine
-    });
+    return res.success("Obat berhasil diperbarui", medicine);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal memperbarui obat', error });
+    return res.fail("Gagal memperbarui obat", error, 500);
   }
 };
 
@@ -110,12 +101,12 @@ export const deleteMedicine = async (req, res) => {
   try {
     const medicine = await Medicine.findByPk(req.params.id);
     if (!medicine) {
-      return res.status(404).json({ message: 'Obat tidak ditemukan' });
+      return res.fail("Obat tidak ditemukan", null, 404);
     }
 
     await medicine.destroy();
-    res.status(200).json({ message: 'Obat berhasil dihapus' });
+    return res.success("Obat berhasil dihapus");
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus obat', error });
+    return res.fail("Gagal menghapus obat", error, 500);
   }
 };

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useEffect, useState } from "react";
 import Navbar from "../components/layout/Navbar";
@@ -65,10 +65,15 @@ export default function DashboardExpert() {
     if (expertId) {
       const fetchExpertData = async () => {
         try {
-          const response = await fetch(`${API_BASE_URL}/fishexperts/${expertId}`);
-          if (!response.ok) throw new Error("Failed to fetch expert data");
+          const token = Cookies.get("token");
+          const response = await fetch(`${API_BASE_URL}/fishexperts/${expertId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (!response.ok) throw new Error("Gagal mengambil data tenaga ahli");
           const data = await response.json();
-          setExpertData(data);
+          setExpertData(data.data);
         } catch (error) {
           console.error("Error fetching expert data:", error);
         }
@@ -83,10 +88,15 @@ export default function DashboardExpert() {
       const fetchConsultations = async () => {
         setIsLoading(true);
         try {
-          const response = await fetch(`${API_BASE_URL}/consultations`);
-          if (!response.ok) throw new Error("Failed to fetch consultations");
-          const data: ConsultationData[] = await response.json();
-          const filteredData = data
+          const token = Cookies.get("token");
+          const response = await fetch(`${API_BASE_URL}/consultations`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (!response.ok) throw new Error("Gagal mengambil data konsultasi");
+          const data = await response.json();
+          const filteredData = data.data
             .filter((consultation: ConsultationData) => consultation.fishExpert_id === expertId)
             .sort((a: ConsultationData, b: ConsultationData) =>
               new Date(b.UserConsultation.createdAt).getTime() - new Date(a.UserConsultation.createdAt).getTime()
@@ -259,7 +269,7 @@ export default function DashboardExpert() {
     
     return pageButtons;
   };
-
+  
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />

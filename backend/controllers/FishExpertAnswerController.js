@@ -5,9 +5,10 @@ import "regenerator-runtime/runtime.js";
 export const getAllFishExpertAnswers = async (req, res) => {
   try {
     const answers = await FishExpertAnswer.findAll();
-    res.status(200).json(answers);
+    return res.success('Berhasil mengambil data jawaban ahli ikan', answers);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data jawaban ahli ikan', error });
+    console.error('Error getting fish expert answers:', error);
+    return res.fail('Gagal mengambil data jawaban ahli ikan', error.message, 500);
   }
 };
 
@@ -16,11 +17,12 @@ export const getFishExpertAnswerById = async (req, res) => {
   try {
     const answer = await FishExpertAnswer.findByPk(req.params.id);
     if (!answer) {
-      return res.status(404).json({ message: 'Jawaban tidak ditemukan' });
+      return res.fail('Jawaban tidak ditemukan', null, 404);
     }
-    res.status(200).json(answer);
+    return res.success('Berhasil mengambil data jawaban ahli ikan', answer);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data jawaban ahli ikan', error });
+    console.error('Error getting fish expert answer by ID:', error);
+    return res.fail('Gagal mengambil data jawaban ahli ikan', error.message, 500);
   }
 };
 
@@ -31,7 +33,7 @@ export const createFishExpertAnswer = async (req, res) => {
 
     // Validasi input (image opsional, tidak wajib)
     if (!fishExpert_id || !answer || !timestamp) {
-      return res.status(400).json({ message: 'Data tidak lengkap' });
+      return res.fail('Data tidak lengkap. fishExpert_id, answer, dan timestamp wajib diisi');
     }
 
     // Menyimpan jawaban ke database
@@ -42,28 +44,32 @@ export const createFishExpertAnswer = async (req, res) => {
       image: image || null, // Jika tidak ada image, disimpan sebagai NULL
     });
 
-    res.status(201).json({ message: 'Jawaban berhasil dibuat', newAnswer });
+    return res.success('Jawaban ahli ikan berhasil dibuat', newAnswer);
   } catch (error) {
-    console.error('Error backend:', error);
-    res.status(500).json({ message: 'Terjadi kesalahan pada server', error });
+    console.error('Error creating fish expert answer:', error);
+    return res.fail('Terjadi kesalahan pada server', error.message, 500);
   }
 };
-
 
 // Fungsi untuk memperbarui jawaban berdasarkan ID
 export const updateFishExpertAnswer = async (req, res) => {
   try {
     const answer = await FishExpertAnswer.findByPk(req.params.id);
     if (!answer) {
-      return res.status(404).json({ message: 'Jawaban tidak ditemukan' });
+      return res.fail('Jawaban tidak ditemukan', null, 404);
     }
 
     const { answer: updatedAnswer, timestamp, consultation_status } = req.body;
-    await answer.update({ answer: updatedAnswer, timestamp, consultation_status });
+    await answer.update({ 
+      answer: updatedAnswer, 
+      timestamp, 
+      consultation_status 
+    });
 
-    res.status(200).json({ message: 'Jawaban berhasil diperbarui', answer });
+    return res.success('Jawaban ahli ikan berhasil diperbarui', answer);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal memperbarui jawaban', error });
+    console.error('Error updating fish expert answer:', error);
+    return res.fail('Gagal memperbarui jawaban', error.message, 500);
   }
 };
 
@@ -72,12 +78,13 @@ export const deleteFishExpertAnswer = async (req, res) => {
   try {
     const answer = await FishExpertAnswer.findByPk(req.params.id);
     if (!answer) {
-      return res.status(404).json({ message: 'Jawaban tidak ditemukan' });
+      return res.fail('Jawaban tidak ditemukan', null, 404);
     }
 
     await answer.destroy();
-    res.status(200).json({ message: 'Jawaban berhasil dihapus' });
+    return res.success('Jawaban ahli ikan berhasil dihapus');
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus jawaban', error });
+    console.error('Error deleting fish expert answer:', error);
+    return res.fail('Gagal menghapus jawaban', error.message, 500);
   }
 };

@@ -9,13 +9,13 @@ export const sendMessage = async (req, res) => {
 
         // Pastikan sender_role valid
         if (!["user", "expert"].includes(sender_role)) {
-            return res.status(400).json({ message: "Invalid sender role" });
+            return res.fail("Sender role tidak valid");
         }
 
         // Periksa apakah konsultasi ada
         const consultation = await Consultation.findByPk(consultation_id);
         if (!consultation) {
-            return res.status(404).json({ message: "Consultation not found" });
+            return res.fail("Konsultasi tidak ditemukan", null, 404);
         }
 
         // Simpan pesan ke database
@@ -25,12 +25,10 @@ export const sendMessage = async (req, res) => {
             message
         });
 
-        res.status(201).json({
-            message: "Message sent successfully",
-            data: newMessage
-        });
+        return res.success("Pesan berhasil dikirim", newMessage);
     } catch (error) {
-        res.status(500).json({ message: "Error sending message", error: error.message });
+        console.error("Error sending message:", error);
+        return res.fail("Gagal mengirim pesan", error.message, 500);
     }
 };
 
@@ -44,9 +42,10 @@ export const getMessagesByConsultation = async (req, res) => {
             order: [["created_at", "ASC"]] // Urutkan berdasarkan waktu
         });
 
-        res.status(200).json({ messages });
+        return res.success("Berhasil mengambil pesan", messages);
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving messages", error: error.message });
+        console.error("Error retrieving messages:", error);
+        return res.fail("Gagal mengambil pesan", error.message, 500);
     }
 };
 
@@ -55,13 +54,24 @@ export const markMessagesAsRead = async (req, res) => {
     try {
         const { consultation_id } = req.body;
 
-        await ConsultationMessage.update(
+        // Memastikan consultation_id ada
+        if (!consultation_id) {
+            return res.fail("ID konsultasi diperlukan");
+        }
+
+        const result = await ConsultationMessage.update(
             { is_read: true },
             { where: { consultation_id } }
         );
 
-        res.status(200).json({ message: "Messages marked as read" });
+        // Jika tidak ada pesan yang diperbarui
+        if (result[0] === 0) {
+            return res.success("Tidak ada pesan yang perlu ditandai");
+        }
+
+        return res.success("Pesan berhasil ditandai sebagai dibaca", { updatedCount: result[0] });
     } catch (error) {
-        res.status(500).json({ message: "Error updating messages", error: error.message });
+        console.error("Error marking messages as read:", error);
+        return res.fail("Gagal menandai pesan sebagai dibaca", error.message, 500);
     }
 };

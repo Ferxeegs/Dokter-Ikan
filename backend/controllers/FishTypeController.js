@@ -1,14 +1,13 @@
 import FishType from "../models/FishTypeModel.js"; // Import model FishType
 import "regenerator-runtime/runtime.js";
 
-
 // Fungsi untuk mendapatkan semua Fish Types
 export const getAllFishTypes = async (req, res) => {
   try {
     const fishTypes = await FishType.findAll();
-    res.status(200).json(fishTypes);
+    return res.success("Berhasil mengambil data jenis ikan", fishTypes);
   } catch (error) {
-    res.status(500).json({ message: "Gagal mengambil data jenis ikan", error });
+    return res.fail("Gagal mengambil data jenis ikan", error, 500);
   }
 };
 
@@ -17,11 +16,11 @@ export const getFishTypeById = async (req, res) => {
   try {
     const fishType = await FishType.findByPk(req.params.id);
     if (!fishType) {
-      return res.status(404).json({ message: "Jenis ikan tidak ditemukan" });
+      return res.fail("Jenis ikan tidak ditemukan", null, 404);
     }
-    res.status(200).json(fishType);
+    return res.success("Berhasil mengambil data jenis ikan", fishType);
   } catch (error) {
-    res.status(500).json({ message: "Gagal mengambil data jenis ikan", error });
+    return res.fail("Gagal mengambil data jenis ikan", error, 500);
   }
 };
 
@@ -30,7 +29,7 @@ export const getFishTypeByName = async (req, res) => {
   try {
     const { name } = req.query;
     if (!name) {
-      return res.status(400).json({ message: "Nama ikan diperlukan" });
+      return res.fail("Nama ikan diperlukan", null, 400);
     }
 
     const fishType = await FishType.findOne({
@@ -38,11 +37,11 @@ export const getFishTypeByName = async (req, res) => {
     });
 
     if (!fishType) {
-      return res.status(404).json({ message: "Jenis ikan tidak ditemukan" });
+      return res.fail("Jenis ikan tidak ditemukan", null, 404);
     }
 
-    res.status(200).json(fishType);
+    return res.success("Berhasil mengambil data jenis ikan", fishType);
   } catch (error) {
-    res.status(500).json({ message: "Gagal mengambil data jenis ikan", error });
+    return res.fail("Gagal mengambil data jenis ikan", error, 500);
   }
 };

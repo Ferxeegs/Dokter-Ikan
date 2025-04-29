@@ -2,15 +2,16 @@ import FishDisease from "../models/FishDiseaseModel.js";
 import axios from "axios";
 import "regenerator-runtime/runtime.js";
 
-
 const DIAGNOSE_API_URL = process.env.DIAGNOSE_API_URL; // URL untuk sistem pakar
+
 // Get all fish diseases
 export const getFishDiseases = async (req, res) => {
   try {
     const diseases = await FishDisease.findAll();
-    res.status(200).json({ success: true, data: diseases });
+    return res.success("Berhasil mengambil data penyakit ikan", diseases);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error getting fish diseases:", error);
+    return res.fail("Gagal mengambil data penyakit ikan", error.message, 500);
   }
 };
 
@@ -20,7 +21,7 @@ export const diagnoseFish = async (req, res) => {
     const { symptoms } = req.body;
 
     if (!symptoms || !Array.isArray(symptoms) || symptoms.length === 0) {
-      return res.status(400).json({ success: false, message: "Gejala tidak boleh kosong" });
+      return res.fail("Gejala tidak boleh kosong");
     }
 
     // Kirim data ke Flask API di port 5000
@@ -28,13 +29,10 @@ export const diagnoseFish = async (req, res) => {
       symptoms, // Kirim daftar kode gejala
     });
 
-    return res.status(200).json({ success: true, data: response.data });
+    return res.success("Diagnosis berhasil dilakukan", response.data);
   } catch (error) {
     console.error("Error saat menghubungi expert system:", error.message);
-    return res.status(500).json({
-      success: false,
-      message: "Gagal menghubungi sistem pakar",
-    });
+    return res.fail("Gagal menghubungi sistem pakar", error.message, 500);
   }
 };
 
@@ -43,7 +41,7 @@ export const getFishDiseasesByNames = async (req, res) => {
     const { diseases } = req.body;
 
     if (!diseases || !Array.isArray(diseases) || diseases.length === 0) {
-      return res.status(400).json({ success: false, message: "Daftar penyakit tidak boleh kosong" });
+      return res.fail("Daftar penyakit tidak boleh kosong");
     }
 
     const fishDiseases = await FishDisease.findAll({
@@ -52,8 +50,13 @@ export const getFishDiseasesByNames = async (req, res) => {
       },
     });
 
-    res.status(200).json({ success: true, data: fishDiseases });
+    if (fishDiseases.length === 0) {
+      return res.success("Tidak ada penyakit yang ditemukan dengan nama yang diberikan", []);
+    }
+
+    return res.success("Berhasil mengambil data penyakit ikan", fishDiseases);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error getting fish diseases by names:", error);
+    return res.fail("Gagal mengambil data penyakit ikan", error.message, 500);
   }
 };

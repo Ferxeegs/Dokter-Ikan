@@ -5,9 +5,9 @@ import "regenerator-runtime/runtime.js";
 export const getSymptoms = async (req, res) => {
   try {
     const symptoms = await Symptom.findAll();
-    res.status(200).json({ success: true, data: symptoms });
+    return res.success('Berhasil mengambil data gejala', symptoms);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.fail('Gagal mengambil data gejala', error.message, 500);
   }
 };
 
@@ -16,10 +16,10 @@ export const getSymptomById = async (req, res) => {
   try {
     const symptom = await Symptom.findByPk(req.params.id);
     if (!symptom) {
-      return res.status(404).json({ success: false, message: "Symptom not found" });
+      return res.fail('Gejala tidak ditemukan', 'Gejala dengan id tersebut tidak ditemukan', 404);
     }
-    res.status(200).json({ success: true, data: symptom });
+    return res.success('Berhasil mengambil data gejala', symptom);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.fail('Gagal mengambil data gejala', error.message, 500);
   }
 };

@@ -23,15 +23,14 @@ export const getAllUserConsultations = async (req, res) => {
     });
 
     if (consultations.length === 0) {
-      return res.status(404).json({ message: "Belum ada data konsultasi." });
+      return res.fail('Data tidak ditemukan', 'Belum ada data konsultasi.', 404);
     }
 
-    res.status(200).json({ data: consultations });
+    return res.success('Berhasil mengambil data konsultasi', consultations);
   } catch (error) {
-    res.status(500).json({ message: "Gagal mengambil data konsultasi.", error: error.message });
+    return res.fail('Gagal mengambil data konsultasi', error.message, 500);
   }
 };
-
 
 // Fungsi untuk mendapatkan data konsultasi berdasarkan ID
 export const getUserConsultationById = async (req, res) => {
@@ -40,7 +39,7 @@ export const getUserConsultationById = async (req, res) => {
 
     // Validasi apakah ID diberikan
     if (!id) {
-      return res.status(400).json({ message: "ID konsultasi diperlukan." });
+      return res.fail('Data tidak lengkap', 'ID konsultasi diperlukan.');
     }
 
     // Mencari data konsultasi berdasarkan ID
@@ -50,32 +49,23 @@ export const getUserConsultationById = async (req, res) => {
 
     // Jika data tidak ditemukan
     if (!consultation) {
-      return res.status(404).json({ message: "Konsultasi tidak ditemukan." });
+      return res.fail('Data tidak ditemukan', 'Konsultasi tidak ditemukan.', 404);
     }
 
     // Jika berhasil ditemukan
-    return res.status(200).json({
-      success: true,
-      message: "Data konsultasi berhasil diambil.",
-      data: consultation,
-    });
+    return res.success('Data konsultasi berhasil diambil', consultation);
   } catch (error) {
     // Menangani error internal server
     console.error("Error fetching consultation:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan saat mengambil data konsultasi.",
-      error: error.message,
-    });
+    return res.fail('Terjadi kesalahan saat mengambil data konsultasi', error.message, 500);
   }
 };
-
 
 export const getUserConsultationHistory = async (req, res) => {
   const token = req.headers.authorization ? req.headers.authorization.split(" ")[1] : null;
 
   if (!token) {
-    return res.status(401).json({ message: "Token tidak ditemukan." });
+    return res.fail('Akses ditolak', 'Token tidak ditemukan.', 401);
   }
 
   try {
@@ -85,10 +75,7 @@ export const getUserConsultationHistory = async (req, res) => {
     const userId = decodedToken.id; // Ambil `id` dari token
 
     if (!userId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "User ID tidak ditemukan dalam token." 
-      });
+      return res.fail('Data tidak valid', 'User ID tidak ditemukan dalam token.');
     }
 
     console.log("User ID:", userId); // Debug log
@@ -112,32 +99,26 @@ export const getUserConsultationHistory = async (req, res) => {
     });
 
     if (consultations.length === 0) {
-      return res.status(404).json({ message: "Belum ada riwayat konsultasi." });
+      return res.fail('Data tidak ditemukan', 'Belum ada riwayat konsultasi.', 404);
     }
 
-    res.status(200).json({
-      success: true,
-      data: consultations,
-    });
+    return res.success('Berhasil mengambil riwayat konsultasi', consultations);
   } catch (error) {
     console.error("Error saat mengambil riwayat konsultasi:", error.message); // Debug log
-    res.status(500).json({
-      success: false,
-      message: "Gagal mengambil riwayat konsultasi.",
-      error: error.message,
-    });
+    return res.fail('Gagal mengambil riwayat konsultasi', error.message, 500);
   }
 };
-
 
 // Fungsi untuk menambahkan konsultasi baru
 export const createUserConsultation = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ 
-      message: "Harap mengisi semua kolom yang tersedia!",
-      errors: errors.array() 
-    });
+    return res.fail(
+      'Validasi gagal', 
+      'Harap mengisi semua kolom yang tersedia!',
+      400,
+      errors.array()
+    );
   }
 
   const {
@@ -183,16 +164,10 @@ export const createUserConsultation = async (req, res) => {
 
     console.log("Respons yang Dikembalikan ke Frontend:", responseData);
 
-    res.status(201).json({
-      message: "Konsultasi berhasil ditambahkan!",
-      data: responseData,
-    });
+    return res.success('Konsultasi berhasil ditambahkan!', responseData);
   } catch (error) {
     await transaction.rollback();
     console.error("Error saat menyimpan konsultasi:", error);
-    res.status(500).json({
-      message: "Gagal menambahkan konsultasi",
-      error: error.message,
-    });
+    return res.fail('Gagal menambahkan konsultasi', error.message, 500);
   }
 };

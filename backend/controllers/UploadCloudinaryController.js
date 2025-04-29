@@ -7,7 +7,7 @@ const uploadcloud = multer({ storage: multer.memoryStorage() }).array("files", 1
 const uploadImagesUser = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "No files uploaded" });
+      return res.fail('Tidak ada file', 'No files uploaded');
     }
 
     // Upload semua file ke Cloudinary
@@ -31,16 +31,17 @@ const uploadImagesUser = async (req, res) => {
     // Log data yang dikirimkan ke frontend
     console.log("Uploaded images:", uploadedImages);
 
-    res.json({ images: uploadedImages });
+    return res.success('Berhasil mengunggah gambar', { images: uploadedImages });
   } catch (error) {
     console.error("Error uploading images:", error);
-    res.status(500).json({ error: error.message });
+    return res.fail('Gagal mengunggah gambar', error.message, 500);
   }
 };
+
 const uploadProfileUser = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "No files uploaded" });
+      return res.fail('Tidak ada file', 'No files uploaded');
     }
 
     // Upload semua file ke Cloudinary
@@ -64,17 +65,17 @@ const uploadProfileUser = async (req, res) => {
     // Log data yang dikirimkan ke frontend
     console.log("Uploaded images:", uploadedImages);
 
-    res.json({ images: uploadedImages });
+    return res.success('Berhasil mengunggah foto profil', { images: uploadedImages });
   } catch (error) {
     console.error("Error uploading images:", error);
-    res.status(500).json({ error: error.message });
+    return res.fail('Gagal mengunggah foto profil', error.message, 500);
   }
 };
 
 const uploadImagesExpert = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "No files uploaded" });
+      return res.fail('Tidak ada file', 'No files uploaded');
     }
 
     // Upload semua file ke Cloudinary
@@ -98,17 +99,17 @@ const uploadImagesExpert = async (req, res) => {
     // Log data yang dikirimkan ke frontend
     console.log("Uploaded images:", uploadedImages);
 
-    res.json({ images: uploadedImages });
+    return res.success('Berhasil mengunggah gambar', { images: uploadedImages });
   } catch (error) {
     console.error("Error uploading images:", error);
-    res.status(500).json({ error: error.message });
+    return res.fail('Gagal mengunggah gambar', error.message, 500);
   }
 };
 
 const uploadProfileExpert = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "No files uploaded" });
+      return res.fail('Tidak ada file', 'No files uploaded');
     }
 
     // Upload semua file ke Cloudinary
@@ -132,17 +133,17 @@ const uploadProfileExpert = async (req, res) => {
     // Log data yang dikirimkan ke frontend
     console.log("Uploaded images:", uploadedImages);
 
-    res.json({ images: uploadedImages });
+    return res.success('Berhasil mengunggah foto profil pakar', { images: uploadedImages });
   } catch (error) {
     console.error("Error uploading images:", error);
-    res.status(500).json({ error: error.message });
+    return res.fail('Gagal mengunggah foto profil pakar', error.message, 500);
   }
 };
 
 const uploadPaymentProof = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "No files uploaded" });
+      return res.fail('Tidak ada file', 'No files uploaded');
     }
 
     // Upload semua file ke Cloudinary
@@ -166,10 +167,10 @@ const uploadPaymentProof = async (req, res) => {
     // Log data yang dikirimkan ke frontend
     console.log("Uploaded images:", uploadedImages);
 
-    res.json({ images: uploadedImages });
+    return res.success('Berhasil mengunggah bukti pembayaran', { images: uploadedImages });
   } catch (error) {
     console.error("Error uploading images:", error);
-    res.status(500).json({ error: error.message });
+    return res.fail('Gagal mengunggah bukti pembayaran', error.message, 500);
   }
 };
 
@@ -179,20 +180,20 @@ const deleteImage = async (req, res) => {
     const { public_id } = req.body;
 
     if (!public_id) {
-      return res.status(400).json({ message: "No public_id provided" });
+      return res.fail('Data tidak lengkap', 'No public_id provided');
     }
 
     // Hapus gambar dari Cloudinary
     const result = await cloudinary.uploader.destroy(public_id);
 
     if (result.result !== "ok") {
-      return res.status(500).json({ message: "Failed to delete image from Cloudinary" });
+      return res.fail('Gagal menghapus gambar', 'Failed to delete image from Cloudinary', 500);
     }
 
-    res.json({ message: "Image deleted successfully" });
+    return res.success('Berhasil menghapus gambar');
   } catch (error) {
     console.error("Error deleting image:", error);
-    res.status(500).json({ error: error.message });
+    return res.fail('Gagal menghapus gambar', error.message, 500);
   }
 };
 

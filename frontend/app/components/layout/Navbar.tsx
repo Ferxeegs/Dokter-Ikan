@@ -35,7 +35,7 @@ export default function Navbar() {
 
           if (response.ok) {
             const data = await response.json();
-            setUser(data);
+            setUser(data.data);
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -77,8 +77,6 @@ export default function Navbar() {
           <img
             src="/images/logo/logo_fdokterikan.png"
             alt="Home Icon"
-            // width={96}
-            // height={64}
             className="w-28 h-10 md:w-40 md:h-16"
           />
         </div>

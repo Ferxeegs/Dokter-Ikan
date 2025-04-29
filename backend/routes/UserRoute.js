@@ -2,7 +2,6 @@ import express from "express";
 import {
   getAllUsers,
   getUserById,
-  createUser,
   updateUser,
   loginUser,
   getMe,
@@ -15,7 +14,6 @@ import { authenticate } from "../middlewares/authMiddleware.js"; // Impor middle
 const router = express.Router();
 
 // Rute yang tidak memerlukan autentikasi
-router.post('/register', createUser); // Mendaftar pengguna baru
 router.post('/login', loginUser); // Login pengguna
 
 // Rute yang memerlukan autentikasi

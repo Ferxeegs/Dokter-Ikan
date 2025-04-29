@@ -53,8 +53,8 @@ function ConsultationContent() {
           throw new Error('Gagal memuat data');
         }
         const result = await response.json();
-        setData(result);
-        setIsChatEnabled(result.chat_enabled);
+        setData(result.data);
+        setIsChatEnabled(result.data.chat_enabled);
       } catch {
         setIsError(true);
       } finally {

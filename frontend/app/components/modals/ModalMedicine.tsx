@@ -46,12 +46,16 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
 
   useEffect(() => {
     if (isOpen) {
-      fetch(`${API_BASE_URL}/medicines`)
+      fetch(`${API_BASE_URL}/medicines`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
         .then(response => response.json())
-        .then(data => setMedicines(data))
+        .then(data => setMedicines(data.data))
         .catch(error => console.error('Error fetching medicines:', error));
     }
-  }, [isOpen, API_BASE_URL]);
+  }, [isOpen, API_BASE_URL, token]);
 
   const handleSelectMedicine = (medicine_id: number) => {
     setSelectedMedicines((prev) =>
@@ -72,31 +76,48 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
     };
 
     try {
+      // Create prescription
       const prescriptionResponse = await fetch(`${API_BASE_URL}/prescriptions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(requestPayload),
       });
 
       if (!prescriptionResponse.ok) {
-        throw new Error('Gagal menambahkan prescription');
+        const errorData = await prescriptionResponse.json();
+        throw new Error(errorData.message || 'Gagal menambahkan prescription');
       }
 
       const prescriptionData = await prescriptionResponse.json();
-      const prescription_id = prescriptionData.prescription_id;
+      const prescription_id = prescriptionData.data.prescription_id;
 
+      // Add medicines to prescription
       const medicinePayloads = selectedMedicines.map(medicine_id => ({
         prescription_id,
         medicine_id,
       }));
 
-      await Promise.all(medicinePayloads.map(payload =>
-        fetch(`${API_BASE_URL}/prescriptions-medicines`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-      ));
+      const medicineResponses = await Promise.all(
+        medicinePayloads.map(payload =>
+          fetch(`${API_BASE_URL}/prescriptions-medicines`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          })
+        )
+      );
+
+      // Check if any medicine addition failed
+      const failedResponses = medicineResponses.filter(response => !response.ok);
+      if (failedResponses.length > 0) {
+        throw new Error('Gagal menambahkan beberapa obat ke resep.');
+      }
 
       setShowConfirmation(false);
       toggleModal();

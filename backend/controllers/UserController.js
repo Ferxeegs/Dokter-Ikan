@@ -21,7 +21,7 @@ export const loginUser = async (req, res) => {
 
       if (!user) {
         // Jika tidak ditemukan di kedua tabel
-        return res.status(404).json({ message: 'Email atau password salah' });
+        return res.fail('Email atau password salah', null, 404);
       }
 
       userId = user.fishExperts_id; // Ambil ID dari tabel FishExperts
@@ -32,7 +32,7 @@ export const loginUser = async (req, res) => {
     // Memverifikasi apakah password cocok
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Email atau password salah' });
+      return res.fail('Email atau password salah');
     }
 
     // Membuat token JWT
@@ -43,8 +43,7 @@ export const loginUser = async (req, res) => {
     );
 
     // Mengirimkan respons sukses dengan token
-    res.status(200).json({
-      message: 'Login berhasil',
+    return res.success('Login berhasil', {
       token,
       user: {
         id: userId, // Gunakan ID yang sesuai (user_id atau fishExperts_id)
@@ -55,66 +54,29 @@ export const loginUser = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Terjadi kesalahan saat login', error: error.message });
+    return res.fail('Terjadi kesalahan saat login', error.message, 500);
   }
 };
 
-
-// }
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll();
-    res.status(200).json(users);
+    return res.success('Data pengguna berhasil diambil', users);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data pengguna', error });
+    return res.fail('Gagal mengambil data pengguna', error.message, 500);
   }
 };
 
 // Fungsi untuk mendapatkan pengguna berdasarkan ID
 export const getUserById = async (req, res) => {
   try {
-    const user = await User.findByPk(req.params.id);  // Perbaiki 'user' menjadi 'User'
+    const user = await User.findByPk(req.params.id);
     if (!user) {
-      return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
+      return res.fail('Pengguna tidak ditemukan', null, 404);
     }
-    res.status(200).json(user);
+    return res.success('Data pengguna berhasil diambil', user);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data pengguna', error });
-  }
-};
-
-
-// Fungsi untuk menambahkan pengguna baru
-export const createUser = async (req, res) => {
-  try {
-    const { name, email, password, address, role } = req.body;
-
-    // Cek apakah email sudah terdaftar
-    const existingUser = await User.findOne({ where: { email } });
-    
-    if (existingUser) {
-      // Jika email sudah terdaftar, kirimkan pesan error
-      return res.status(400).json({ message: 'Email sudah terdaftar' });
-    }
-
-    // Enkripsi password menggunakan bcrypt
-    const hashedPassword = await bcrypt.hash(password, 10); // 10 adalah jumlah salt rounds
-
-    // Jika email belum terdaftar, lanjutkan untuk membuat pengguna baru
-    const newUser = await User.create({ 
-      name, 
-      email, 
-      password: hashedPassword, // Menyimpan password yang terenkripsi
-      address, 
-      role 
-    });
-
-    // Kirimkan respons sukses jika berhasil membuat pengguna baru
-    res.status(201).json({ message: 'Pengguna berhasil ditambahkan', newUser });
-  } catch (error) {
-    // Tangani error lain
-    console.error(error);
-    res.status(500).json({ message: 'Gagal menambahkan pengguna', error: error.message });
+    return res.fail('Gagal mengambil data pengguna', error.message, 500);
   }
 };
 
@@ -123,7 +85,7 @@ export const updateUser = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) {
-      return res.status(404).json({ message: 'Pengguna tidak ditemukan' });
+      return res.fail('Pengguna tidak ditemukan', null, 404);
     }
 
     const { name, email, password, address, province, city, district, village, phone_number, image, role } = req.body;
@@ -139,13 +101,12 @@ export const updateUser = async (req, res) => {
     // Update data user
     await user.update(updatedData);
 
-    res.status(200).json({ message: 'Pengguna berhasil diperbarui', user });
+    return res.success('Pengguna berhasil diperbarui', user);
   } catch (error) {
     console.error('Error updating user:', error);
-    res.status(500).json({ message: 'Gagal memperbarui pengguna', error });
+    return res.fail('Gagal memperbarui pengguna', error.message, 500);
   }
 };
-
 
 export const getMe = async (req, res) => {
   try {
@@ -158,9 +119,10 @@ export const getMe = async (req, res) => {
       console.log('Role is expert, looking in fishexperts...');
       const fishExpert = await FishExperts.findByPk(userId); // Mencari di tabel FishExperts
       if (!fishExpert) {
-        return res.status(404).json({ message: 'Expert tidak ditemukan di fishexperts' });
+        return res.fail('Expert tidak ditemukan di fishexperts', null, 404);
       }
-      return res.status(200).json({
+      
+      const expertData = {
         id: fishExpert.fishExperts_id,
         name: fishExpert.name,
         email: fishExpert.email,
@@ -170,15 +132,18 @@ export const getMe = async (req, res) => {
         created_at: fishExpert.created_at,
         image: fishExpert.image_url,
         role: 'expert',
-      });
+      };
+      
+      return res.success('Data expert berhasil diambil', expertData);
     }
 
     // Jika role adalah 'user', cari di tabel Users
     const user = await User.findByPk(userId);
     if (!user) {
-      return res.status(404).json({ message: 'Pengguna tidak ditemukan di users' });
+      return res.fail('Pengguna tidak ditemukan di users', null, 404);
     }
-    return res.status(200).json({
+    
+    const userData = {
       id: user.user_id,
       name: user.name,
       email: user.email,
@@ -187,10 +152,12 @@ export const getMe = async (req, res) => {
       image: user.image,
       created_at: user.created_at,
       role: 'user',
-    });
+    };
+    
+    return res.success('Data pengguna berhasil diambil', userData);
   } catch (error) {
     console.error('Error in getMe:', error);
-    res.status(500).json({ message: 'Gagal mengambil data pengguna', error: error.message });
+    return res.fail('Gagal mengambil data pengguna', error.message, 500);
   }
 };
 
@@ -204,24 +171,24 @@ export const updatePassword = async (req, res) => {
 
     // Validasi input
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ message: "Semua kolom harus diisi." });
+      return res.fail("Semua kolom harus diisi.");
     }
 
     // Ambil data user dari database
     const user = await User.findByPk(userId);
     if (!user) {
-      return res.status(404).json({ message: "User tidak ditemukan." });
+      return res.fail("User tidak ditemukan.", null, 404);
     }
 
     // Pastikan password lama yang dimasukkan tidak undefined
     if (!user.password) {
-      return res.status(500).json({ message: "Password lama tidak ditemukan di database." });
+      return res.fail("Password lama tidak ditemukan di database.", null, 500);
     }
 
     // Cek apakah password lama cocok
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Kata sandi saat ini salah." });
+      return res.fail("Kata sandi saat ini salah.");
     }
 
     // Hash password baru
@@ -232,10 +199,10 @@ export const updatePassword = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
-    res.json({ message: "Kata sandi berhasil diperbarui." });
+    return res.success("Kata sandi berhasil diperbarui.");
   } catch (error) {
     console.error("Error updating password:", error);
-    res.status(500).json({ message: "Terjadi kesalahan pada server." });
+    return res.fail("Terjadi kesalahan pada server.", error.message, 500);
   }
 };
 
@@ -247,7 +214,7 @@ export const updateProfile = async (req, res) => {
     const user = await User.findByPk(userId);
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.fail('User tidak ditemukan', null, 404);
     }
 
     user.name = name || user.name;
@@ -261,10 +228,10 @@ export const updateProfile = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ message: 'Profile updated successfully', user });
+    return res.success('Profil berhasil diperbarui', user);
   } catch (error) {
     console.error('Error updating profile:', error);
-    res.status(500).json({ message: 'Server error' });
+    return res.fail('Terjadi kesalahan server', error.message, 500);
   }
 };
 
@@ -278,9 +245,9 @@ export const updateProfileImage = async (req, res) => {
 
     await User.update({ image }, { where: { user_id: userId } });
 
-    res.json({ message: "Profile picture updated successfully!" });
+    return res.success("Foto profil berhasil diperbarui");
   } catch (error) {
     console.error("Error updating profile image:", error);
-    res.status(500).json({ error: error.message });
+    return res.fail("Gagal memperbarui foto profil", error.message, 500);
   }
 };

@@ -18,9 +18,9 @@ export const getAllPayments = async (req, res) => {
         }
       ]
     });
-    res.status(200).json(payments);
+    return res.success('Berhasil mengambil data pembayaran', payments);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data pembayaran', error: error.message });
+    return res.fail('Gagal mengambil data pembayaran', error.message, 500);
   }
 };
 
@@ -41,12 +41,12 @@ export const getPaymentById = async (req, res) => {
     });
 
     if (!payment) {
-      return res.status(404).json({ message: 'Data pembayaran tidak ditemukan' });
+      return res.fail('Data pembayaran tidak ditemukan', null, 404);
     }
 
-    res.status(200).json(payment);
+    return res.success('Berhasil mengambil data pembayaran', payment);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data pembayaran', error: error.message });
+    return res.fail('Gagal mengambil data pembayaran', error.message, 500);
   }
 };
 
@@ -57,7 +57,7 @@ export const createPayment = async (req, res) => {
 
     // Validasi input
     if (!consultation_id || !total_fee) {
-      return res.status(400).json({ message: 'Harap isi semua data yang diperlukan' });
+      return res.fail('Harap isi semua data yang diperlukan');
     }
 
     const newPayment = await Payment.create({
@@ -67,9 +67,9 @@ export const createPayment = async (req, res) => {
       payment_status: payment_status || 'pending' // Default pending jika tidak diisi
     });
 
-    res.status(201).json({ message: 'Pembayaran berhasil ditambahkan', data: newPayment });
+    return res.success('Pembayaran berhasil ditambahkan', newPayment);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menambahkan pembayaran', error: error.message });
+    return res.fail('Gagal menambahkan pembayaran', error.message, 500);
   }
 };
 
@@ -81,27 +81,26 @@ export const updatePayment = async (req, res) => {
 
     const payment = await Payment.findByPk(id);
     if (!payment) {
-      return res.status(404).json({ message: 'Payment not found' });
+      return res.fail('Payment not found', null, 404);
     }
 
     payment.payment_method = payment_method;
     payment.payment_proof = payment_proof;
     await payment.save();
 
-    res.status(200).json({ message: 'Payment updated successfully', payment });
+    return res.success('Payment updated successfully', payment);
   } catch (error) {
     console.error('Error updating payment:', error); // Tambahkan log error
-    res.status(500).json({ message: 'Error updating payment', error });
+    return res.fail('Error updating payment', error, 500);
   }
 };
-
 
 export const getPaymentByConsultationId = async (req, res) => {
   try {
     const { consultation_id } = req.query;
     
     if (!consultation_id) {
-      return res.status(400).json({ error: "consultation_id is required" });
+      return res.fail('consultation_id is required');
     }
 
     // Cari pembayaran berdasarkan consultation_id
@@ -111,13 +110,13 @@ export const getPaymentByConsultationId = async (req, res) => {
     });
 
     if (!payment) {
-      return res.status(404).json({ error: "Payment not found for this consultation" });
+      return res.fail('Payment not found for this consultation', null, 404);
     }
 
-    res.json({ payment_id: payment.payment_id });
+    return res.success('Berhasil mengambil data payment ID', { payment_id: payment.payment_id });
   } catch (error) {
     console.error("Error fetching payment:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    return res.fail('Internal Server Error', error, 500);
   }
 };
 
@@ -126,12 +125,12 @@ export const deletePayment = async (req, res) => {
   try {
     const payment = await Payment.findByPk(req.params.id);
     if (!payment) {
-      return res.status(404).json({ message: 'Data pembayaran tidak ditemukan' });
+      return res.fail('Data pembayaran tidak ditemukan', null, 404);
     }
 
     await payment.destroy();
-    res.status(200).json({ message: 'Data pembayaran berhasil dihapus' });
+    return res.success('Data pembayaran berhasil dihapus');
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus data pembayaran', error: error.message });
+    return res.fail('Gagal menghapus data pembayaran', error.message, 500);
   }
 };

@@ -18,9 +18,9 @@ export const getAllConsultations = async (req, res) => {
         { model: FishExpertAnswer }
       ]
     });
-    res.status(200).json(consultations);
+    return res.success('Data konsultasi berhasil diambil', consultations);
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data konsultasi', error });
+    return res.fail('Gagal mengambil data konsultasi', error.message, 500);
   }
 };
 
@@ -39,15 +39,15 @@ export const getConsultationById = async (req, res) => {
 
     // Jika data tidak ditemukan
     if (!consultation) {
-      return res.status(404).json({ message: 'Konsultasi tidak ditemukan' });
+      return res.fail('Konsultasi tidak ditemukan', null, 404);
     }
 
     // Berhasil mengambil data
-    return res.status(200).json(consultation);
+    return res.success('Data konsultasi berhasil diambil', consultation);
   } catch (error) {
     // Tangani error
     console.error('Error fetching consultation data:', error);
-    return res.status(500).json({ message: 'Gagal mengambil data konsultasi', error: error.message });
+    return res.fail('Gagal mengambil data konsultasi', error.message, 500);
   }
 };
 
@@ -65,9 +65,7 @@ export const createConsultation = async (req, res) => {
     console.log("Received Data in createConsultation:", req.body);
 
     if (!user_id || !user_consultation_id) {
-      return res.status(400).json({
-        message: "user_id dan user_consultation_id wajib diisi",
-      });
+      return res.fail("user_id dan user_consultation_id wajib diisi");
     }
 
     const newConsultation = await Consultation.create({
@@ -80,16 +78,10 @@ export const createConsultation = async (req, res) => {
 
     console.log("Data Disimpan ke Tabel Consultations:", newConsultation);
 
-    res.status(201).json({
-      message: 'Konsultasi berhasil ditambahkan',
-      data: newConsultation,
-    });
+    return res.success('Konsultasi berhasil ditambahkan', newConsultation);
   } catch (error) {
     console.error('Error creating consultation:', error);
-    res.status(500).json({ 
-      message: 'Gagal menambahkan konsultasi', 
-      error: error.message 
-    });
+    return res.fail('Gagal menambahkan konsultasi', error.message, 500);
   }
 };
 
@@ -98,7 +90,7 @@ export const updateConsultation = async (req, res) => {
   try {
     const consultation = await Consultation.findByPk(req.params.id);
     if (!consultation) {
-      return res.status(404).json({ message: 'Konsultasi tidak ditemukan' });
+      return res.fail('Konsultasi tidak ditemukan', null, 404);
     }
 
     const { fish_expert_answer_id, consultation_status } = req.body;
@@ -116,10 +108,10 @@ export const updateConsultation = async (req, res) => {
     // Log data setelah diupdate
     console.log('Updated consultation:', consultation);
 
-    res.status(200).json({ message: 'Konsultasi berhasil diperbarui', consultation });
+    return res.success('Konsultasi berhasil diperbarui', consultation);
   } catch (error) {
     console.error('Error updating consultation:', error);
-    res.status(500).json({ message: 'Gagal memperbarui konsultasi', error });
+    return res.fail('Gagal memperbarui konsultasi', error.message, 500);
   }
 };
 
@@ -127,7 +119,7 @@ export const getConsultationHistory = async (req, res) => {
   const token = req.headers.authorization ? req.headers.authorization.split(" ")[1] : null;
 
   if (!token) {
-    return res.status(401).json({ message: "Token tidak ditemukan." });
+    return res.fail("Token tidak ditemukan.", null, 401);
   }
 
   try {
@@ -136,10 +128,7 @@ export const getConsultationHistory = async (req, res) => {
     const userId = decodedToken.id;
 
     if (!userId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "User ID tidak ditemukan dalam token." 
-      });
+      return res.fail("User ID tidak ditemukan dalam token.");
     }
 
     console.log("User ID:", userId); // Debug log
@@ -182,23 +171,14 @@ export const getConsultationHistory = async (req, res) => {
     });
 
     if (consultations.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Belum ada riwayat konsultasi." 
-      });
+      return res.fail("Belum ada riwayat konsultasi.", null, 404);
     }
+    
     console.log("Consultations Data:", consultations);
-    res.status(200).json({
-      success: true,
-      data: consultations,
-    });
+    return res.success("Berhasil mengambil riwayat konsultasi", consultations);
   } catch (error) {
     console.error("Error saat mengambil riwayat konsultasi:", error.message); // Debug log
-    res.status(500).json({
-      success: false,
-      message: "Gagal mengambil riwayat konsultasi.",
-      error: error.message,
-    });
+    return res.fail("Gagal mengambil riwayat konsultasi.", error.message, 500);
   }
 };
 
@@ -248,7 +228,7 @@ export const getConsultation = async (req, res) => {
     console.log('Consultation data:', JSON.stringify(consultation, null, 2));
 
     if (!consultation) {
-      return res.status(404).json({ error: 'Konsultasi tidak ditemukan' });
+      return res.fail('Konsultasi tidak ditemukan', null, 404);
     }
 
     const userName = consultation.User ? consultation.User.name : 'Tidak ada nama pengguna';
@@ -271,7 +251,7 @@ export const getConsultation = async (req, res) => {
     const consultationStatus = consultation.consultation_status;
     const createdAt = consultation.created_at; // Ambil tanggal konsultasi dibuat
 
-    res.json({
+    const consultationData = {
       title: consultationTopic,
       description: complaint,
       answer: answer,
@@ -286,11 +266,13 @@ export const getConsultation = async (req, res) => {
       answer_image: answerImage,
       chat_enabled: chatEnabled, 
       consultation_status: consultationStatus,
-      created_at: createdAt, // Kirim ke response
-    });
+      created_at: createdAt,
+    };
+
+    return res.success('Data konsultasi berhasil diambil', consultationData);
   } catch (error) {
     console.error('Error:', error.message, error.stack);
-    res.status(500).json({ error: 'Terjadi kesalahan pada server' });
+    return res.fail('Terjadi kesalahan pada server', error.message, 500);
   }
 };
 
@@ -300,17 +282,17 @@ export const enableChat = async (req, res) => {
   try {
     const consultation = await Consultation.findByPk(id);
     if (!consultation) {
-      return res.status(404).json({ error: "Konsultasi tidak ditemukan" });
+      return res.fail("Konsultasi tidak ditemukan", null, 404);
     }
 
     // Update chat_enabled menjadi true
     consultation.chat_enabled = true;
     await consultation.save();
 
-    res.json({ message: "Fitur chat telah diaktifkan." });
+    return res.success("Fitur chat telah diaktifkan");
   } catch (error) {
     console.error("Error:", error.message);
-    res.status(500).json({ error: "Terjadi kesalahan pada server." });
+    return res.fail("Terjadi kesalahan pada server", error.message, 500);
   }
 };
 
@@ -321,16 +303,16 @@ export const endConsultation = async (req, res) => {
     // Cek apakah konsultasi ada
     const consultation = await Consultation.findByPk(id);
     if (!consultation) {
-      return res.status(404).json({ error: "Konsultasi tidak ditemukan" });
+      return res.fail("Konsultasi tidak ditemukan", null, 404);
     }
 
     // Update status konsultasi menjadi "Closed"
     consultation.consultation_status = "Closed";
     await consultation.save();
 
-    res.json({ message: "Konsultasi berhasil diakhiri" });
+    return res.success("Konsultasi berhasil diakhiri");
   } catch (error) {
     console.error("Error saat mengupdate status konsultasi:", error.message);
-    res.status(500).json({ error: "Terjadi kesalahan saat mengakhiri konsultasi" });
+    return res.fail("Terjadi kesalahan saat mengakhiri konsultasi", error.message, 500);
   }
 };

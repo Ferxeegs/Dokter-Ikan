@@ -72,7 +72,7 @@ const DetectionResult = () => {
       const response = await fetch(`${API_BASE_URL}/fish/search?name=${encodeURIComponent(className)}`);
       const data = await response.json();
       if (response.ok) {
-        setFishData(data);
+        setFishData(data.data);
         setErrorMessage(null);
       } else {
         setErrorMessage('Gagal mendeteksi ikan. Silakan coba lagi.');

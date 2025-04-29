@@ -8,7 +8,6 @@ import FishTypes from "./routes/FishTypeRoute.js";
 import FishExperts from "./routes/FishExpertRoute.js";
 import UserConsultation from "./routes/UserConsultationRoute.js";
 import FishExpertAnswer from "./routes/FishExpertAnswerRoute.js";
-import Vendor from "./routes/VendorRoute.js";
 import Medicine from "./routes/MedicineRoute.js";
 import Consultation from "./routes/ConsultationRoute.js";
 import PrescriptionRoutes from './routes/PrescriptionRoute.js';
@@ -19,6 +18,7 @@ import UploadRoute from "./routes/UploadRoute.js";
 import MessageRoutes from "./routes/MessageRoutes.js";
 import SymptomRoute from "./routes/SymptomRoute.js";
 import FishDiseaseRoute from "./routes/FishDiseaseRoute.js";
+import { responseFormatter } from "./middlewares/ResponseFormatter.js";
 
 
 dotenv.config();
@@ -42,6 +42,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+app.use(responseFormatter); 
 
 // Gunakan route
 app.use(UserRoute);
@@ -50,7 +51,6 @@ app.use(FishDiseaseRoute);
 app.use(FishExperts);
 app.use(UserConsultation);
 app.use(FishExpertAnswer);
-app.use(Vendor);
 app.use(Medicine);
 app.use(Consultation);
 app.use(PrescriptionRoutes);

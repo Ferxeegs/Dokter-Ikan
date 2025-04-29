@@ -41,48 +41,52 @@ const Payment = () => {
       setLoading(true);
       setError(null);
       try {
+        // Fetch consultation data
         const consultationResponse = await fetch(`${API_BASE_URL}/consultations/${consultationId}`, { signal });
         if (!consultationResponse.ok) throw new Error("Gagal mengambil data konsultasi.");
         const consultationData = await consultationResponse.json();
 
+        // Fetch prescription data
         const prescriptionResponse = await fetch(`${API_BASE_URL}/prescriptionsbyconsultation?consultation_id=${consultationId}`, { signal });
         const prescriptionData = prescriptionResponse.ok ? await prescriptionResponse.json() : null;
 
+        // Fetch payment data by consultation ID
         const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`, { signal });
         if (!paymentLookupResponse.ok) throw new Error("Gagal mengambil data ID pembayaran.");
         const paymentLookupData = await paymentLookupResponse.json();
 
-        if (!paymentLookupData || !paymentLookupData.payment_id) {
+        if (!paymentLookupData || !paymentLookupData.data?.payment_id) {
           throw new Error("ID pembayaran tidak ditemukan.");
         }
+        
+        const paymentId = paymentLookupData.data.payment_id;
 
-        const paymentId = paymentLookupData.payment_id;
-
+        // Fetch payment details
         const paymentResponse = await fetch(`${API_BASE_URL}/payments/${paymentId}`, { signal });
         if (!paymentResponse.ok) throw new Error("Gagal mengambil data pembayaran.");
         const paymentDetail = await paymentResponse.json();
 
-        const formattedDateTime = paymentDetail?.createdAt
-          ? new Date(paymentDetail.createdAt).toLocaleString("id-ID", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
-          })
+        const formattedDateTime = paymentDetail.data?.createdAt
+          ? new Date(paymentDetail.data.createdAt).toLocaleString("id-ID", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false,
+            })
           : "Waktu Tidak Diketahui";
 
         if (isMounted) {
           setPaymentData({
-            userName: consultationData?.name || "Nama Tidak Diketahui",
-            expertName: consultationData?.fish_expert_name || "Expert Tidak Diketahui",
-            medicines: Array.isArray(prescriptionData?.medicines) ? prescriptionData.medicines : [],
+            userName: consultationData?.data?.name || "Nama Tidak Diketahui",
+            expertName: consultationData?.data?.fish_expert_name || "Expert Tidak Diketahui",
+            medicines: Array.isArray(prescriptionData?.data?.medicines) ? prescriptionData.data.medicines : [],
             dateTime: formattedDateTime,
-            totalFee: (paymentDetail?.total_fee || 0),
-            chatEnabled: consultationData?.chat_enabled || false,
-            shippingFee: paymentDetail?.shipping_fee || 0,
+            totalFee: paymentDetail?.data?.total_fee || 0,
+            chatEnabled: consultationData?.data?.chat_enabled || false,
+            shippingFee: paymentDetail?.data?.shipping_fee || 0,
           });
         }
       } catch (error) {

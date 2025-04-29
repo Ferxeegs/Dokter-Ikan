@@ -16,7 +16,6 @@ import ChatExpert from '@/app/components/chat/ChatExpert';
 import Image from 'next/image';
 import { ClipLoader } from "react-spinners";
 
-
 function ExpertPostContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id') || ''; // Default to empty string if id is null
@@ -53,14 +52,14 @@ function ExpertPostContent() {
   }, []);
 
   const handleUploadSuccess = useCallback((uploadedImages: { url: string; public_id: string }[]) => {
-    // Map the images to ensure consistent property names
-    const formattedImages = uploadedImages.map((img: { url: string; public_id: string }) => ({
+    const formattedImages = uploadedImages.map((img) => ({
       url: img.url,
-      publicId: img.public_id, // Convert from public_id to publicId
+      publicId: img.public_id,
     }));
 
     setImages((prevImages) => [...prevImages, ...formattedImages]);
   }, []);
+
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -70,6 +69,7 @@ function ExpertPostContent() {
   };
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const handleSubmit = async () => {
     try {
       const token = Cookies.get("token");
@@ -81,49 +81,44 @@ function ExpertPostContent() {
 
       const decoded: { id: string } = jwtDecode(token);
       const fishExpert_id = decoded.id;
-      const timestamp = new Date().toISOString();
 
-      const answerResponse = await fetch(
-        `${API_BASE_URL}/fish-expert-answers`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            fishExpert_id,
-            answer: inputText,
-            image: JSON.stringify(images.map((image) => image.url)),
-            timestamp,
-          }),
-        }
-      );
+      const answerResponse = await fetch(`${API_BASE_URL}/fish-expert-answers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          fishExpert_id,
+          answer: inputText,
+          image: JSON.stringify(images.map((image) => image.url)),
+          timestamp: new Date().toISOString(),
+        }),
+      });
 
       if (!answerResponse.ok) {
-        throw new Error("Kolom jawaban tidak boleh kosong!");
+        const errorData = await answerResponse.json();
+        throw new Error(errorData.message || "Kolom jawaban tidak boleh kosong!");
       }
 
       const answerResult = await answerResponse.json();
-      const fish_expert_answer_id = answerResult.newAnswer.fish_expert_answer_id;
+      const fish_expert_answer_id = answerResult.data.fish_expert_answer_id;
 
-      const consultationUpdateResponse = await fetch(
-        `${API_BASE_URL}/consultations/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            fish_expert_answer_id,
-            consultation_status: "In Consultation",
-          }),
-        }
-      );
+      const consultationUpdateResponse = await fetch(`${API_BASE_URL}/consultations/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          fish_expert_answer_id,
+          consultation_status: "In Consultation",
+        }),
+      });
 
       if (!consultationUpdateResponse.ok) {
-        throw new Error("Gagal memperbarui konsultasi.");
+        const errorData = await consultationUpdateResponse.json();
+        throw new Error(errorData.message || "Gagal memperbarui konsultasi.");
       }
 
       setModalMessage("Jawaban berhasil dikirim");
@@ -145,8 +140,7 @@ function ExpertPostContent() {
           throw new Error('Gagal memuat data');
         }
         const result = await response.json();
-        console.log(result);
-        setData(result);
+        setData(result.data);
       } catch {
         setIsError(true);
       } finally {
@@ -181,11 +175,6 @@ function ExpertPostContent() {
       return;
     }
 
-    if (!API_BASE_URL) {
-      alert("API URL tidak ditemukan");
-      return;
-    }
-
     setLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/delete`, {
@@ -193,14 +182,14 @@ function ExpertPostContent() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ public_id: publicId }), // Kirim publicId ke server
+        body: JSON.stringify({ public_id: publicId }),
       });
 
-      const data = await response.json();
       if (response.ok) {
-        setImages((prevImages) => prevImages.filter((image) => image.publicId !== publicId)); // Hapus gambar dari state
+        setImages((prevImages) => prevImages.filter((image) => image.publicId !== publicId));
       } else {
-        alert(data.message || 'Failed to delete image');
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to delete image');
       }
     } catch (error) {
       console.error('Error deleting image:', error);

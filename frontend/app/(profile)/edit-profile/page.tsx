@@ -56,7 +56,7 @@ export default function EditProfile() {
 
           if (response.ok) {
             const data = await response.json();
-            setFormData(data);
+            setFormData(data.data);
           }
         } catch (error) {
           console.error('Error fetching user data:', error);

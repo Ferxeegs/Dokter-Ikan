@@ -32,7 +32,7 @@ export default function UploadPaymentProof() {
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [bankInfo, setBankInfo] = useState<{ accountNumber: string; holder: string } | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [consultationId, setConsultationId] = useState<string | null>(null);
+  const [, setConsultationId] = useState<string | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);

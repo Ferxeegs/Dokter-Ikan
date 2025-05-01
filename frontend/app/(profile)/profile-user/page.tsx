@@ -36,8 +36,8 @@ export default function Profile() {
           if (response.ok) {
             const data = await response.json();
             setUser({
-              ...data,
-              created_at: new Date(data.created_at).toLocaleDateString('id-ID', {
+              ...data.data,
+              created_at: new Date(data.data.created_at).toLocaleDateString('id-ID', {
                 day: '2-digit',
                 month: 'long',
                 year: 'numeric',
@@ -76,7 +76,7 @@ export default function Profile() {
 
       if (response.ok) {
         const result = await response.json();
-        const newImageUrl = result.images[0].url;
+        const newImageUrl = result.data.images[0].url;
 
         // Update user image di frontend
         setUser((prev) => prev ? { ...prev, image: newImageUrl } : prev);

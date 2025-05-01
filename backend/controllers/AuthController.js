@@ -118,8 +118,7 @@ export const completeRegistration = async (req, res) => {
     const newUser = await User.create({
       email,
       name,
-      password: hashedPassword,
-      address
+      password: hashedPassword
     });
 
     await otpRecord.destroy();

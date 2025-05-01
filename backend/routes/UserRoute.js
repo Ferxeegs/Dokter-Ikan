@@ -14,7 +14,7 @@ import { authenticate } from "../middlewares/authMiddleware.js"; // Impor middle
 const router = express.Router();
 
 // Rute yang tidak memerlukan autentikasi
-router.post('/login', loginUser); // Login pengguna
+router.post('/login', loginUser);
 
 // Rute yang memerlukan autentikasi
 router.get('/users', authenticate, getAllUsers); // Mendapatkan semua pengguna (diperlukan autentikasi)

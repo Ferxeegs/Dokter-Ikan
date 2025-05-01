@@ -36,13 +36,14 @@ export default function Register() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
+      const result = await response.json();
       if (response.ok) {
-        toast.success('OTP sent to your email!');
+        toast.success(result.message || 'OTP sent to your email!');
         setStep(2); // Pindah ke step input OTP
       } else {
-        toast.error('Failed to send OTP. Try again.');
+        toast.error(result.message || 'Failed to send OTP. Try again.');
       }
-    } catch {
+    } catch (error) {
       toast.error('Error sending OTP.');
     }
   };
@@ -56,13 +57,14 @@ export default function Register() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp_code }),
       });
+      const result = await response.json();
       if (response.ok) {
-        toast.success('OTP verified!');
+        toast.success(result.message || 'OTP verified!');
         setStep(3); // Pindah ke step input data tambahan
       } else {
-        toast.error('Invalid OTP. Try again.');
+        toast.error(result.message || 'Invalid OTP. Try again.');
       }
-    } catch {
+    } catch (error) {
       toast.error('Error verifying OTP.');
     }
   };
@@ -76,13 +78,14 @@ export default function Register() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       });
+      const result = await response.json();
       if (response.ok) {
-        toast.success('Registration successful! Please Login');
+        toast.success(result.message || 'Registration successful! Please Login');
         setTimeout(() => router.push('/login'), 2000);
       } else {
-        toast.error('Registration failed. Try again.');
+        toast.error(result.message || 'Registration failed. Try again.');
       }
-    } catch {
+    } catch (error) {
       toast.error('Error during registration.');
     }
   };

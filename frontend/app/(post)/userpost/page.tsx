@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from "next/navigation";
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import UploadFile from '@/app/components/uploads/UploadFile';
@@ -80,6 +81,14 @@ export default function UserPost() {
       console.error('Error fetching fish types:', error);
     }
   }, [API_BASE_URL]);
+
+  const router = useRouter();
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (!token) {
+      router.push('/login'); // atau redirect ke halaman login jika ada
+    }
+  }, []);
 
   useEffect(() => {
     const id = getUserIdFromToken();

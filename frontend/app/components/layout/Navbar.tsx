@@ -115,7 +115,7 @@ export default function Navbar() {
             {user ? (
               <>
                 <Link href={user.role === 'expert' ? '/profile-expert' : '/profile-user'}>
-                  <span className="block px-4 py-2 text-black text-base hover:bg-gray-200 cursor-pointer" onClick={() => setMenuOpen(false)}>Profil</span>
+                  <span className="block px-4 py-2 text-black text-sm hover:bg-gray-200 cursor-pointer" onClick={() => setMenuOpen(false)}>Profil</span>
                 </Link>
                 <button onClick={handleLogout} className="block w-full px-4 py-2 text-red-600 hover:bg-gray-200 cursor-pointer">Logout</button>
               </>

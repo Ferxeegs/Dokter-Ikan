@@ -43,7 +43,7 @@ export default function Register() {
       } else {
         toast.error(result.message || 'Failed to send OTP. Try again.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error sending OTP.');
     }
   };
@@ -64,7 +64,7 @@ export default function Register() {
       } else {
         toast.error(result.message || 'Invalid OTP. Try again.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error verifying OTP.');
     }
   };
@@ -85,7 +85,7 @@ export default function Register() {
       } else {
         toast.error(result.message || 'Registration failed. Try again.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error during registration.');
     }
   };

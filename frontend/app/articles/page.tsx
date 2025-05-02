@@ -7,6 +7,7 @@ import Footer from "../components/layout/Footer";
 import Image from 'next/image';
 import { Calendar, User, ArrowLeft, Bookmark, Share2, Tag, Clock, ExternalLink } from 'lucide-react';
 import Link from "next/link";
+import React, { Suspense } from "react";
 
 // Define article data type to match the API response
 interface Article {
@@ -67,6 +68,14 @@ const estimateReadTime = (content: string): number => {
 };
 
 export default function ArticleDetailPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ArticleContent />
+    </Suspense>
+  );
+}
+
+function ArticleContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");

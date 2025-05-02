@@ -19,6 +19,7 @@ import MessageRoutes from "./routes/MessageRoutes.js";
 import SymptomRoute from "./routes/SymptomRoute.js";
 import FishDiseaseRoute from "./routes/FishDiseaseRoute.js";
 import { responseFormatter } from "./middlewares/ResponseFormatter.js";
+import ArticleRoutes from "./routes/ArticleRoutes.js";
 
 
 dotenv.config();
@@ -60,6 +61,7 @@ app.use(AuthRoutes)
 app.use(UploadRoute);
 app.use(MessageRoutes);
 app.use(SymptomRoute);
+app.use(ArticleRoutes);
 
 // Menjalankan server
 app.listen(process.env.APP_PORT, () => {

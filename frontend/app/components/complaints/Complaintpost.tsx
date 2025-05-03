@@ -79,7 +79,7 @@ const ComplaintPost: React.FC<ComplaintProps> = ({
 
   return (
     <div className="bg-white shadow-lg rounded-2xl p-6 w-full md:w-[40%] h-auto border-4 border-[#1A83FB] overflow-y-auto">
-      <h3 className="text-xl font-bold text-black mb-4 text-center">
+      <h3 className="text-lg md:text-xl font-bold text-black mb-4 text-center">
         {title || 'Judul keluhan akan muncul di sini'}
       </h3>
 

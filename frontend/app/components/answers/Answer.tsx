@@ -77,7 +77,7 @@ const Answer: React.FC<AnswerProps> = ({
 
   return (
     <div className="bg-white shadow-lg rounded-2xl p-6 w-full md:w-[40%] h-auto border-4 border-[#1A83FB] overflow-y-auto relative">
-      <h3 className="text-xl font-bold text-black mb-4 text-center">
+      <h3 className="text-lg md:text-xl font-bold text-black mb-4 text-center">
         Jawaban Tenaga Ahli
       </h3>
 
@@ -86,7 +86,7 @@ const Answer: React.FC<AnswerProps> = ({
       </p>
 
       {/* Thumbnail Gambar */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-20"> {/* Menambah margin-bottom agar tidak bertumpuk dengan info profil */}
         {fishImageUrls.length > 0 ? (
           fishImageUrls.map((url, index) => (
             <div
@@ -105,7 +105,32 @@ const Answer: React.FC<AnswerProps> = ({
             </div>
           ))
         ) : (
-          <p className="text-sm text-gray-500">Tidak ada gambar ikan.</p>
+          <div className="w-full text-sm text-gray-500 mb-6">
+            Tidak ada gambar ikan.
+          </div>
+        )}
+      </div>
+
+      {/* Footer area dengan flexbox untuk menghindari tumpang tindih */}
+      <div className="absolute bottom-4 left-0 right-0 px-4 flex justify-between items-center">
+        {/* Info tenaga ahli */}
+        <div className="flex items-center space-x-2">
+          <Image src="/images/icon/ic_profile.png" alt="Foto Profil" width={40} height={40} className="rounded-full" />
+          <div className="flex flex-col text-left font-sans">
+            <span className="text-sm font-bold text-black">{name || 'Nama Tenaga Ahli'}</span>
+            <span className="text-xs font-light text-black italic">{specialization || 'Spesialisasi'}</span>
+          </div>
+        </div>
+
+        {/* Button lihat detail resep */}
+        {consultation_status === 'Closed' && (
+          <button
+            className="px-4 py-2 rounded-2xl text-xs font-bold"
+            style={{ backgroundColor: 'rgba(105, 203, 244, 0.3)', color: 'black' }}
+            onClick={toggleModal}
+          >
+            Lihat Detail Resep
+          </button>
         )}
       </div>
 
@@ -170,8 +195,9 @@ const Answer: React.FC<AnswerProps> = ({
                 <div
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-12 h-12 relative cursor-pointer rounded-md overflow-hidden border-2 ${index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
-                    }`}
+                  className={`w-12 h-12 relative cursor-pointer rounded-md overflow-hidden border-2 ${
+                    index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
+                  }`}
                 >
                   <Image
                     src={url}
@@ -186,25 +212,6 @@ const Answer: React.FC<AnswerProps> = ({
           )}
         </div>
       )}
-
-      {/* Button hanya muncul jika consultation_status adalah "Closed" */}
-      {consultation_status === 'Closed' && (
-        <button
-          className="absolute bottom-4 right-4 px-4 py-2 rounded-2xl text-xs font-bold"
-          style={{ backgroundColor: 'rgba(105, 203, 244, 0.3)', color: 'black' }}
-          onClick={toggleModal}
-        >
-          Lihat Detail Resep
-        </button>
-      )}
-
-      <div className="absolute bottom-4 left-4 flex items-center space-x-2">
-        <Image src="/images/icon/ic_profile.png" alt="Foto Profil" width={40} height={40} className="rounded-full" />
-        <div className="flex flex-col text-left font-sans">
-          <span className="text-sm font-bold text-black">{name || 'Nama Tenaga Ahli'}</span>
-          <span className="text-xs font-light text-black italic">{specialization || 'Spesialisasi'}</span>
-        </div>
-      </div>
     </div>
   );
 };

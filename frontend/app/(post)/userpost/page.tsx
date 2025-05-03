@@ -8,6 +8,7 @@ import UploadFile from '@/app/components/uploads/UploadFile';
 import UploadFotoButton from '@/app/components/uploads/UploadFoto';
 import ComplaintPost from '@/app/components/complaints/Complaintpost';
 import Answer from '@/app/components/answers/Answer';
+import WelcomeModal from '@/app/components/modals/WelcomeModal';
 import jwt_decode from 'jwt-decode';
 import Cookies from 'js-cookie';
 import Modal from '@/app/components/modals/ModalPost';
@@ -21,6 +22,7 @@ type FishType = {
 export default function UserPost() {
   const [inputText, setInputText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(true); // Set to true to show on page load
   const [modalMessage, setModalMessage] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [judul, setJudul] = useState('');
@@ -258,6 +260,10 @@ export default function UserPost() {
     setLoading(false); // Stop loading when upload is complete
   }, []);
 
+  const closeWelcomeModal = () => {
+    setIsWelcomeModalOpen(false);
+  };
+
   return (
     <div
       className="flex flex-col min-h-screen"
@@ -270,6 +276,9 @@ export default function UserPost() {
       }}
     >
       <Navbar />
+
+      {/* Welcome Modal that shows on page load */}
+      <WelcomeModal isOpen={isWelcomeModalOpen} onClose={closeWelcomeModal} />
 
       <main className="flex-1">
         <div className="ml-6 mt-32 font-sans text-center">
@@ -438,7 +447,7 @@ export default function UserPost() {
         )}
       </main>
 
-      {/* Modal moved outside of render flow to avoid potential state updates during render */}
+      {/* Regular modal for messages */}
       {showModal && <Modal message={modalMessage} onClose={() => setShowModal(false)} />}
 
       <Footer />

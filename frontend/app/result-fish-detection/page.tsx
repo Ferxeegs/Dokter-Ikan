@@ -206,20 +206,20 @@ const DetectionResult = () => {
               {/* Tombol Navigasi */}
               <motion.div
                 variants={itemVariants}
-                className="mt-8 flex justify-center gap-3"
+                className="mt-8 flex flex-col sm:flex-row justify-center gap-3 w-full"
               >
                 <Link
                   href="/fishdetection"
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-3 bg-blue-100 text-blue-700 font-semibold rounded-lg shadow-md hover:bg-blue-200 transition-all duration-300 text-sm sm:text-base"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-100 text-blue-700 font-semibold rounded-lg shadow-md hover:bg-blue-200 transition-all duration-300 text-sm sm:text-base"
                 >
-                  <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <RefreshCw className="w-4 h-4" />
                   <span>Deteksi Ulang</span>
                 </Link>
                 <Link
                   href="/"
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:from-blue-700 hover:to-blue-600 transition-all duration-300 flex items-center"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:from-blue-700 hover:to-blue-600 transition-all duration-300 text-sm sm:text-base"
                 >
-                  <FiHome className="mr-2" /> Kembali ke Beranda
+                  <FiHome className="w-4 h-4" /> Kembali ke Beranda
                 </Link>
               </motion.div>
             </motion.div>

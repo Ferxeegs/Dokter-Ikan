@@ -72,7 +72,7 @@ export default function Navbar() {
 
   return (
     <nav className="flex items-center justify-between bg-white text-black font-bold p-4 sticky top-0 z-10">
-      <Link href="/">
+      <Link href={user?.role === 'expert' ? '/expertpage' : '/'}>
         <div className="flex items-center gap-2 md:gap-4">
           <img
             src="/images/logo/logo_fdokterikan.png"
@@ -103,7 +103,7 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden absolute top-16 left-0 w-full bg-white shadow-lg text-sm z-10 font-lato">
           <div className="flex flex-col items-center space-y-4 py-4">
-            <Link href="/">
+            <Link href={user?.role === 'expert' ? '/expertpage' : '/'}>
               <span className={`hover:underline ${pathname === '/' ? 'text-[#1A83FB]' : ''}`} onClick={() => setMenuOpen(false)}>Beranda</span>
             </Link>
             <Link href="/article">

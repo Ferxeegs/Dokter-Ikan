@@ -154,12 +154,12 @@ const Payment = () => {
             <ul className="bg-blue-50 p-4 rounded-lg mt-2">
               <li className="flex justify-between py-3 border-b last:border-none text-gray-800">
                 <span>Biaya Konsultasi</span>
-                <span className="font-semibold text-blue-600">Rp 50.000</span>
+                <span className="font-semibold text-blue-600">Rp 20.000</span>
               </li>
               {paymentData.chatEnabled && (
                 <li className="flex justify-between py-3 border-b last:border-none text-gray-800">
                   <span>Biaya Fitur Chat</span>
-                  <span className="font-semibold text-blue-600">Rp 25.000</span>
+                  <span className="font-semibold text-blue-600">Rp 10.000</span>
                 </li>
               )}
               <li className="flex justify-between py-3 border-b last:border-none text-gray-800">

@@ -57,8 +57,8 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
                                 <span className="font-bold text-gray-900">Rp 20.000</span>
                             </div>
                             <div className="flex justify-between mb-2">
-                                <span className="font-medium text-gray-800">Aktifkan Fitur Chat:</span>
-                                <span className="font-bold text-gray-900">Rp 50.000</span>
+                                <span className="font-medium text-gray-800">Fitur Chat:</span>
+                                <span className="font-bold text-gray-900">Rp 10.000</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="font-medium text-gray-800">Obat dan Pengiriman:</span>

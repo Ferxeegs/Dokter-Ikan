@@ -51,37 +51,46 @@ export default function DiseaseDetection() {
   }, [API_BASE_URL]);
 
   const toggleSymptom = (symptomCode: string, type: 'fisik' | 'perilaku') => {
+    // Perbaikan: Gunakan callback function dengan nilai state terbaru 
+    // dan kembalikan langsung Set baru untuk memastikan pembaruan state segera terjadi
     if (type === 'fisik') {
-      setSelectedPhysicalSymptoms(prev => {
-        const newSelected = new Set(prev);
-        if (newSelected.has(symptomCode)) {
-          newSelected.delete(symptomCode);
+      setSelectedPhysicalSymptoms(prevSelected => {
+        const newSet = new Set(prevSelected);
+        if (newSet.has(symptomCode)) {
+          newSet.delete(symptomCode);
         } else {
-          newSelected.add(symptomCode);
+          newSet.add(symptomCode);
         }
-        return newSelected;
+        return newSet;
       });
     } else {
-      setSelectedBehavioralSymptoms(prev => {
-        const newSelected = new Set(prev);
-        if (newSelected.has(symptomCode)) {
-          newSelected.delete(symptomCode);
+      setSelectedBehavioralSymptoms(prevSelected => {
+        const newSet = new Set(prevSelected);
+        if (newSet.has(symptomCode)) {
+          newSet.delete(symptomCode);
         } else {
-          newSelected.add(symptomCode);
+          newSet.add(symptomCode);
         }
-        return newSelected;
+        return newSet;
       });
     }
   };
 
-  const getButtonClass = (symptomCode: string, type: 'fisik' | 'perilaku') => {
-    const isSelected =
-      type === 'fisik'
-        ? selectedPhysicalSymptoms.has(symptomCode)
-        : selectedBehavioralSymptoms.has(symptomCode);
+  // Perbaikan: Tambahkan fungsi untuk memeriksa secara langsung apakah gejala dipilih
+  const isSymptomSelected = (symptomCode: string, type: 'fisik' | 'perilaku') => {
+    if (type === 'fisik') {
+      return selectedPhysicalSymptoms.has(symptomCode);
+    }
+    return selectedBehavioralSymptoms.has(symptomCode);
+  };
 
-    return `px-3 py-2 rounded-lg text-sm ${isSelected ? 'bg-blue-500 text-white font-medium shadow-md transform scale-105' : 'bg-[#D2EFFC]'
-      } text-gray-700 hover:bg-blue-400 hover:text-white transition-all duration-200 mb-2`;
+  const getButtonClass = (symptomCode: string, type: 'fisik' | 'perilaku') => {
+    // Perbaikan: Gunakan isSymptomSelected untuk mendapatkan status terbaru
+    const isSelected = isSymptomSelected(symptomCode, type);
+
+    return `px-3 py-2 rounded-lg text-sm ${
+      isSelected ? 'bg-blue-500 text-white font-medium shadow-md transform scale-105' : 'bg-[#D2EFFC]'
+    } text-gray-700 hover:bg-blue-400 hover:text-white transition-all duration-200 mb-2`;
   };
 
   const handleSubmit = async () => {
@@ -208,6 +217,8 @@ export default function DiseaseDetection() {
                       key={symptom.symptoms_id}
                       className={getButtonClass(symptom.code, 'perilaku')}
                       onClick={() => toggleSymptom(symptom.code, 'perilaku')}
+                      // Perbaikan: Tambahkan atribut data untuk memastikan status saat ini
+                      data-selected={isSymptomSelected(symptom.code, 'perilaku').toString()}
                     >
                       {symptom.name}
                     </button>
@@ -235,8 +246,9 @@ export default function DiseaseDetection() {
           <button
             onClick={handleSubmit}
             disabled={isLoading || isFetching}
-            className={`flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-[#1A83FB] text-white text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-300 ${isLoading || isFetching ? 'opacity-70 cursor-not-allowed' : ''
-              }`}
+            className={`flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-[#1A83FB] text-white text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-300 ${
+              isLoading || isFetching ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
           >
             {isLoading ? (
               <>

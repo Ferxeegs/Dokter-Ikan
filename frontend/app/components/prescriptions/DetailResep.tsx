@@ -19,8 +19,8 @@ interface Medicine {
   price: number;
 }
 
-const CONSULTATION_FEE = 50000;
-const CHAT_FEE = 25000;
+const CONSULTATION_FEE = 20000;
+const CHAT_FEE = 10000;
 
 const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consultationId }) => {
   const [prescriptionData, setPrescriptionData] = useState<Medicine[]>([]);

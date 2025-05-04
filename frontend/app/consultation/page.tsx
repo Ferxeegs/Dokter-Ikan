@@ -9,6 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import DetailResep from '@/app/components/prescriptions/DetailResep';
 import ChatConsultation from '@/app/components/chat/ChatConsultation';
 import ConsultationRules from '@/app/components/rules/ConsultationRules';
+import EndConsultationButton from '@/app/components/rules/EndConsultationButton';
 import Cookies from 'js-cookie';
 
 function ConsultationContent() {
@@ -141,26 +142,27 @@ function ConsultationContent() {
       {/* Navbar */}
       <Navbar />
 
-      {/* Consultation Rules Button (Moved to Top Right) */}
-      <div className="absolute top-20 right-4 p-1">
-        <ConsultationRules
-          consultationId={consultationId}
-          onEndSession={() => setIsChatEnabled(false)}
-        />
+      {/* Header with Title and Action Buttons */}
+      <div className="flex flex-col px-6 pt-24 pb-4">
+        {/* Title Section - Centered on all screens */}
+        <div className="w-full text-center mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#1A83FB]">
+            Konsultasi Masalah Ikan Anda
+          </h1>
+          <h2 className="text-sm sm:text-base font-semibold text-[#2C2C2C]">
+            Keluhan Anda akan Terjawab Disini
+          </h2>
+        </div>
+
+        {/* Rules Button - Positioned at right */}
+        <div className="self-end">
+          <ConsultationRules />
+        </div>
       </div>
 
       {/* Main Content */}
       <main className="flex-1">
-        <div className="ml-6 mt-32 font-sans text-center">
-          <h1 className="text-xl sm:text-2xl font-bold mb-2 text-[#1A83FB]">
-            Konsultasi Masalah Ikan Anda
-          </h1>
-          <h2 className="text-sm sm:text-base mb-6 font-semibold text-[#2C2C2C]">
-            Masukkan keluhan Anda dan dapatkan solusi dari tenaga ahli.
-          </h2>
-        </div>
-
-        <div className="flex flex-col md:flex-row justify-center gap-8 mt-20 mx-6 font-sans">
+        <div className="flex flex-col md:flex-row justify-center gap-8 mt-8 mx-6 font-sans">
           <Complaint
             title={data.title}
             description={data.description}
@@ -184,21 +186,53 @@ function ConsultationContent() {
         </div>
 
         {/* Chat Consultation Section */}
-        <div className="mt-10 mx-auto w-full max-w-4xl px-4">
+        <div className="mt-10 mx-auto w-full max-w-4xl px-4 mb-8">
           {!isChatEnabled ? (
-            <div className="text-center">
-              <p className="text-lg font-semibold text-gray-700">
-                Gunakan fitur chat dengan biaya tambahan?
+            <div className="text-center bg-gradient-to-r from-blue-50 to-sky-50 p-6 rounded-xl shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center justify-center mb-4">
+                <div className="bg-blue-500 rounded-full p-2 shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-blue-700 mb-2">
+                Konsultasi Lebih Interaktif
+              </h3>
+              <p className="text-lg font-semibold text-gray-700 mb-3">
+                Gunakan fitur chat dengan biaya tambahan
               </p>
-              <ul className="text-sm text-gray-600 mt-2 list-disc list-inside">
-                <li>Respon lebih cepat dari ahli perikanan</li>
-                <li>Dapat mengajukan pertanyaan tambahan secara langsung</li>
-                <li>Konsultasi lebih interaktif dengan ahli</li>
-                <li>Mendapatkan saran langsung untuk penanganan ikan</li>
-              </ul>
+              <div className="bg-white rounded-lg p-4 shadow-inner mb-4">
+                <ul className="text-sm text-gray-600 space-y-2">
+                  <li className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Respon lebih cepat dari ahli perikanan
+                  </li>
+                  <li className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Ajukan pertanyaan tambahan secara langsung
+                  </li>
+                  <li className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Konsultasi lebih interaktif dengan ahli
+                  </li>
+                  <li className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Saran langsung untuk penanganan ikan
+                  </li>
+                </ul>
+              </div>
               <button
                 onClick={() => setShowConfirmation(true)}
-                className="mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg transform transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
                 Gunakan Fitur Chat
               </button>
@@ -208,7 +242,7 @@ function ConsultationContent() {
           )}
 
           {showConfirmation && (
-            <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+            <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-20">
               <div className="bg-white p-6 rounded-lg shadow-lg text-center">
                 <p className="text-lg font-semibold text-gray-800">
                   Anda yakin ingin menggunakan fitur chat dengan biaya tambahan?
@@ -234,6 +268,14 @@ function ConsultationContent() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* End Consultation Button at the bottom */}
+        <div className="flex justify-center mb-8 px-4">
+          <EndConsultationButton
+            consultationId={consultationId}
+            onEndSession={() => setIsChatEnabled(false)}
+          />
         </div>
       </main>
 

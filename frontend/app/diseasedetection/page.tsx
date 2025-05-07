@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
@@ -50,9 +50,8 @@ export default function DiseaseDetection() {
     fetchSymptoms();
   }, [API_BASE_URL]);
 
-  const toggleSymptom = (symptomCode: string, type: 'fisik' | 'perilaku') => {
-    // Perbaikan: Gunakan callback function dengan nilai state terbaru 
-    // dan kembalikan langsung Set baru untuk memastikan pembaruan state segera terjadi
+  // Menggunakan useCallback untuk memastikan fungsi ini tidak direkonstruksi pada setiap render
+  const toggleSymptom = useCallback((symptomCode: string, type: 'fisik' | 'perilaku') => {
     if (type === 'fisik') {
       setSelectedPhysicalSymptoms(prevSelected => {
         const newSet = new Set(prevSelected);
@@ -74,24 +73,15 @@ export default function DiseaseDetection() {
         return newSet;
       });
     }
-  };
+  }, []);
 
-  // Perbaikan: Tambahkan fungsi untuk memeriksa secara langsung apakah gejala dipilih
-  const isSymptomSelected = (symptomCode: string, type: 'fisik' | 'perilaku') => {
+  // Fungsi helper untuk memeriksa apakah gejala dipilih
+  const isSymptomSelected = useCallback((symptomCode: string, type: 'fisik' | 'perilaku') => {
     if (type === 'fisik') {
       return selectedPhysicalSymptoms.has(symptomCode);
     }
     return selectedBehavioralSymptoms.has(symptomCode);
-  };
-
-  const getButtonClass = (symptomCode: string, type: 'fisik' | 'perilaku') => {
-    // Perbaikan: Gunakan isSymptomSelected untuk mendapatkan status terbaru
-    const isSelected = isSymptomSelected(symptomCode, type);
-
-    return `px-3 py-2 rounded-lg text-sm ${
-      isSelected ? 'bg-blue-500 text-white font-medium shadow-md transform scale-105' : 'bg-[#D2EFFC]'
-    } text-gray-700 hover:bg-blue-400 hover:text-white transition-all duration-200 mb-2`;
-  };
+  }, [selectedPhysicalSymptoms, selectedBehavioralSymptoms]);
 
   const handleSubmit = async () => {
     const selectedSymptoms = [
@@ -131,6 +121,25 @@ export default function DiseaseDetection() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Memindahkan logika tombol ke component terpisah untuk menghindari re-render yang tidak perlu
+  const SymptomButton = ({ symptom, type }: { symptom: Symptom; type: 'fisik' | 'perilaku' }) => {
+    const selected = type === 'fisik' 
+      ? selectedPhysicalSymptoms.has(symptom.code) 
+      : selectedBehavioralSymptoms.has(symptom.code);
+    
+    return (
+      <button
+        key={symptom.symptoms_id}
+        className={`px-3 py-2 rounded-lg text-sm ${
+          selected ? 'bg-blue-500 text-white font-medium shadow-md transform scale-105' : 'bg-[#D2EFFC]'
+        } text-gray-700 hover:bg-blue-400 hover:text-white transition-all duration-200 mb-2`}
+        onClick={() => toggleSymptom(symptom.code, type)}
+      >
+        {symptom.name}
+      </button>
+    );
   };
 
   return (
@@ -191,13 +200,11 @@ export default function DiseaseDetection() {
                 </div>
                 <div className="mt-4 flex flex-wrap justify-center gap-2 bg-blue-50 p-4 rounded-xl">
                   {physicalSymptoms.map((symptom) => (
-                    <button
-                      key={symptom.symptoms_id}
-                      className={getButtonClass(symptom.code, 'fisik')}
-                      onClick={() => toggleSymptom(symptom.code, 'fisik')}
-                    >
-                      {symptom.name}
-                    </button>
+                    <SymptomButton 
+                      key={symptom.symptoms_id} 
+                      symptom={symptom} 
+                      type="fisik" 
+                    />
                   ))}
                 </div>
                 {/* Border below Gejala Fisik */}
@@ -213,15 +220,11 @@ export default function DiseaseDetection() {
                 </div>
                 <div className="mt-4 flex flex-wrap justify-center gap-2 bg-blue-50 p-4 rounded-xl">
                   {behavioralSymptoms.map((symptom) => (
-                    <button
-                      key={symptom.symptoms_id}
-                      className={getButtonClass(symptom.code, 'perilaku')}
-                      onClick={() => toggleSymptom(symptom.code, 'perilaku')}
-                      // Perbaikan: Tambahkan atribut data untuk memastikan status saat ini
-                      data-selected={isSymptomSelected(symptom.code, 'perilaku').toString()}
-                    >
-                      {symptom.name}
-                    </button>
+                    <SymptomButton 
+                      key={symptom.symptoms_id} 
+                      symptom={symptom} 
+                      type="perilaku" 
+                    />
                   ))}
                 </div>
               </div>

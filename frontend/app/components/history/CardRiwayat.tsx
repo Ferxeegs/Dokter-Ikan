@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import jwt_decode from "jwt-decode";
 import Cookies from "js-cookie";
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Calendar, Clock, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Clock, User, LogIn } from "lucide-react";
 
 // Menambahkan tipe untuk data konsultasi yang mencakup hasil join dari beberapa tabel
 interface Consultation {
@@ -38,25 +38,23 @@ interface UserFromToken {
   name: string;
 }
 
-interface ApiResponse {
-  data: {
-    consultation_id: number;
-    user_consultation_id: number;
-    fishExpert_id: number | null;
-    fish_expert_answer_id: number | null;
-    consultation_status: string;
-    "UserConsultation.fish_type_id": number;
-    "UserConsultation.fish_age": string;
-    "UserConsultation.fish_length": string;
-    "UserConsultation.consultation_topic": string;
-    "UserConsultation.fish_image": string;
-    "UserConsultation.complaint": string;
-    "UserConsultation.created_at": string;
-    "FishExpert.name": string | null;
-    "FishExpert.specialization": string | null;
-    "FishExpertAnswer.answer": string | null;
-    "FishExpertAnswer.created_at": string | null;
-  }[];
+interface ApiResponseItem {
+  consultation_id: number;
+  user_consultation_id: number;
+  fishExpert_id: number | null;
+  fish_expert_answer_id: number | null;
+  consultation_status: string;
+  "UserConsultation.fish_type_id": number;
+  "UserConsultation.fish_age": string;
+  "UserConsultation.fish_length": string;
+  "UserConsultation.consultation_topic": string;
+  "UserConsultation.fish_image": string;
+  "UserConsultation.complaint": string;
+  "UserConsultation.created_at": string;
+  "FishExpert.name": string | null;
+  "FishExpert.specialization": string | null;
+  "FishExpertAnswer.answer": string | null;
+  "FishExpertAnswer.created_at": string | null;
 }
 
 export default function CardRiwayat() {
@@ -64,6 +62,7 @@ export default function CardRiwayat() {
   const [userName, setUserName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   
   // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -90,11 +89,12 @@ export default function CardRiwayat() {
 
   const fetchConsultations = useCallback(async () => {
     if (!token) {
-      setError("Token tidak ditemukan. Silakan login kembali.");
+      setIsLoggedIn(false);
       setLoading(false);
       return;
     }
 
+    setIsLoggedIn(true);
     setLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/consultation`, {
@@ -104,12 +104,21 @@ export default function CardRiwayat() {
         },
       });
 
-      const data: ApiResponse = await response.json();
+      const data = await response.json();
+
+      // Penanganan respons khusus untuk status 404 (belum ada riwayat konsultasi)
+      // Backend mengirim 404 dengan pesan khusus saat belum ada riwayat konsultasi
+      if (response.status === 404 && data.message === "Belum ada riwayat konsultasi.") {
+        setConsultations([]);
+        setError(null);
+        setLoading(false);
+        return;
+      }
 
       if (response.ok) {
         if (data && data.data) {
           // Transformasi data agar sesuai dengan tipe `Consultation`
-          const transformedData = data.data.map((item) => ({
+          const transformedData = data.data.map((item: ApiResponseItem) => ({
             consultation_id: item.consultation_id,
             user_consultation_id: item.user_consultation_id,
             fishExpert_id: item.fishExpert_id,
@@ -135,17 +144,19 @@ export default function CardRiwayat() {
           }));
           
           // Sort by most recent first
-          transformedData.sort((a, b) => 
+          transformedData.sort((a: Consultation, b: Consultation) => 
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
           
           setConsultations(transformedData);
           setError(null);
         } else {
-          setError("Data tidak ditemukan dalam response");
+          setConsultations([]);
+          setError(null);
         }
       } else {
-        setError(`Error: ${response.statusText}`);
+        // Jika bukan 404 dengan pesan "Belum ada riwayat konsultasi", itu adalah error lain
+        setError(data.message || `Error: ${response.statusText}`);
       }
     } catch (error) {
       setError("Terjadi kesalahan saat mengambil data konsultasi");
@@ -159,10 +170,11 @@ export default function CardRiwayat() {
     const user = getUserFromToken(token);
     if (user) {
       setUserName(user.name);
+      setIsLoggedIn(true);
       fetchConsultations();
     } else {
+      setIsLoggedIn(false);
       setLoading(false);
-      setError("Silakan login untuk melihat riwayat konsultasi");
     }
   }, [token, fetchConsultations]);
 
@@ -198,6 +210,10 @@ export default function CardRiwayat() {
     router.push(`/consultation?id=${consultationId}`);
   };
 
+  const handleLogin = () => {
+    router.push('/login');
+  };
+
   // Calculate pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -218,8 +234,27 @@ export default function CardRiwayat() {
     );
   }
 
-  // Error state
-  if (error) {
+  // Tidak login
+  if (!isLoggedIn) {
+    return (
+      <div className="flex flex-col items-center justify-center bg-blue-50 rounded-lg p-8 my-8 shadow-sm">
+        <div className="bg-blue-100 p-3 rounded-full mb-4">
+          <LogIn className="w-8 h-8 text-blue-500" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Anda belum login</h2>
+        <p className="text-gray-600 text-center mb-4">Silakan login terlebih dahulu untuk melihat riwayat konsultasi.</p>
+        <button 
+          onClick={handleLogin} 
+          className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition shadow"
+        >
+          Login Sekarang
+        </button>
+      </div>
+    );
+  }
+
+  // Error state - tetapi hindari menampilkan error untuk kasus "Belum ada riwayat konsultasi"
+  if (error && error !== "Belum ada riwayat konsultasi.") {
     return (
       <div className="flex justify-center items-center w-full py-20">
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm">
@@ -240,17 +275,17 @@ export default function CardRiwayat() {
       {consultations.length === 0 ? (
         <div className="flex flex-col items-center justify-center bg-blue-50 rounded-lg p-8 my-8 shadow-sm">
           <Image 
-            src="/images/no-data.svg" 
+            src="/images/icon/ic_nodata.svg" 
             alt="Tidak ada data" 
             width={150} 
             height={150} 
             className="mb-4" 
             unoptimized={true}
           />
-          <p className="text-gray-600 text-lg">Belum ada riwayat konsultasi.</p>
+          <h2 className="text-base text-gray-800 mb-2">Belum Ada Riwayat Konsultasi</h2>
           <button 
-            onClick={() => router.push('/konsultasi')} 
-            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition shadow"
+            onClick={() => router.push('/userpost')} 
+            className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-lg transition shadow"
           >
             Mulai Konsultasi Baru
           </button>

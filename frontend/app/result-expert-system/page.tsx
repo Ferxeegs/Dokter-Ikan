@@ -29,6 +29,7 @@ const DetectionResultContent = () => {
   const [diseaseData, setDiseaseData] = useState<DiseaseData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, setActiveIndex] = useState(0);
+  const [noDiagnosisMessage, setNoDiagnosisMessage] = useState<string | null>(null);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const fetchDiseases = useCallback(async (diseases: string[]) => {
@@ -58,9 +59,25 @@ const DetectionResultContent = () => {
     if (data) {
       try {
         const parsedData = JSON.parse(data);
-        if (parsedData.success && parsedData.data && Array.isArray(parsedData.data.diagnoses)) {
-          const diseases = parsedData.data.diagnoses.map((diagnosis: { disease: string }) => diagnosis.disease);
-          fetchDiseases(diseases);
+        if (parsedData.success) {
+          // Menangani kasus khusus "Tidak ada penyakit dengan kecocokan di atas 50%"
+          if (parsedData.data && parsedData.data.diagnoses === "Tidak ada penyakit dengan kecocokan di atas 50%.") {
+            setNoDiagnosisMessage("Tidak ada penyakit yang cocok dengan gejala");
+            setIsLoading(false);
+          } 
+          // Menangani kasus normal dengan array diagnoses
+          else if (parsedData.data && Array.isArray(parsedData.data.diagnoses)) {
+            const diseases = parsedData.data.diagnoses.map((diagnosis: { disease: string }) => diagnosis.disease);
+            fetchDiseases(diseases);
+          } 
+          // Jika format respons tidak sesuai yang diharapkan
+          else {
+            console.error('Unexpected data format:', parsedData);
+            setIsLoading(false);
+          }
+        } else {
+          console.error('API response indicates failure:', parsedData);
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('Failed to parse data:', error);
@@ -123,6 +140,29 @@ const DetectionResultContent = () => {
                 <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 text-blue-500 animate-spin mb-3 sm:mb-4" />
                 <p className="text-gray-600 text-base sm:text-lg">Memuat hasil diagnosa...</p>
               </div>
+            ) : noDiagnosisMessage ? (
+              <motion.div
+                className="flex flex-col items-center justify-center h-48 sm:h-64 bg-blue-50 rounded-xl p-4 sm:p-8"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <motion.div variants={itemVariants}>
+                  <AlertCircle className="h-12 w-12 sm:h-16 sm:w-16 text-blue-500 mb-3 sm:mb-4" />
+                </motion.div>
+                <motion.p
+                  variants={itemVariants}
+                  className="text-gray-800 text-lg sm:text-xl font-medium text-center"
+                >
+                  {noDiagnosisMessage}
+                </motion.p>
+                <motion.p
+                  variants={itemVariants}
+                  className="text-gray-600 text-center mt-2 text-sm sm:text-base max-w-md"
+                >
+                  Silakan coba lagi dengan menyesuaikan gejalanya atau konsultasikan dengan tenaga ahli ikan
+                </motion.p>
+              </motion.div>
             ) : diseaseData.length === 0 ? (
               <motion.div
                 className="flex flex-col items-center justify-center h-48 sm:h-64 bg-blue-50 rounded-xl p-4 sm:p-8"

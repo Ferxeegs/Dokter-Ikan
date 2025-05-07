@@ -72,7 +72,7 @@ const User = db.define('User', {
   image: {
     type: DataTypes.STRING,
     allowNull: true,
-    defaultValue: 'default-avatar.png' // Default gambar profil
+    defaultValue: 'images/icon/ic_defaultprofil.svg' // Default gambar profil
   },
   role: {
     type: DataTypes.ENUM('user', 'admin'),

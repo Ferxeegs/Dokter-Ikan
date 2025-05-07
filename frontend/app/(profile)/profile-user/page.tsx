@@ -111,7 +111,7 @@ export default function Profile() {
             <div className="relative w-24 h-24">
               <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300 shadow-md">
                 <Image
-                  src={user.image || '/default-avatar.png'}
+                  src={user.image || '/images/icon/ic_defaultprofil.svg'}
                   alt="Profile Picture"
                   width={96}
                   height={96}

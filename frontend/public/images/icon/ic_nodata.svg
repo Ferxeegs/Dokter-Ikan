@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <!-- Background Circle -->
+  <circle cx="150" cy="150" r="130" fill="#f0f6ff" stroke="#e0e9f7" stroke-width="2" />
+  
+  <!-- Document Icon -->
+  <g transform="translate(80, 70)">
+    <!-- Document Outline -->
+    <path d="M20,0 h80 l40,40 v120 a10,10 0 0 1 -10,10 h-110 a10,10 0 0 1 -10,-10 v-150 a10,10 0 0 1 10,-10 z" 
+          fill="#ffffff" stroke="#90b4e9" stroke-width="3" />
+    
+    <!-- Document Fold -->
+    <path d="M100,0 v40 h40" fill="none" stroke="#90b4e9" stroke-width="3" />
+    
+    <!-- Data Lines -->
+    <line x1="40" y1="60" x2="120" y2="60" stroke="#d6e4f9" stroke-width="8" stroke-linecap="round" />
+    <line x1="40" y1="85" x2="120" y2="85" stroke="#d6e4f9" stroke-width="8" stroke-linecap="round" />
+    <line x1="40" y1="110" x2="120" y2="110" stroke="#d6e4f9" stroke-width="8" stroke-linecap="round" />
+    <line x1="40" y1="135" x2="90" y2="135" stroke="#d6e4f9" stroke-width="8" stroke-linecap="round" />
+  </g>
+  
+  <!-- Search Magnifying Glass -->
+  <g transform="translate(160, 130)">
+    <!-- Glass -->
+    <circle cx="0" cy="0" r="32" fill="none" stroke="#4a89dc" stroke-width="6" />
+    <!-- Handle -->
+    <line x1="24" y1="24" x2="45" y2="45" stroke="#4a89dc" stroke-width="6" stroke-linecap="round" />
+  </g>
+  
+  <!-- X Mark -->
+  <g transform="translate(150, 150) rotate(45)">
+    <line x1="-40" y1="0" x2="40" y2="0" stroke="#e74c3c" stroke-width="5" stroke-linecap="round" />
+    <line x1="0" y1="-40" x2="0" y2="40" stroke="#e74c3c" stroke-width="5" stroke-linecap="round" />
+  </g>
+</svg>

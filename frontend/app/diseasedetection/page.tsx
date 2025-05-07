@@ -75,14 +75,6 @@ export default function DiseaseDetection() {
     }
   }, []);
 
-  // Fungsi helper untuk memeriksa apakah gejala dipilih
-  const isSymptomSelected = useCallback((symptomCode: string, type: 'fisik' | 'perilaku') => {
-    if (type === 'fisik') {
-      return selectedPhysicalSymptoms.has(symptomCode);
-    }
-    return selectedBehavioralSymptoms.has(symptomCode);
-  }, [selectedPhysicalSymptoms, selectedBehavioralSymptoms]);
-
   const handleSubmit = async () => {
     const selectedSymptoms = [
       ...Array.from(selectedPhysicalSymptoms),

@@ -12,8 +12,23 @@ const nextConfig = {
 
 export default withPWA({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
+  disable: false,
+  register: false,
   skipWaiting: true,
   runtimeCaching,
+  buildExcludes: [
+    /app-build-manifest\.json$/,
+    /build-manifest\.json$/,
+    /react-loadable-manifest\.json$/,
+    /middleware-manifest\.json$/,
+    /_middleware\.js$/,
+    /\.js\.map$/,
+  ],
+  fallbacks: {
+  document: '/fallback.html',
+  image: '',
+  audio: '',
+  video: '',
+  font: '',
+},
 })(nextConfig);

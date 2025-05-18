@@ -1,15 +1,19 @@
-const withPWA = require("next-pwa")({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
-});
+import withPWA from 'next-pwa';
+import runtimeCaching from './runtimeCaching';
 
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
   images: {
-    domains: ["res.cloudinary.com"],
+    domains: ['res.cloudinary.com'],
     unoptimized: true,
   },
 };
 
-module.exports = withPWA(nextConfig);
+export default withPWA({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+  runtimeCaching,
+})(nextConfig);

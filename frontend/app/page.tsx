@@ -7,6 +7,7 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Image from 'next/image';
 import Cookies from 'js-cookie';
+import RegisterSW from "./components/utils/RegisterSW";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,6 +30,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <RegisterSW />
       <Navbar />
       <main
         className="flex-1 p-6 text-center"
@@ -71,7 +73,7 @@ export default function Home() {
               <Image src="/images/icon/ic_fish.png" alt="Artikel Icon" width={64} height={64} className="w-16 h-16 mb-4" />
               <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">DETEKSI PENYAKIT IKAN</h3>
               <p className="text-xs text-black text-center">
-                Fitur ini digunakan menganalisis penyakit ikan yang telah di unggah. AI akan mendeteksi gejala penyakit, seperti perubahan warna, luka, atau tanda-tanda abnormal lainnya pada tubuh ikan.
+                Fitur ini digunakan menganalisis penyakit ikan yang dengan memilih gejala penyakit. Expert System akan mendiagnosa penyakit berdasarkan gejala yang anda pilih.
               </p>
             </div>
             </Link>

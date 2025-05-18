@@ -1,12 +1,10 @@
-import { RouteHandler } from 'workbox-core';
 
 // Definisikan tipe yang valid untuk handler caching
 type StrategyName = 'CacheFirst' | 'NetworkFirst' | 'CacheOnly' | 'NetworkOnly' | 'StaleWhileRevalidate';
 
-// Interface untuk konfigurasi cache
 interface RuntimeCaching {
   urlPattern: RegExp | string | ((params: { url: URL; request: Request }) => boolean);
-  handler: RouteHandler | StrategyName;
+  handler: StrategyName;
   options?: {
     cacheName: string;
     expiration?: {

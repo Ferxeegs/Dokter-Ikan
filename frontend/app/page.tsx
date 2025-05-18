@@ -7,7 +7,7 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Image from 'next/image';
 import Cookies from 'js-cookie';
-import RegisterSW from "./components/utils/RegisterSW";
+// import RegisterSW from "./components/utils/RegisterSW";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,7 +30,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <RegisterSW />
+      {/* <RegisterSW /> */}
       <Navbar />
       <main
         className="flex-1 p-6 text-center"

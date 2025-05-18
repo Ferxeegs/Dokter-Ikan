@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
+import RegisterSW from "./components/utils/RegisterSW";
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -34,7 +36,6 @@ export const metadata: Metadata = {
   },
 };
 
-// ✅ Ini tambahan yang benar
 export const viewport: Viewport = {
   themeColor: "#00AEEF",
 };
@@ -46,9 +47,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <RegisterSW />
         {children}
       </body>
     </html>

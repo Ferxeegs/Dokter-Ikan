@@ -12,10 +12,11 @@ const nextConfig = {
 
 export default withPWA({
   dest: 'public',
-  disable: false,
-  register: false,
+  disable: process.env.NODE_ENV === 'development', // Disable PWA in development mode
+  register: true,
   skipWaiting: true,
   runtimeCaching,
+  maximumFileSizeToCacheInBytes: 25 * 1024 * 1024, // 25 MB
   buildExcludes: [
     /app-build-manifest\.json$/,
     /build-manifest\.json$/,
@@ -25,10 +26,10 @@ export default withPWA({
     /\.js\.map$/,
   ],
   fallbacks: {
-  document: '/fallback.html',
-  image: '',
-  audio: '',
-  video: '',
-  font: '',
-},
+    document: '/fallback.html',
+    image: '',
+    audio: '',
+    video: '',
+    font: '',
+  },
 })(nextConfig);

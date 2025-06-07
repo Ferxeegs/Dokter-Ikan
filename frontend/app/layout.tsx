@@ -1,8 +1,10 @@
+// app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
 import RegisterSW from "./components/utils/RegisterSW";
+import PWAInstallHandler from "./components/utils/PWAInstallHandler";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -49,6 +51,9 @@ export default function RootLayout({
     <html lang="id">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <RegisterSW />
+        <PWAInstallHandler 
+          apiBaseUrl={process.env.NEXT_PUBLIC_API_BASE_URL}
+        />
         {children}
       </body>
     </html>

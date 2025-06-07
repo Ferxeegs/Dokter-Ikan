@@ -1,4 +1,3 @@
-
 // Definisikan tipe yang valid untuk handler caching
 type StrategyName = 'CacheFirst' | 'NetworkFirst' | 'CacheOnly' | 'NetworkOnly' | 'StaleWhileRevalidate';
 
@@ -38,6 +37,18 @@ const runtimeCaching: RuntimeCaching[] = [
       expiration: {
         maxEntries: 1,
         maxAgeSeconds: 30 * 24 * 60 * 60, // 30 hari
+      },
+    },
+  },
+  // Cache untuk model ONNX
+  {
+    urlPattern: /\/models\/.*\.onnx$/i,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'onnx-models',
+      expiration: {
+        maxEntries: 5,
+        maxAgeSeconds: 365 * 24 * 60 * 60, // 1 tahun
       },
     },
   },

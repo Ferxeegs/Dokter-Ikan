@@ -6,6 +6,8 @@ import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { getSymptomsFromIndexedDB } from '../components/utils/indexedDB';
+import { diagnoseDisease } from './logic';
 
 interface Symptom {
   symptoms_id: number;
@@ -23,31 +25,57 @@ export default function DiseaseDetection() {
   const [isFetching, setIsFetching] = useState(true);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const router = useRouter();
+  const [isOffline, setIsOffline] = useState(false);
+
+   useEffect(() => {
+    const handleOnlineStatus = () => {
+      setIsOffline(!navigator.onLine);
+    };
+
+    window.addEventListener('online', handleOnlineStatus);
+    window.addEventListener('offline', handleOnlineStatus);
+    setIsOffline(!navigator.onLine);
+
+    return () => {
+      window.removeEventListener('online', handleOnlineStatus);
+      window.removeEventListener('offline', handleOnlineStatus);
+    };
+  }, []);
 
   useEffect(() => {
-    const fetchSymptoms = async () => {
+    const fetchData = async () => {
       setIsFetching(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/symptoms`);
-        const result = await response.json();
+        // Fetch symptoms
+        const symptomsResponse = await fetch(`${API_BASE_URL}/symptoms`);
+        const symptomsResult = await symptomsResponse.json();
 
-        if (result.success && Array.isArray(result.data)) {
-          const physical = result.data.filter((symptom: Symptom) => symptom.type === 'fisik');
-          const behavioral = result.data.filter((symptom: Symptom) => symptom.type === 'perilaku');
-
+        if (symptomsResult.success && Array.isArray(symptomsResult.data)) {
+          // Save symptoms to IndexedDB
+          // await saveSymptomsToIndexedDB(symptomsResult.data);
+          const physical = symptomsResult.data.filter((s: Symptom) => s.type === 'fisik');
+          const behavioral = symptomsResult.data.filter((s: Symptom) => s.type === 'perilaku');
           setPhysicalSymptoms(physical);
           setBehavioralSymptoms(behavioral);
-        } else {
-          console.error('Data fetched is not an array:', result);
         }
-      } catch (error) {
-        console.error('Error fetching symptoms:', error);
+
+      } catch {
+        console.error('Gagal fetch online, mencoba load dari IndexedDB...');
+        try {
+          const offlineData = await getSymptomsFromIndexedDB();
+          const physical = offlineData.filter((s: Symptom) => s.type === 'fisik');
+          const behavioral = offlineData.filter((s: Symptom) => s.type === 'perilaku');
+          setPhysicalSymptoms(physical);
+          setBehavioralSymptoms(behavioral);
+        } catch (dbError) {
+          console.error('Failed to load from IndexedDB:', dbError);
+        }
       } finally {
         setIsFetching(false);
       }
     };
 
-    fetchSymptoms();
+    fetchData();
   }, [API_BASE_URL]);
 
   // Menggunakan useCallback untuk memastikan fungsi ini tidak direkonstruksi pada setiap render
@@ -90,22 +118,29 @@ export default function DiseaseDetection() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/diagnose`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ symptoms: selectedSymptoms }),
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        console.log('Diagnosis result:', result);
-        // Navigate to result page with the diagnosis result
+      if (isOffline) {
+        // Diagnosa offline menggunakan logic.ts
+        const result = diagnoseDisease(selectedSymptoms);
+        console.log('Offline diagnosis result:', result);
         router.push(`/result-expert-system?data=${encodeURIComponent(JSON.stringify(result))}`);
       } else {
-        console.error('Failed to diagnose:', result.message);
-        alert('Gagal mendiagnosa: ' + result.message);
+        // Online diagnosis menggunakan API
+        const response = await fetch(`${API_BASE_URL}/diagnose`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ symptoms: selectedSymptoms }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          console.log('Online diagnosis result:', result);
+          router.push(`/result-expert-system?data=${encodeURIComponent(JSON.stringify(result))}`);
+        } else {
+          console.error('Failed to diagnose:', result.message);
+          alert('Gagal mendiagnosa: ' + result.message);
+        }
       }
     } catch (error) {
       console.error('Error diagnosing:', error);
@@ -147,6 +182,12 @@ export default function DiseaseDetection() {
     >
       {/* Navbar */}
       <Navbar />
+
+      {isOffline && (
+        <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-white text-center py-2 z-50">
+          Mode Offline
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-grow flex flex-col items-center justify-center px-4 py-8 text-center">

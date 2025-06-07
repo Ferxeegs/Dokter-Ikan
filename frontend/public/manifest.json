@@ -1,37 +1,40 @@
 {
-    "name": "Dokter Ikan",
-    "short_name": "DokterIkan",
-    "description": "Aplikasi untuk mendeteksi penyakit ikan dan konsultasi dengan ahli.",
-    "start_url": "/",
-    "display": "standalone",
-    "orientation": "portrait",
-    "background_color": "#ffffff",
-    "theme_color": "#00AEEF",
-    "icons": [
-      {
-        "src": "/images/logo/logo_dokterikan192.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      },
-      {
-        "src": "/images/logo/logo_dokterikan512.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }
-    ],
-    "screenshots": [
-      {
-        "src": "/images/screenshots/image1.png",
-        "sizes": "540x720",
-        "type": "image/png",
-        "form_factor": "wide"
-      },
-      {
-        "src": "/images/screenshots/image2.png",
-        "sizes": "540x720",
-        "type": "image/png",
-        "form_factor": "narrow"
-      }
-    ]
-  }
-  
+  "name": "Dokter Ikan",
+  "short_name": "DokterIkan",
+  "description": "Aplikasi untuk mendeteksi penyakit ikan dan konsultasi dengan ahli.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#00AEEF",
+  "icons": [
+    {
+      "src": "/images/logo/logo_dokterikan192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo/logo_dokterikan512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshots/image1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/images/screenshots/image2.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "offline_enabled": true,
+  "cache": [
+    "/models/species.onnx"
+  ]
+}

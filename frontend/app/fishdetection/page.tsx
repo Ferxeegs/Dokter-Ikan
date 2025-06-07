@@ -1,13 +1,25 @@
 'use client';
 
-import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from 'next/navigation';
+import * as ort from 'onnxruntime-web';
+import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 
 interface Prediction {
   image_url: string;
   class_name: string;
+}
+
+interface Detection {
+  className: string;
+  confidence: number;
+  bbox: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  };
 }
 
 export default function FishDetection() {
@@ -21,14 +33,315 @@ export default function FishDetection() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isMounted, setIsMounted] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const [model, setModel] = useState<ort.InferenceSession | null>(null);
+  const [, setIsModelLoading] = useState(false);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const router = useRouter();
-
 
   // Client-side only code
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Initialize model on component mount
+  useEffect(() => {
+    const initModel = async () => {
+      try {
+        setIsModelLoading(true);
+        // Load model from public directory
+        const session = await ort.InferenceSession.create('/models/species.onnx', {
+          executionProviders: ['wasm'],
+          graphOptimizationLevel: 'all'
+        });
+        setModel(session);
+      } catch (error) {
+        console.error('Error loading model:', error);
+        setErrorMessage('Gagal memuat model deteksi offline.');
+        setShowErrorModal(true);
+      } finally {
+        setIsModelLoading(false);
+      }
+    };
+
+    // Check online status
+    const handleOnlineStatus = () => {
+      setIsOffline(!navigator.onLine);
+    };
+
+    window.addEventListener('online', handleOnlineStatus);
+    window.addEventListener('offline', handleOnlineStatus);
+    setIsOffline(!navigator.onLine);
+
+    initModel();
+
+    return () => {
+      window.removeEventListener('online', handleOnlineStatus);
+      window.removeEventListener('offline', handleOnlineStatus);
+    };
+  }, []);
+
+  // Function to preprocess image for ONNX model
+  const preprocessImage = async (imageData: ImageData): Promise<Float32Array> => {
+    const tensor = new Float32Array(3 * 640 * 640); // CHW format: [C, H, W]
+    const { data } = imageData;
+
+    // Convert from HWC to CHW format
+    for (let y = 0; y < 640; y++) {
+      for (let x = 0; x < 640; x++) {
+        const pixelIndex = (y * 640 + x) * 4;
+        const tensorIndex = y * 640 + x;
+        
+        // R channel
+        tensor[tensorIndex] = data[pixelIndex] / 255.0;
+        // G channel  
+        tensor[640 * 640 + tensorIndex] = data[pixelIndex + 1] / 255.0;
+        // B channel
+        tensor[2 * 640 * 640 + tensorIndex] = data[pixelIndex + 2] / 255.0;
+      }
+    }
+
+    return tensor;
+  };
+
+  const normalize = (tensor: Float32Array): Float32Array => {
+    const mean = [0.485, 0.456, 0.406];
+    const std = [0.229, 0.224, 0.225];
+    const size = 640 * 640;
+
+    // Normalize each channel separately (CHW format)
+    for (let c = 0; c < 3; c++) {
+      for (let i = 0; i < size; i++) {
+        const index = c * size + i;
+        tensor[index] = (tensor[index] - mean[c]) / std[c];
+      }
+    }
+
+    return tensor;
+  };
+
+  // Fungsi untuk menghitung Intersection over Union (IoU)
+  const calculateIoU = (box1: Detection['bbox'], box2: Detection['bbox']): number => {
+    const x1 = Math.max(box1.x - box1.w/2, box2.x - box2.w/2);
+    const y1 = Math.max(box1.y - box1.h/2, box2.y - box2.h/2);
+    const x2 = Math.min(box1.x + box1.w/2, box2.x + box2.w/2);
+    const y2 = Math.min(box1.y + box1.h/2, box2.y + box2.h/2);
+
+    if (x2 <= x1 || y2 <= y1) return 0;
+
+    const intersection = (x2 - x1) * (y2 - y1);
+    const area1 = box1.w * box1.h;
+    const area2 = box2.w * box2.h;
+    const union = area1 + area2 - intersection;
+
+    return intersection / union;
+  };
+
+  // Non-Maximum Suppression
+  const applyNMS = (detections: Detection[], iouThreshold: number = 0.5): Detection[] => {
+    if (detections.length === 0) return [];
+
+    // Sort berdasarkan confidence (tertinggi dulu)
+    const sortedDetections = detections.sort((a, b) => b.confidence - a.confidence);
+    const keepDetections: Detection[] = [];
+
+    for (let i = 0; i < sortedDetections.length; i++) {
+      const currentDetection = sortedDetections[i];
+      let shouldKeep = true;
+
+      // Bandingkan dengan deteksi yang sudah di-keep
+      for (let j = 0; j < keepDetections.length; j++) {
+        const keptDetection = keepDetections[j];
+        
+        // Jika sama class dan IoU tinggi, skip (duplikat)
+        if (currentDetection.className === keptDetection.className) {
+          const iou = calculateIoU(currentDetection.bbox, keptDetection.bbox);
+          if (iou > iouThreshold) {
+            shouldKeep = false;
+            break;
+          }
+        }
+      }
+
+      if (shouldKeep) {
+        keepDetections.push(currentDetection);
+      }
+    }
+
+    return keepDetections;
+  };
+
+  // Fungsi postprocessOutput yang sudah diperbaiki dengan NMS
+  const postprocessOutput = (output: ort.Tensor, numClasses: number, confidenceThreshold: number = 0.25): Detection[] => {
+    const outputData = Array.from(output.data as Float32Array);
+    
+    // Debug output shape
+    console.log('Output shape:', output.dims);
+    console.log('Output data length:', outputData.length);
+    
+    // Untuk YOLOv8, format output biasanya [1, 84, 8400] untuk 5 classes
+    // 84 = 4 (bbox) + 80 (coco classes) tapi kita hanya pakai 5 classes
+    // Atau bisa jadi [1, 4+5, 8400] = [1, 9, 8400]
+    
+    let numAnchors, numFeatures;
+    if (output.dims.length === 3) {
+      numAnchors = output.dims[2];  // 8400 anchors
+      numFeatures = output.dims[1]; // 9 features (4 bbox + 5 classes)
+    } else {
+      // Fallback jika format berbeda
+      numAnchors = outputData.length / (numClasses + 4); // 4 untuk bbox
+      numFeatures = numClasses + 4;
+    }
+    
+    console.log(`Processing ${numAnchors} anchors with ${numFeatures} features`);
+    
+    const detections: Detection[] = [];
+    const classNames = ['Ikan Bawal', 'Ikan Gurame', 'Ikan Lele', 'Ikan Nila', 'Ikan Tuna'];
+
+    // Ekstrak semua deteksi yang memenuhi threshold
+    for (let i = 0; i < numAnchors; i++) {
+      // YOLOv8 format: data disusun sebagai [x, y, w, h, class1, class2, ...]
+      // Tanpa object confidence terpisah
+      const x = outputData[i]; // atau outputData[0 * numAnchors + i]
+      const y = outputData[numAnchors + i]; // atau outputData[1 * numAnchors + i]  
+      const w = outputData[2 * numAnchors + i];
+      const h = outputData[3 * numAnchors + i];
+
+      // Ambil probabilitas untuk setiap class
+      const classProbabilities: number[] = [];
+      for (let c = 0; c < numClasses; c++) {
+        const classIndex = (4 + c) * numAnchors + i;
+        classProbabilities.push(outputData[classIndex]);
+      }
+
+      // Cari class dengan probabilitas tertinggi
+      const maxClassProbability = Math.max(...classProbabilities);
+      const maxClassIndex = classProbabilities.indexOf(maxClassProbability);
+      
+      // Untuk YOLOv8, class probability sudah final confidence
+      const finalConfidence = maxClassProbability;
+
+      // Debug untuk beberapa anchor pertama
+      if (i < 5) {
+        console.log(`Anchor ${i}: x=${x.toFixed(3)}, y=${y.toFixed(3)}, w=${w.toFixed(3)}, h=${h.toFixed(3)}, conf=${finalConfidence.toFixed(3)}, class=${maxClassIndex}`);
+      }
+
+      // Hanya tambahkan jika confidence di atas threshold
+      if (finalConfidence > confidenceThreshold) {
+        detections.push({
+          className: classNames[maxClassIndex],
+          confidence: finalConfidence,
+          bbox: { x, y, w, h }
+        });
+      }
+    }
+
+    console.log(`Found ${detections.length} raw detections before NMS`);
+
+    // Terapkan NMS untuk menghilangkan duplikasi
+    const nmsDetections = applyNMS(detections, 0.5);
+    console.log(`After NMS: ${nmsDetections.length} detections`);
+
+    // Untuk single species prediction, ambil yang confidence tertinggi
+    if (nmsDetections.length > 0) {
+      const bestDetection = nmsDetections.reduce((best, current) => 
+        current.confidence > best.confidence ? current : best
+      );
+      
+      console.log(`Best detection: ${bestDetection.className} with confidence ${bestDetection.confidence.toFixed(3)}`);
+      return [bestDetection];
+    }
+
+    return [];
+  };
+
+  // // Alternatif: Jika Anda yakin hanya butuh 1 prediksi terbaik tanpa NMS
+  // const postprocessOutputSimplest = (output: ort.Tensor, numClasses: number, confidenceThreshold: number = 0.25): Detection[] => {
+  //   const outputData = Array.from(output.data as Float32Array);
+    
+  //   // Debug output shape
+  //   console.log('Output shape:', output.dims);
+    
+  //   let numAnchors;
+  //   if (output.dims.length === 3) {
+  //     numAnchors = output.dims[2];  // Biasanya 8400 untuk YOLOv8
+  //   } else {
+  //     numAnchors = outputData.length / (numClasses + 4);
+  //   }
+    
+  //   let bestDetection: Detection | null = null;
+  //   let bestConfidence = 0;
+  //   const classNames = ['Ikan Bawal', 'Ikan Gurame', 'Ikan Lele', 'Ikan Nila', 'Ikan Tuna'];
+
+  //   // Langsung cari yang terbaik tanpa menyimpan semua
+  //   for (let i = 0; i < numAnchors; i++) {
+  //     // YOLOv8 format: [x, y, w, h, class1, class2, ...]
+  //     const x = outputData[i];
+  //     const y = outputData[numAnchors + i];
+  //     const w = outputData[2 * numAnchors + i];
+  //     const h = outputData[3 * numAnchors + i];
+
+  //     // Ambil probabilitas untuk setiap class
+  //     const classProbabilities: number[] = [];
+  //     for (let c = 0; c < numClasses; c++) {
+  //       const classIndex = (4 + c) * numAnchors + i;
+  //       classProbabilities.push(outputData[classIndex]);
+  //     }
+
+  //     const maxClassProbability = Math.max(...classProbabilities);
+  //     const maxClassIndex = classProbabilities.indexOf(maxClassProbability);
+      
+  //     // Debug untuk beberapa anchor pertama
+  //     if (i < 5) {
+  //       console.log(`Anchor ${i}: conf=${maxClassProbability.toFixed(3)}, class=${maxClassIndex} (${classNames[maxClassIndex]})`);
+  //     }
+
+  //     if (maxClassProbability > bestConfidence && maxClassProbability > confidenceThreshold) {
+  //       bestConfidence = maxClassProbability;
+  //       bestDetection = {
+  //         className: classNames[maxClassIndex],
+  //         confidence: maxClassProbability,
+  //         bbox: { x, y, w, h }
+  //       };
+  //     }
+  //   }
+
+  //   console.log(`Processed ${numAnchors} anchors, best: ${bestDetection?.className} (${bestDetection?.confidence.toFixed(3)})`);
+  //   return bestDetection ? [bestDetection] : [];
+  // };
+
+  // Function to run inference
+  const runInference = async (imageData: ImageData): Promise<Detection[]> => {
+    if (!model) {
+      throw new Error('Model not loaded');
+    }
+
+    let inputTensor = await preprocessImage(imageData);
+    inputTensor = normalize(inputTensor);
+
+    const inputName = model.inputNames[0];
+    const input = new ort.Tensor('float32', inputTensor, [1, 3, 640, 640]);
+
+    const feeds = { [inputName]: input };
+    const outputs = await model.run(feeds);
+
+    const outputName = model.outputNames[0];
+    const output = outputs[outputName];
+
+    if (!output) {
+      throw new Error('Output tensor is undefined');
+    }
+
+    console.log('Output shape:', output.dims);
+    
+    const numClasses = 5;
+    const confidenceThreshold = 0.3;
+    
+    // Gunakan versi simplest untuk performa terbaik
+    const detections = postprocessOutput(output, numClasses, confidenceThreshold);
+
+    return detections;
+  };
 
   const handleBrowseClick = () => {
     if (fileInputRef.current) {
@@ -53,51 +366,74 @@ export default function FishDetection() {
     }
   };
 
+  // Modified processFile function
   const processFile = async (file: File) => {
     console.log("Processing file:", file.name);
 
-    // Show preview of the image
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       if (e.target?.result) {
         setPreviewImage(e.target.result as string);
+
+        try {
+          setIsLoading(true);
+
+          if (isOffline) {
+            const img = new Image();
+            img.src = e.target.result as string;
+            await new Promise((resolve) => (img.onload = resolve));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 640;
+            canvas.height = 640;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('Could not get canvas context');
+
+            ctx.drawImage(img, 0, 0, 640, 640);
+            const imageData = ctx.getImageData(0, 0, 640, 640);
+
+            const detections = await runInference(imageData);
+            console.log('Offline detection result:', detections);
+
+            // Ambil class_name dari deteksi pertama (jika ada)
+            const className = detections.length > 0 ? detections[0].className : "Unknown";
+
+            // Redirect ke halaman hasil dengan class_name
+            router.push(`/result-fish-detection?class_name=${encodeURIComponent(className)}&offline=true`);
+          } else {
+            // Online processing using API
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch(`${API_BASE_URL}/upload-fish`, {
+              method: "POST",
+              body: formData,
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+              setImageUrls((prevImageUrls) => [
+                ...prevImageUrls,
+                ...result.predictions.map((prediction: Prediction) => prediction.image_url),
+              ]);
+              const className = result.predictions[0].class_name;
+              router.push(`/result-fish-detection?class_name=${encodeURIComponent(className)}`);
+            } else {
+              throw new Error(result.message || "Terjadi kesalahan tak terduga");
+            }
+          }
+        } catch (error) {
+          console.error("Error processing image:", error);
+          setErrorMessage(error instanceof Error ? error.message : "Terjadi kesalahan saat memproses gambar.");
+          setShowErrorModal(true);
+          setPreviewImage(null);
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
     reader.readAsDataURL(file);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/upload-fish`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        setImageUrls((prevImageUrls) => [
-          ...prevImageUrls,
-          ...result.predictions.map((prediction: Prediction) => prediction.image_url),
-        ]);
-        const className = result.predictions[0].class_name;
-        router.push(`/result-fish-detection?class_name=${encodeURIComponent(className)}`);
-      } else {
-        setErrorMessage("Upload gagal: " + (result.message || "Terjadi kesalahan tak terduga"));
-        setShowErrorModal(true);
-        setPreviewImage(null);
-      }
-    } catch (error) {
-      console.error("Error saat mengupload:", error);
-      setErrorMessage("Terjadi kesalahan saat mengupload.");
-      setShowErrorModal(true);
-      setPreviewImage(null);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -458,6 +794,13 @@ export default function FishDetection() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Add offline indicator */}
+      {isOffline && (
+        <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-white text-center py-2 z-50">
+          Mode Offline - Menggunakan deteksi lokal
         </div>
       )}
 

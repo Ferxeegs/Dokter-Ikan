@@ -5,9 +5,10 @@ import Link from 'next/link';
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import React, { useEffect, useState, useCallback } from 'react';
+import { getDiseasesFromIndexedDB } from '../components/utils/indexedDB';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Loader2, AlertCircle, RefreshCw, Home } from 'lucide-react';
+import { Loader2, AlertCircle, RefreshCw, Home, MessageCircle } from 'lucide-react';
 // Import Swiper dan modulnya
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, EffectCards } from 'swiper/modules';
@@ -23,6 +24,20 @@ interface DiseaseData {
   image: string | null;
 }
 
+interface DiagnosisResult {
+  disease: string;
+  match_percentage: number;
+}
+
+interface ParsedData {
+  success?: boolean;
+  data?: {
+    diagnoses: DiagnosisResult[] | string;
+  };
+  diagnoses?: DiagnosisResult[] | string; // For offline diagnosis
+  offline?: boolean;
+}
+
 const DetectionResultContent = () => {
   const searchParams = useSearchParams();
   const data = searchParams.get('data');
@@ -30,67 +45,174 @@ const DetectionResultContent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [, setActiveIndex] = useState(0);
   const [noDiagnosisMessage, setNoDiagnosisMessage] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const fetchDiseases = useCallback(async (diseases: string[]) => {
+  useEffect(() => {
+    const handleOnlineStatus = () => {
+      setIsOffline(!navigator.onLine);
+    };
+
+    window.addEventListener('online', handleOnlineStatus);
+    window.addEventListener('offline', handleOnlineStatus);
+    setIsOffline(!navigator.onLine);
+
+    return () => {
+      window.removeEventListener('online', handleOnlineStatus);
+      window.removeEventListener('offline', handleOnlineStatus);
+    };
+  }, []);
+
+  const fetchDiseases = useCallback(async (diseases: string[], offline: boolean = false) => {
     setIsLoading(true);
+    console.log('Fetching diseases:', diseases, 'offline:', offline);
+
     try {
-      const response = await fetch(`${API_BASE_URL}/fishdiseases`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ diseases }),
-      });
-      const result = await response.json();
-      if (result.success) {
-        setDiseaseData(result.data);
+      if (offline || isOffline) {
+        console.log('Fetching diseases from IndexedDB:', diseases);
+        const offlineDiseases = await getDiseasesFromIndexedDB(diseases);
+        console.log('Diseases from IndexedDB:', offlineDiseases);
+
+        if (offlineDiseases && offlineDiseases.length > 0) {
+          // Transform data sesuai dengan interface DiseaseData
+          const formattedDiseases = offlineDiseases.map(disease => ({
+            name: disease.name,
+            description: disease.description,
+            image: disease.image
+          }));
+          console.log('Formatted diseases:', formattedDiseases);
+          setDiseaseData(formattedDiseases);
+          setNoDiagnosisMessage(null); // Clear any previous error message
+        } else {
+          console.error('No diseases found in IndexedDB');
+          setNoDiagnosisMessage('Data penyakit tidak tersedia dalam mode offline');
+        }
       } else {
-        console.error('Failed to fetch diseases:', result.message);
+        // Online fetch from API
+        const response = await fetch(`${API_BASE_URL}/fishdiseases`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ diseases }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+          setDiseaseData(result.data);
+          setNoDiagnosisMessage(null); // Clear any previous error message
+        } else {
+          console.error('Failed to fetch diseases:', result.message);
+          setNoDiagnosisMessage('Gagal mengambil data penyakit');
+        }
       }
     } catch (error) {
       console.error('Error fetching diseases:', error);
+      
+      // If online request fails, try offline as fallback
+      if (!offline && !isOffline) {
+        console.log('Online request failed, trying offline fallback...');
+        try {
+          const offlineDiseases = await getDiseasesFromIndexedDB(diseases);
+          if (offlineDiseases && offlineDiseases.length > 0) {
+            const formattedDiseases = offlineDiseases.map(disease => ({
+              name: disease.name,
+              description: disease.description,
+              image: disease.image
+            }));
+            setDiseaseData(formattedDiseases);
+            setNoDiagnosisMessage(null);
+          } else {
+            setNoDiagnosisMessage('Terjadi kesalahan saat mengambil data penyakit');
+          }
+        } catch (offlineError) {
+          console.error('Offline fallback also failed:', offlineError);
+          setNoDiagnosisMessage('Terjadi kesalahan saat mengambil data penyakit');
+        }
+      } else {
+        setNoDiagnosisMessage('Terjadi kesalahan saat mengambil data penyakit');
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [API_BASE_URL]);
+  }, [API_BASE_URL, isOffline]);
 
   useEffect(() => {
     if (data) {
       try {
-        const parsedData = JSON.parse(data);
-        if (parsedData.success) {
-          // Menangani kasus khusus "Tidak ada penyakit dengan kecocokan di atas 50%"
-          if (parsedData.data && parsedData.data.diagnoses === "Tidak ada penyakit dengan kecocokan di atas 50%.") {
+        const parsedData = JSON.parse(data) as ParsedData;
+        console.log('Parsed data:', parsedData);
+
+        // Handle different data structures
+        let diagnoses: DiagnosisResult[] | string;
+        let isOfflineResult = false;
+
+        // Check if it's a standard API response with success property
+        if ('success' in parsedData && parsedData.success && parsedData.data) {
+          diagnoses = parsedData.data.diagnoses;
+          isOfflineResult = parsedData.offline === true;
+        } 
+        // Check if it's a direct offline diagnosis result
+        else if ('diagnoses' in parsedData && parsedData.diagnoses) {
+          diagnoses = parsedData.diagnoses;
+          isOfflineResult = true; // Assume offline if no success property
+        }
+        // Handle case where the entire parsed data is the diagnosis result
+        else if (Array.isArray(parsedData)) {
+          diagnoses = parsedData;
+          isOfflineResult = true;
+        }
+        else {
+          console.error('Unexpected data format:', parsedData);
+          setNoDiagnosisMessage('Format data tidak valid');
+          setIsLoading(false);
+          return;
+        }
+
+        // Handle case where diagnoses is a string (no match found)
+        if (typeof diagnoses === "string") {
+          if (diagnoses === "Tidak ada penyakit dengan kecocokan di atas 50%." || 
+              diagnoses === "Tidak ada penyakit dengan kecocokan di atas 40%.") {
             setNoDiagnosisMessage("Tidak ada penyakit yang cocok dengan gejala");
-            setIsLoading(false);
-          } 
-          // Menangani kasus normal dengan array diagnoses
-          else if (parsedData.data && Array.isArray(parsedData.data.diagnoses)) {
-            const diseases = parsedData.data.diagnoses.map((diagnosis: { disease: string }) => diagnosis.disease);
-            fetchDiseases(diseases);
-          } 
-          // Jika format respons tidak sesuai yang diharapkan
-          else {
-            console.error('Unexpected data format:', parsedData);
-            setIsLoading(false);
+          } else {
+            setNoDiagnosisMessage(diagnoses);
           }
-        } else {
-          console.error('API response indicates failure:', parsedData);
+          setIsLoading(false);
+        } 
+        // Handle case where diagnoses is an array
+        else if (Array.isArray(diagnoses)) {
+          const diseases = diagnoses.map(
+            (diagnosis: DiagnosisResult) => diagnosis.disease
+          );
+          console.log('Diseases to fetch:', diseases);
+          console.log('Is offline result:', isOfflineResult);
+          
+          fetchDiseases(diseases, isOfflineResult);
+        }
+        // Handle unexpected data format
+        else {
+          console.error('Unexpected diagnoses format:', diagnoses);
+          setNoDiagnosisMessage('Format data tidak valid');
           setIsLoading(false);
         }
       } catch (error) {
         console.error('Failed to parse data:', error);
+        setNoDiagnosisMessage('Gagal memproses hasil diagnosis');
         setIsLoading(false);
       }
     } else {
+      setNoDiagnosisMessage('Tidak ada data diagnosis');
       setIsLoading(false);
     }
   }, [data, fetchDiseases]);
 
   // Animation variants
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 0 }, 
     visible: {
       opacity: 1,
       transition: {
@@ -107,7 +229,11 @@ const DetectionResultContent = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-400 via-blue-200 to-white text-gray-800">
       <Navbar />
-
+      {isOffline && (
+        <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-white text-center py-2 z-50">
+          Mode Offline
+        </div>
+      )}
       <div className="container mx-auto px-4 py-6 sm:py-8">
         <motion.div
           className="max-w-4xl mx-auto"
@@ -273,10 +399,17 @@ const DetectionResultContent = () => {
               </Link>
               <Link
                 href="/"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 text-sm sm:text-base"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-3 bg-blue-100 text-blue-700 font-semibold rounded-lg shadow-md hover:bg-blue-200 transition-all duration-300 text-sm sm:text-base"
               >
                 <Home className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Kembali ke Beranda</span>
+              </Link>
+              <Link
+                href="/userpost"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 text-sm sm:text-base"
+              >
+                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Konsultasi dengan Ahli </span>
               </Link>
             </motion.div>
           </motion.div>
@@ -300,72 +433,72 @@ const DetectionResultContent = () => {
 
       {/* Custom CSS for better Swiper styling */}
       <style jsx global>{`
-  .disease-swiper {
-    padding: 15px 5px 30px;
-  }
-  .disease-swiper .swiper-pagination-bullet {
-    background: #fff;
-    opacity: 0.6;
-  }
-  .disease-swiper .swiper-pagination-bullet-active {
-    background: #fff;
-    opacity: 1;
-  }
-  .disease-swiper .swiper-button-next,
-  .disease-swiper .swiper-button-prev {
-    color: white;
-    background: rgba(37, 99, 235, 0.5);
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    transform: translateY(-50%);
-    backdrop-filter: blur(4px);
-  }
-  .disease-swiper .swiper-button-next:after,
-  .disease-swiper .swiper-button-prev:after {
-    font-size: 14px;
-    font-weight: bold;
-  }
-  .disease-swiper .swiper-button-next:hover,
-  .disease-swiper .swiper-button-prev:hover {
-    background: rgba(37, 99, 235, 0.8);
-  }
-  @media (min-width: 640px) {
-    .disease-swiper {
-      padding: 20px 10px 40px;
-    }
-    .disease-swiper .swiper-button-next,
-    .disease-swiper .swiper-button-prev {
-      width: 40px;
-      height: 40px;
-    }
-    .disease-swiper .swiper-button-next:after,
-    .disease-swiper .swiper-button-prev:after {
-      font-size: 18px;
-    }
-  }
+        .disease-swiper {
+          padding: 15px 5px 30px;
+        }
+        .disease-swiper .swiper-pagination-bullet {
+          background: #fff;
+          opacity: 0.6;
+        }
+        .disease-swiper .swiper-pagination-bullet-active {
+          background: #fff;
+          opacity: 1;
+        }
+        .disease-swiper .swiper-button-next,
+        .disease-swiper .swiper-button-prev {
+          color: white;
+          background: rgba(37, 99, 235, 0.5);
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          transform: translateY(-50%);
+          backdrop-filter: blur(4px);
+        }
+        .disease-swiper .swiper-button-next:after,
+        .disease-swiper .swiper-button-prev:after {
+          font-size: 14px;
+          font-weight: bold;
+        }
+        .disease-swiper .swiper-button-next:hover,
+        .disease-swiper .swiper-button-prev:hover {
+          background: rgba(37, 99, 235, 0.8);
+        }
+        @media (min-width: 640px) {
+          .disease-swiper {
+            padding: 20px 10px 40px;
+          }
+          .disease-swiper .swiper-button-next,
+          .disease-swiper .swiper-button-prev {
+            width: 40px;
+            height: 40px;
+          }
+          .disease-swiper .swiper-button-next:after,
+          .disease-swiper .swiper-button-prev:after {
+            font-size: 18px;
+          }
+        }
 
-  /* Custom Scrollbar Styling */
-  ::-webkit-scrollbar {
-    width: 8px; /* Width of the scrollbar */
-    height: 8px; /* Height of the scrollbar (for horizontal scrollbars) */
-  }
+        /* Custom Scrollbar Styling */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
 
-  ::-webkit-scrollbar-track {
-    background: #f0f0f0; /* Background color of the scrollbar track */
-    border-radius: 10px; /* Rounded corners for the track */
-  }
+        ::-webkit-scrollbar-track {
+          background: #f0f0f0;
+          border-radius: 10px;
+        }
 
-  ::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, #1a83fb, #69cbf4); /* Gradient color for the scrollbar thumb */
-    border-radius: 10px; /* Rounded corners for the thumb */
-    border: 2px solid #f0f0f0; /* Border around the thumb */
-  }
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(90deg, #1a83fb, #69cbf4);
+          border-radius: 10px;
+          border: 2px solid #f0f0f0;
+        }
 
-  ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(90deg, #1a83fb, #1a6fbf); /* Darker gradient on hover */
-  }
-`}</style>
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(90deg, #1a83fb, #1a6fbf);
+        }
+      `}</style>
     </div>
   );
 };

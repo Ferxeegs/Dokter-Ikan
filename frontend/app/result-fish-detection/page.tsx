@@ -12,8 +12,16 @@ import { RefreshCw } from 'lucide-react';
 import { FiInfo, FiHome, FiLoader } from 'react-icons/fi';
 import { GiSeahorse, GiWaterDrop } from 'react-icons/gi';
 
+// Import IndexedDB functions
+import { 
+  getFishTypeFromIndexedDB, 
+  // saveFishTypesToIndexedDB, 
+ 
+} from '../components/utils/indexedDB';
+
 // Definisikan tipe data untuk fishData
 interface FishData {
+  fish_type_id?: number;
   name: string;
   habitat: string;
   description: string;
@@ -64,23 +72,104 @@ const DetectionResult = () => {
   const [fishData, setFishData] = useState<FishData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [, setIsOffline] = useState<boolean>(false);
+  const [, setDataSource] = useState<'online' | 'offline'>('online');
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const fetchFishData = useCallback(async (className: string) => {
-    setIsLoading(true);
+  // Function untuk fetch data dari API
+  const fetchFishDataFromAPI = async (className: string): Promise<FishData | null> => {
     try {
       const response = await fetch(`${API_BASE_URL}/fish/search?name=${encodeURIComponent(className)}`);
       const data = await response.json();
+      
       if (response.ok) {
-        setFishData(data.data);
-        setErrorMessage(null);
+        return data.data;
       } else {
-        setErrorMessage('Gagal mendeteksi ikan. Silakan coba lagi.');
-        console.error('Failed to fetch fish data:', data.message);
+        console.error('API Error:', data.message);
+        return null;
       }
     } catch (error) {
-      setErrorMessage('Gagal mendeteksi ikan. Silakan coba lagi.');
+      console.error('Network Error:', error);
+      return null;
+    }
+  };
+
+  // Function untuk sync data fish types ke IndexedDB
+  const syncFishTypesToIndexedDB = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/fish-types`);
+      const data = await response.json();
+      
+      if (response.ok && data.data) {
+        // await saveFishTypesToIndexedDB(data.data);
+        console.log('Fish types synced to IndexedDB');
+      }
+    } catch (error) {
+      console.error('Failed to sync fish types:', error);
+    }
+  };
+
+  // Main function untuk fetch fish data
+  const fetchFishData = useCallback(async (className: string) => {
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      // Cek apakah online
+      const isOnline = navigator.onLine;
+      setIsOffline(!isOnline);
+
+      if (isOnline) {
+        // Coba fetch dari API terlebih dahulu
+        const apiData = await fetchFishDataFromAPI(className);
+        
+        if (apiData) {
+          setFishData(apiData);
+          setDataSource('online');
+          
+          // Background sync untuk update IndexedDB
+          syncFishTypesToIndexedDB();
+        } else {
+          // Jika API gagal, coba dari IndexedDB
+          const offlineData = await getFishTypeFromIndexedDB(className);
+          
+          if (offlineData) {
+            setFishData({
+              fish_type_id: offlineData.fish_type_id,
+              name: offlineData.name,
+              habitat: offlineData.habitat || '',
+              description: offlineData.description || '',
+              other_name: offlineData.other_name || '',
+              latin_name: offlineData.latin_name || '',
+              image: offlineData.image || ''
+            });
+            setDataSource('offline');
+          } else {
+            setErrorMessage('Gagal mendeteksi ikan. Data tidak tersedia secara offline.');
+          }
+        }
+      } else {
+        // Mode offline - langsung ke IndexedDB
+        const offlineData = await getFishTypeFromIndexedDB(className);
+        
+        if (offlineData) {
+          setFishData({
+            fish_type_id: offlineData.fish_type_id,
+            name: offlineData.name,
+            habitat: offlineData.habitat || '',
+            description: offlineData.description || '',
+            other_name: offlineData.other_name || '',
+            latin_name: offlineData.latin_name || '',
+            image: offlineData.image || ''
+          });
+          setDataSource('offline');
+        } else {
+          setErrorMessage('Data tidak tersedia secara offline. Silakan coba lagi saat terhubung ke internet.');
+        }
+      }
+    } catch (error) {
       console.error('Error fetching fish data:', error);
+      setErrorMessage('Terjadi kesalahan saat mengambil data ikan.');
     } finally {
       setIsLoading(false);
     }
@@ -88,9 +177,31 @@ const DetectionResult = () => {
 
   useEffect(() => {
     if (className) {
-      // Fetch fish data based on class_name
       fetchFishData(className);
     }
+  }, [className, fetchFishData]);
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      // Refresh data ketika kembali online
+      if (className) {
+        fetchFishData(className);
+      }
+    };
+
+    const handleOffline = () => {
+      setIsOffline(true);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, [className, fetchFishData]);
 
   // Animasi untuk fade-in content

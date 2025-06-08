@@ -50,37 +50,40 @@ export default function FishDetection() {
 
   // Notifikasi koneksi online/offline
   useEffect(() => {
-    // Handler untuk status online/offline
-    const handleOnline = () => {
-      setNotificationType('online');
-      setShowNotification(true);
-      setIsOffline(false);
-    };
-    const handleOffline = () => {
-      setNotificationType('offline');
-      setShowNotification(true);
-      setIsOffline(true);
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    // Deteksi status awal saat mount
-    if (!navigator.onLine) {
-      setNotificationType('offline');
-      setShowNotification(true);
-      setIsOffline(true);
-    } else {
+  // Handler untuk status online/offline
+  const handleOnline = () => {
+    // Hanya tampilkan notifikasi online jika sebelumnya offline
+    if (isOffline) {
       setNotificationType('online');
       setShowNotification(true);
       setIsOffline(false);
     }
+  };
+  
+  const handleOffline = () => {
+    setNotificationType('offline');
+    setShowNotification(true);
+    setIsOffline(true);
+  };
 
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+
+  // Deteksi status awal saat mount
+  if (!navigator.onLine) {
+    setNotificationType('offline');
+    setShowNotification(true);
+    setIsOffline(true);
+  } else {
+    // Tidak menampilkan notifikasi online saat pertama kali
+    setIsOffline(false);
+  }
+
+  return () => {
+    window.removeEventListener('online', handleOnline);
+    window.removeEventListener('offline', handleOffline);
+  };
+}, [isOffline]);
 
   // Timer auto-hide notifikasi
   useEffect(() => {
@@ -850,7 +853,14 @@ export default function FishDetection() {
             </div>
             {/* Progress bar */}
             <div className="mt-2 w-full bg-white/20 rounded-full h-1 overflow-hidden">
-              <div className="h-full bg-white rounded-full animate-progressBar"></div>
+              <div
+                className="h-full bg-white rounded-full progress-bar-animation"
+                style={{
+                  animationDuration: '4s',
+                  animationTimingFunction: 'linear',
+                  animationFillMode: 'forwards'
+                }}
+              ></div>
             </div>
           </div>
         </div>
@@ -858,6 +868,20 @@ export default function FishDetection() {
 
       {/* CSS for animations */}
       <style jsx>{`
+        @keyframes progressBar {
+          from { 
+            width: 100%; 
+          }
+          to { 
+            width: 0%; 
+          }
+        }
+
+        .progress-bar-animation {
+          width: 100%;
+          animation: progressBar 4s linear forwards;
+        }
+      
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }

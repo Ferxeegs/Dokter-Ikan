@@ -5,7 +5,8 @@ import {
   createPayment,
   updatePayment,
   deletePayment,
-  getPaymentByConsultationId
+  getPaymentByConsultationId,
+  getPaymentHistoryByUser
 } from '../controllers/PaymentController.js';
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.post('/payments', createPayment); // Tambah pembayaran baru
 router.put('/payments/:id', updatePayment); // Update status pembayaran
 router.delete('/payments/:id', deletePayment); // Hapus pembayaran
 router.get("/paymentsbyconsultation", getPaymentByConsultationId);
+router.get("/payments/history/:userId", getPaymentHistoryByUser);
 
 export default router;

@@ -134,3 +134,30 @@ export const deletePayment = async (req, res) => {
     return res.fail('Gagal menghapus data pembayaran', error.message, 500);
   }
 };
+
+export const getPaymentHistoryByUser = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const payments = await Payment.findAll({
+      include: [
+        {
+          model: Consultation,
+          attributes: ["consultation_id", "user_id"],
+          where: { user_id: userId },
+        }
+      ],
+      order: [["createdAt", "DESC"]],
+      attributes: ["payment_id", "payment_method", "total_fee", "payment_status", "createdAt"],
+    });
+
+    if (!payments || payments.length === 0) {
+      return res.fail("Tidak ada riwayat pembayaran ditemukan.");
+    }
+
+    return res.success("Berhasil mengambil riwayat pembayaran", payments);
+  } catch (error) {
+    console.error(error);
+    return res.fail("Terjadi kesalahan pada server", error.message, 500);
+  }
+};

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { Info } from "lucide-react";
+import { Info, CreditCard } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import CardRiwayat from "../components/history/CardRiwayat";
@@ -11,6 +11,11 @@ export default function Riwayat() {
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
+  };
+
+  const navigateToPaymentHistory = () => {
+    // Navigate to payment history page
+    window.location.href = '/riwayat-pembayaran';
   };
 
   return (
@@ -27,13 +32,22 @@ export default function Riwayat() {
           paddingTop: "5rem",
         }}
       >
-        <button
-          onClick={toggleModal}
-          className="absolute top-4 right-4 bg-blue-500 text-white p-1 sm:p-2 rounded-full hover:bg-blue-600 transition z-1 shadow-md"
-          aria-label="Informasi status konsultasi"
-        >
-          <Info className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
+        <div className="absolute top-4 right-4 flex gap-2">
+          <button
+            onClick={navigateToPaymentHistory}
+            className="bg-green-500 text-white p-1 sm:p-2 rounded-full hover:bg-green-600 transition z-1 shadow-md"
+            aria-label="Riwayat pembayaran"
+          >
+            <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+          <button
+            onClick={toggleModal}
+            className="bg-blue-500 text-white p-1 sm:p-2 rounded-full hover:bg-blue-600 transition z-1 shadow-md"
+            aria-label="Informasi status konsultasi"
+          >
+            <Info className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+        </div>
 
         <div className="text-center px-4 sm:px-0 max-w-3xl mx-auto">
           <h1 className="text-xl sm:text-3xl font-bold mb-2 text-[#1A83FB] font-lato">

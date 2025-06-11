@@ -31,14 +31,14 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: {
-        secure: 'true'  // Atur sesuai kebutuhan (true jika menggunakan HTTPS)
+        secure: 'true' 
     }
 }));
 
 // Konfigurasi CORS
 app.use(cors({
     credentials: true,
-    origin: process.env.FRONTEND_URL || "*",  // Sesuaikan dengan frontend kamu
+    origin: process.env.FRONTEND_URL || "*", 
 }));
 
 app.use(express.json());

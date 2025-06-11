@@ -7,6 +7,7 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Image from 'next/image';
 import Cookies from 'js-cookie';
+import { verifyToken } from "./components/utils/auth";
 // import RegisterSW from "./components/utils/RegisterSW";
 
 export default function Home() {
@@ -19,12 +20,35 @@ export default function Home() {
     setIsModalOpen(true);
   };
 
-  const handleConsultationClick = () => {
+ const handleConsultationClick = async () => {
     const token = Cookies.get('token');
     if (!token) {
       handleOpenModal("Anda harus login terlebih dahulu untuk mengakses halaman konsultasi tenaga ahli.");
-    } else {
-      router.push('/userpost');
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+      return;
+    }
+
+    try {
+      const isValid = await verifyToken();
+      
+      if (isValid) {
+        router.push('/userpost');
+      } else {
+        // If token is invalid, remove it and show login message
+        Cookies.remove('token');
+        handleOpenModal("Sesi Anda telah berakhir. Silakan login kembali.");
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      handleOpenModal("Terjadi kesalahan saat memverifikasi sesi. Silakan coba lagi.");
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
     }
   };
 

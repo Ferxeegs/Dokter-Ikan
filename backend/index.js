@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import session from "express-session";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 // import db from "./config/Database.js"; 
 import UserRoute from "./routes/UserRoute.js";
 import FishTypes from "./routes/FishTypeRoute.js";
@@ -24,6 +25,8 @@ import ArticleRoutes from "./routes/ArticleRoutes.js";
 
 dotenv.config();
 const app = express();
+
+app.use(cookieParser());
 
 // Konfigurasi session
 app.use(session({

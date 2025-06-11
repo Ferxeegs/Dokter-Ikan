@@ -1,19 +1,27 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, CreditCard, Clock, CheckCircle, XCircle, Info } from "lucide-react";
+import { ArrowLeft, CreditCard, Clock, CheckCircle, XCircle, Info, User, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Cookies from 'js-cookie';
 
+// Dynamic data from API
+
 interface Consultation {
   consultation_id: number;
-  id: number;
+  user_id: number;
+  User: {
+    name: string;
+  };
+  UserConsultation: {
+    consultation_topic: string;
+  };
 }
 
 interface Payment {
   payment_id: number;
-  payment_method: string;
+  payment_method: string | null;
   total_fee: number;
   payment_status: string;
   createdAt: string;
@@ -22,6 +30,7 @@ interface Payment {
 
 interface User {
   id: number;
+  name: string;
 }
 
 export default function RiwayatPembayaran() {
@@ -30,7 +39,15 @@ export default function RiwayatPembayaran() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  // Pagination calculations
+  const totalPages = Math.ceil(paymentHistory.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = paymentHistory.slice(startIndex, endIndex);
 
   // Optimized: Fetch user data and payment history in parallel when possible
   useEffect(() => {
@@ -149,16 +166,16 @@ export default function RiwayatPembayaran() {
       case 'success':
       case 'completed':
       case 'paid':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-gradient-to-r from-green-100 to-green-50 text-green-800 border-green-200';
       case 'pending':
       case 'waiting':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-800 border-yellow-200';
       case 'failed':
       case 'cancelled':
       case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-gradient-to-r from-red-100 to-red-50 text-red-800 border-red-200';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800 border-gray-200';
     }
   };
 
@@ -198,6 +215,21 @@ export default function RiwayatPembayaran() {
     }
   };
 
+  const getPaymentMethodIcon = (method: string | null) => {
+    if (!method) return <CreditCard className="w-4 h-4 text-gray-400" />;
+    
+    switch (method.toLowerCase()) {
+      case 'bank transfer':
+        return <CreditCard className="w-4 h-4 text-blue-600" />;
+      case 'e-wallet':
+        return <CreditCard className="w-4 h-4 text-green-600" />;
+      case 'credit card':
+        return <CreditCard className="w-4 h-4 text-purple-600" />;
+      default:
+        return <CreditCard className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -210,189 +242,362 @@ export default function RiwayatPembayaran() {
     window.location.reload();
   };
 
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const goToPreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
+  const getPaginationNumbers = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+
+    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, '...');
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push('...', totalPages);
+    } else {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
   return (
-    <div className="flex flex-col min-h-screen relative">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Navbar />
 
-      <main
-        className="flex-1 flex flex-col items-center text-center relative w-full"
-        style={{
-          backgroundImage:
-            "linear-gradient(to top, rgba(154, 201, 252, 1) 0.5%, rgba(255, 255, 255, 1) 80%), linear-gradient(to bottom, rgba(255, 255, 255, 1) 100%, rgba(255, 255, 255, 1) 80%)",
-          backgroundSize: "cover",
-          minHeight: "10vh",
-          paddingTop: "5rem",
-        }}
-      >
-        <div className="absolute top-4 left-4 flex gap-2">
-          <button
-            onClick={goBack}
-            className="bg-blue-500 text-white p-1 sm:p-2 rounded-full hover:bg-blue-600 transition z-1 shadow-md"
-            aria-label="Kembali"
-          >
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-          </button>
-        </div>
-
-        <button
-          onClick={toggleModal}
-          className="absolute top-4 right-4 bg-blue-500 text-white p-1 sm:p-2 rounded-full hover:bg-blue-600 transition z-1 shadow-md"
-          aria-label="Informasi status pembayaran"
-        >
-          <Info className="w-4 h-4 sm:w-5 sm:h-5" />
-        </button>
-
-        <div className="text-center px-4 sm:px-0 max-w-3xl mx-auto mb-8">
-          <h1 className="text-xl sm:text-3xl font-bold mb-2 text-[#1A83FB] font-lato">
-            Riwayat Pembayaran
-          </h1>
-          <h2 className="text-sm sm:text-lg text-[#2C2C2C]">
-            Halaman ini menampilkan daftar pembayaran konsultasi yang pernah Anda lakukan
-          </h2>
-          {user && (
-            <p className="text-xs sm:text-sm text-gray-600 mt-2">
-              User ID: {user.id}
-            </p>
-          )}
-        </div>
-
-        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6">
-          {loading ? (
-            <div className="flex flex-col justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A83FB] mb-4"></div>
-              <span className="text-gray-600 text-center">
-                Memuat riwayat pembayaran...
-              </span>
-              <p className="text-xs text-gray-500 mt-2">
-                Mohon tunggu sebentar
-              </p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-red-600 mb-2">
-                Terjadi Kesalahan
-              </h3>
-              <p className="text-red-500 mb-4 max-w-md mx-auto">
-                {error}
-              </p>
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
               <button
-                onClick={handleRetry}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition shadow-md"
+                onClick={goBack}
+                className="bg-white border border-gray-200 text-gray-600 p-2 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                aria-label="Kembali"
               >
-                Coba Lagi
+                <ArrowLeft className="w-5 h-5" />
               </button>
-            </div>
-          ) : paymentHistory.length === 0 ? (
-            <div className="text-center py-12">
-              <CreditCard className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                Belum Ada Riwayat Pembayaran
-              </h3>
-              <p className="text-gray-500">
-                Anda belum melakukan pembayaran konsultasi apapun
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="text-right text-sm text-gray-600 mb-4">
-                Ditemukan {paymentHistory.length} pembayaran
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Riwayat Pembayaran</h1>
+                <p className="text-sm text-gray-500">Kelola dan pantau pembayaran Anda</p>
               </div>
-              {paymentHistory.map((payment) => (
+            </div>
+            <button
+              onClick={toggleModal}
+              className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-all duration-200 shadow-sm"
+              aria-label="Informasi status pembayaran"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* User Info Card */}
+        {user && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                <User className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">{user.name}</h3>
+                <p className="text-sm text-gray-500">User ID: {user.id}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Content */}
+        {loading ? (
+          <div className="flex flex-col justify-center items-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+            <span className="text-gray-600 text-lg font-medium">
+              Memuat riwayat pembayaran...
+            </span>
+            <p className="text-sm text-gray-500 mt-2">
+              Mohon tunggu sebentar
+            </p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <XCircle className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Terjadi Kesalahan
+            </h3>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              {error}
+            </p>
+            <button
+              onClick={handleRetry}
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200 shadow-sm font-medium"
+            >
+              Coba Lagi
+            </button>
+          </div>
+        ) : paymentHistory.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CreditCard className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Belum Ada Riwayat Pembayaran
+            </h3>
+            <p className="text-gray-600">
+              Anda belum melakukan pembayaran konsultasi apapun
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <CreditCard className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Total Pembayaran</p>
+                    <p className="text-xl font-bold text-gray-900">{paymentHistory.length}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Berhasil</p>
+                    <p className="text-xl font-bold text-gray-900">
+                      {paymentHistory.filter(p => p.payment_status.toLowerCase() === 'success').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Menunggu</p>
+                    <p className="text-xl font-bold text-gray-900">
+                      {paymentHistory.filter(p => p.payment_status.toLowerCase() === 'pending').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment History List */}
+            <div className="space-y-4">
+              {currentItems.map((payment) => (
                 <div
                   key={payment.payment_id}
-                  className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 overflow-hidden"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CreditCard className="w-5 h-5 text-[#1A83FB]" />
-                        <h3 className="text-lg font-semibold text-gray-800">
-                          Payment ID: #{payment.payment_id}
-                        </h3>
+                  <div className="p-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                      {/* Left Section */}
+                      <div className="flex-1 space-y-4">
+                        {/* Header */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                            <CreditCard className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              Payment #{payment.payment_id}
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                              Konsultasi #{payment.Consultation?.consultation_id}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Details Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <User className="w-4 h-4 text-gray-400" />
+                              <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wide">Nama</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {payment.Consultation?.User?.name || 'N/A'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <MessageCircle className="w-4 h-4 text-gray-400" />
+                              <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wide">Topik Konsultasi</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {payment.Consultation?.UserConsultation?.consultation_topic || 'N/A'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              {getPaymentMethodIcon(payment.payment_method)}
+                              <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wide">Metode Pembayaran</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {payment.payment_method || 'Belum dipilih'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Clock className="w-4 h-4 text-gray-400" />
+                              <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wide">Tanggal</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {formatDate(payment.createdAt)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      
-                      <div className="space-y-2 text-left">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600 font-medium">Konsultasi ID:</span>
-                          <span className="text-sm text-gray-800">
-                            #{payment.Consultation?.consultation_id || 'N/A'}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600 font-medium">Metode Pembayaran:</span>
-                          <span className="text-sm text-gray-800">
-                            {payment.payment_method || 'Belum dipilih'}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600 font-medium">Total Biaya:</span>
-                          <span className="text-sm font-semibold text-[#1A83FB]">
+
+                      {/* Right Section */}
+                      <div className="flex flex-col items-end gap-4 lg:ml-6">
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500">Total Biaya</p>
+                          <p className="text-2xl font-bold text-gray-900">
                             {formatCurrency(payment.total_fee)}
-                          </span>
+                          </p>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600 font-medium">Tanggal:</span>
-                          <span className="text-sm text-gray-800">
-                            {formatDate(payment.createdAt)}
-                          </span>
+                        <div className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold ${getStatusColor(payment.payment_status)}`}>
+                          {getStatusIcon(payment.payment_status)}
+                          {getStatusText(payment.payment_status)}
                         </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col items-center sm:items-end gap-2">
-                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full border text-xs sm:text-sm font-semibold ${getStatusColor(payment.payment_status)}`}>
-                        {getStatusIcon(payment.payment_status)}
-                        {getStatusText(payment.payment_status)}
                       </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
+                <div className="text-sm text-gray-500">
+                  Menampilkan {startIndex + 1}-{Math.min(endIndex, paymentHistory.length)} dari {paymentHistory.length} pembayaran
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={goToPreviousPage}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Sebelumnya
+                  </button>
+                  
+                  <div className="flex items-center gap-1">
+                    {getPaginationNumbers().map((page, index) => (
+                      <button
+                        key={index}
+                        onClick={() => typeof page === 'number' && goToPage(page)}
+                        disabled={page === '...'}
+                        className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                          page === currentPage
+                            ? 'bg-blue-500 text-white'
+                            : page === '...'
+                            ? 'text-gray-400 cursor-default'
+                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  <button
+                    onClick={goToNextPage}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    Selanjutnya
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
-      {/* Modal untuk menampilkan status pembayaran */}
+      {/* Status Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md text-center">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Keterangan Status Pembayaran
-            </h3>
-            <ul className="space-y-4 text-left text-gray-700">
-              <li className="flex items-center gap-3">
-                <span className="bg-yellow-100 text-yellow-800 border border-yellow-200 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  Menunggu
-                </span>
-                <span>Pembayaran sedang diproses</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="bg-green-100 text-green-800 border border-green-200 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3" />
-                  Berhasil
-                </span>
-                <span>Pembayaran berhasil dikonfirmasi</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="bg-red-100 text-red-800 border border-red-200 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-1">
-                  <XCircle className="w-3 h-3" />
-                  Gagal
-                </span>
-                <span>Pembayaran tidak berhasil</span>
-              </li>
-            </ul>
-            <button
-              onClick={toggleModal}
-              className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition shadow-md"
-            >
-              Tutup
-            </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="p-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">
+                Keterangan Status Pembayaran
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <Clock className="w-4 h-4 text-yellow-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-yellow-900">Menunggu</p>
+                    <p className="text-sm text-yellow-700">Pembayaran sedang diproses</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-green-900">Berhasil</p>
+                    <p className="text-sm text-green-700">Pembayaran berhasil dikonfirmasi</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 p-3 bg-red-50 rounded-lg border border-red-200">
+                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                    <XCircle className="w-4 h-4 text-red-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-red-900">Gagal</p>
+                    <p className="text-sm text-red-700">Pembayaran tidak berhasil</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 rounded-b-xl">
+              <button
+                onClick={toggleModal}
+                className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 font-medium"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

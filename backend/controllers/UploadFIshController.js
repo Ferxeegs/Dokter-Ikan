@@ -73,7 +73,7 @@ export const uploadFishImage = async (req, res) => {
       console.error("Error:", error.message);  // Log error jika ada masalah saat pengiriman
       return res.status(500).json({
         success: false,
-        message: "Internal server error",
+        message: "Terjadi kesalahan ketika memproses gambar, silakan coba lagi.",
         error: error.message,
       });
     }

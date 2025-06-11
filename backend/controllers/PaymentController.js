@@ -1,6 +1,8 @@
 import Payment from '../models/PaymentModel.js';
 import Prescription from '../models/PrescriptionModel.js';
-import Consultation from '../models/ConsultationModel.js'; // Relasi ke Consultation
+import Consultation from '../models/ConsultationModel.js';
+import User from '../models/UserModel.js';
+import UserConsultation from '../models/UserConsultationModel.js';
 import "regenerator-runtime/runtime.js";
 
 // Mendapatkan semua pembayaran
@@ -145,10 +147,26 @@ export const getPaymentHistoryByUser = async (req, res) => {
           model: Consultation,
           attributes: ["consultation_id", "user_id"],
           where: { user_id: userId },
+          include: [
+            {
+              model: User,
+              attributes: ["name"],
+            },
+            {
+              model: UserConsultation,
+              attributes: ["consultation_topic"],
+            }
+          ]
         }
       ],
       order: [["createdAt", "DESC"]],
-      attributes: ["payment_id", "payment_method", "total_fee", "payment_status", "createdAt"],
+      attributes: [
+        "payment_id",
+        "payment_method",
+        "total_fee",
+        "payment_status",
+        "createdAt"
+      ],
     });
 
     if (!payments || payments.length === 0) {
@@ -161,3 +179,4 @@ export const getPaymentHistoryByUser = async (req, res) => {
     return res.fail("Terjadi kesalahan pada server", error.message, 500);
   }
 };
+

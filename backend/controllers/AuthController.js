@@ -7,6 +7,7 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import PasswordReset from '../models/PasswordResetModel.js';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import "regenerator-runtime/runtime.js";
 
 dotenv.config();
@@ -216,5 +217,20 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.fail('Terjadi kesalahan saat mereset password', error.message, 500);
+  }
+};
+
+export const verifyTokenFromCookie = (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Token tidak ditemukan di cookies' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return res.status(200).json({ success: true, message: 'Token valid', user: decoded });
+  } catch (error) {
+    return res.status(403).json({ success: false, message: 'Token tidak valid', error: error.message });
   }
 };

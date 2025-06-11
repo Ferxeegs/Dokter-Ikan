@@ -7,9 +7,9 @@ import {
 
 const router = express.Router();
 
-router.get("/fishdiseases", getFishDiseases); // Get all diseases
+router.get("/fishdiseases", getFishDiseases); 
 router.post("/diagnose", diagnoseFish);
-router.post("/fishdiseases", getFishDiseasesByNames); // Get fish diseases by names
+router.post("/fishdiseases", getFishDiseasesByNames); 
 
 
 

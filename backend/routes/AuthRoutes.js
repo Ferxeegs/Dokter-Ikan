@@ -3,9 +3,9 @@ import { startRegistration, verifyOtp, completeRegistration, forgotPassword, res
 
 const router = express.Router();
 
-router.post('/start-registration', startRegistration); // Route untuk memulai registrasi
-router.post('/verify-otp', verifyOtp); // Route untuk verifikasi OTP
-router.post('/complete-registration', completeRegistration); // Route untuk melengkapi pendaftaran
+router.post('/start-registration', startRegistration); 
+router.post('/verify-otp', verifyOtp); 
+router.post('/complete-registration', completeRegistration);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 

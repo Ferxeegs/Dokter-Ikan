@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
 import db from "../config/Database.js";
-import User from "../models/UserModel.js"; // Pastikan import ini benar
+import User from "../models/UserModel.js"; 
 import FishTypes from "./FishTypeModel.js";
 
 const { DataTypes } = Sequelize;
@@ -39,7 +39,7 @@ const UserConsultation = db.define(
     },
     fish_image: {
       type: DataTypes.STRING,
-      allowNull: true, // Jika gambar opsional
+      allowNull: true, 
     },
     complaint: {
       type: DataTypes.TEXT,
@@ -48,13 +48,13 @@ const UserConsultation = db.define(
     consultation_status: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: "Waiting", // Nilai default
+      defaultValue: "Waiting", 
     },
   },
   {
-    tableName: "userconsultation", // Nama tabel di database
-    timestamps: true, // Aktifkan timestamps untuk createdAt dan updatedAt
-    underscored: true, // Gunakan snake_case untuk kolom timestamps
+    tableName: "userconsultation", 
+    timestamps: true, 
+    underscored: true, 
   }
 );
 

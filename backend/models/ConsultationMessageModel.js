@@ -35,7 +35,7 @@ const ConsultationMessage = db.define(
   },
   {
     tableName: "consultation_messages",
-    timestamps: true, // Menyimpan waktu pengiriman pesan
+    timestamps: true,
     underscored: true,
   }
 );

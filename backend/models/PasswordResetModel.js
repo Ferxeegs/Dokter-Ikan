@@ -9,11 +9,11 @@ const PasswordReset = sequelize.define('PasswordReset', {
     primaryKey: true
   },
   user_id: {
-    type: DataTypes.INTEGER,  // Ubah dari UUID ke INTEGER
+    type: DataTypes.INTEGER, 
     allowNull: false,
     references: {
       model: User,
-      key: 'user_id'  // Sesuaikan dengan nama kolom di tabel `user`
+      key: 'user_id'
     },
     onDelete: 'CASCADE'
   },

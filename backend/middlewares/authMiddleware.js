@@ -10,12 +10,12 @@ export const authenticate = (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verifikasi token
-    console.log('Decoded Token:', decoded); // Log token yang didecode
-    req.user = decoded; // Menyimpan informasi token ke req.user
-    next(); // Lanjutkan ke route berikutnya
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+    console.log('Decoded Token:', decoded); 
+    req.user = decoded; 
+    next();
   } catch (error) {
-    console.error('Token verification error:', error); // Log jika token tidak valid
+    console.error('Token verification error:', error);
     return res.status(403).json({ message: 'Token tidak valid', error: error.message });
   }
 };

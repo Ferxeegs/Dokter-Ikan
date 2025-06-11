@@ -72,7 +72,7 @@ const User = db.define('User', {
   image: {
     type: DataTypes.STRING,
     allowNull: true,
-    defaultValue: 'images/icon/ic_defaultprofil.svg' // Default gambar profil
+    defaultValue: 'images/icon/ic_defaultprofil.svg' 
   },
   role: {
     type: DataTypes.ENUM('user', 'admin'),
@@ -81,8 +81,8 @@ const User = db.define('User', {
 }, {
   tableName: 'user',
   timestamps: true,
-  createdAt: 'created_at', // Gunakan nama kolom yang benar
-  updatedAt: 'updated_at' // createdAt dan updatedAt otomatis diaktifkan
+  createdAt: 'created_at', 
+  updatedAt: 'updated_at' 
 });
 
 export default User;

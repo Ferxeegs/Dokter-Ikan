@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import db from '../config/Database.js'; // Pastikan path ini benar dan sesuai dengan konfigurasi database Anda
+import db from '../config/Database.js'; 
 
 const { DataTypes } = Sequelize;
 

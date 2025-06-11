@@ -9,9 +9,9 @@ import {
 const router = express.Router();
 
 // Definisi route
-router.get('/medicines', getAllMedicines);             // Mendapatkan semua data obat
-router.get('/medicines/:id', getMedicineById);         // Mendapatkan data obat berdasarkan ID
-router.post('/medicines', createMedicine);             // Menambahkan obat baru
-router.put('/medicines/:id', updateMedicine);          // Memperbarui data obat berdasarkan ID
+router.get('/medicines', getAllMedicines);             
+router.get('/medicines/:id', getMedicineById);        
+router.post('/medicines', createMedicine);            
+router.put('/medicines/:id', updateMedicine);         
 
 export default router;

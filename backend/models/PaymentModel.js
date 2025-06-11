@@ -42,7 +42,7 @@ const Payment = db.define('Payment', {
   },
   payment_proof: {
     type: DataTypes.STRING,
-    allowNull: true // URL atau path gambar bukti pembayaran
+    allowNull: true 
   },
   payment_status: {
     type: DataTypes.STRING,

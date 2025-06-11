@@ -29,9 +29,9 @@ const FishExperts = db.define('FishExperts', {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true, // Email harus unik
+    unique: true, 
     validate: {
-      isEmail: true, // Validasi format email
+      isEmail: true, 
     },
   },
   password: {
@@ -41,20 +41,20 @@ const FishExperts = db.define('FishExperts', {
   role: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: 'expert', // Role default sebagai 'expert'
+    defaultValue: 'expert', 
   },
   image_url: {
     type: DataTypes.STRING,
-    allowNull: true, // Bisa kosong jika belum ada gambar
+    allowNull: true, 
     validate: {
-      isUrl: true, // Validasi format URL
+      isUrl: true, 
     },
   },
 }, {
   tableName: 'fishexperts',
   timestamps: true,
-  createdAt: 'created_at', // Gunakan nama kolom yang benar
-  updatedAt: 'updated_at', // Menonaktifkan createdAt dan updatedAt
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 });
 
 export default FishExperts;

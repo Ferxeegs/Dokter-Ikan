@@ -30,19 +30,19 @@ const Prescription = db.define('Prescription', {
   instruction: {
     type: DataTypes.TEXT,
   },
-  created_at: { // Sesuaikan dengan nama kolom di database
+  created_at: { 
     type: DataTypes.DATE,
     allowNull: false
   },
-  updated_at: { // Sesuaikan dengan nama kolom di database
+  updated_at: { 
     type: DataTypes.DATE,
     allowNull: false
   }
 }, {
   tableName: 'prescriptions',
-  timestamps: true, // Aktifkan timestamps
-  createdAt: 'created_at', // Arahkan ke kolom created_at di database
-  updatedAt: 'updated_at' // Arahkan ke kolom updated_at di database
+  timestamps: true, 
+  createdAt: 'created_at', 
+  updatedAt: 'updated_at' 
 });
 
 // Relasi dengan model Consultation

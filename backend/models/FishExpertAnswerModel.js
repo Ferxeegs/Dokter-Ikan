@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
 import db from "../config/Database.js";
-import FishExpert from "./FishExpertsModel.js"; // Asumsi model FishExpert sudah ada
+import FishExpert from "./FishExpertsModel.js";
 
 const { DataTypes } = Sequelize;
 
@@ -16,8 +16,8 @@ const FishExpertAnswer = db.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: FishExpert, // Relasi ke FishExpert
-        key: "fishExperts_id", // Pastikan sesuai dengan nama PK di model FishExpert
+        model: FishExpert, 
+        key: "fishExperts_id", 
       },
     },
     answer: {
@@ -29,13 +29,13 @@ const FishExpertAnswer = db.define(
       allowNull: true,
     },
     image: {
-      type: DataTypes.STRING, // Menyimpan URL gambar
+      type: DataTypes.STRING, 
       allowNull: true,
     },
   },
   {
-    tableName: "fishexpertanswer", // Nama tabel di database
-    timestamps: false, // Nonaktifkan createdAt dan updatedAt
+    tableName: "fishexpertanswer", 
+    timestamps: false, 
   }
 );
 

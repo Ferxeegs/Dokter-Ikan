@@ -26,7 +26,7 @@ const FishDisease = db.define(
   },
   {
     tableName: "fishdisease",
-    timestamps: false, // Tidak menggunakan createdAt dan updatedAt
+    timestamps: false,
   }
 );
 

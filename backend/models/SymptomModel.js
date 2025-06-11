@@ -27,7 +27,7 @@ const Symptom = db.define(
   },
   {
     tableName: "symptoms",
-    timestamps: false, // Jika tidak ingin menggunakan createdAt dan updatedAt
+    timestamps: false,
   }
 );
 

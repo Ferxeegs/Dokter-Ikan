@@ -36,7 +36,7 @@ const FishTypes = db.define('FishType', {
   },
 }, {
   tableName: 'fishtype',
-  timestamps: false, // Mengaktifkan createdAt dan updatedAt
+  timestamps: false,
 });
 
 export default FishTypes;

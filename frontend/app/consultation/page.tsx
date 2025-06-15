@@ -47,21 +47,31 @@ function ConsultationContent() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}`);
-        if (!response.ok) {
-          throw new Error('Gagal memuat data');
-        }
-        const result = await response.json();
-        setData(result.data);
-        setIsChatEnabled(result.data.chat_enabled);
-      } catch {
-        setIsError(true);
-      } finally {
-        setIsLoading(false);
+  const fetchData = async () => {
+    try {
+      const token = Cookies.get('token'); 
+
+      const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Sertakan token di header
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Gagal memuat data');
       }
-    };
+
+      const result = await response.json();
+      setData(result.data);
+      setIsChatEnabled(result.data.chat_enabled);
+    } catch {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
     fetchData();
   }, [consultationId, API_BASE_URL]);
@@ -69,7 +79,7 @@ function ConsultationContent() {
   if (!consultationId) {
     return (
       <div className="flex flex-col min-h-screen justify-center items-center">
-        <p className="text-xl font-semibold text-red-600">Consultation ID tidak ditemukan.</p>
+        <p className="text-xl font-semibold text-red-600">Consultation ID tidak ditemukan</p>
       </div>
     );
   }
@@ -85,7 +95,7 @@ function ConsultationContent() {
   if (isError || !data) {
     return (
       <div className="flex flex-col min-h-screen justify-center items-center">
-        <p className="text-xl font-semibold text-red-600">Terjadi kesalahan saat memuat data.</p>
+        <p className="text-xl font-semibold text-red-600">Terjadi kesalahan saat memuat data</p>
       </div>
     );
   }

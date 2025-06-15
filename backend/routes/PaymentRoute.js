@@ -8,11 +8,13 @@ import {
   getPaymentByConsultationId,
   getPaymentHistoryByUser
 } from '../controllers/PaymentController.js';
+import { authenticate } from '../middlewares/authMiddleware.js';
+import { checkConsultationOwnership } from '../middlewares/Authorization.js';
 
 const router = express.Router();
 
 router.get('/payments', getAllPayments); 
-router.get('/payments/:id', getPaymentById); 
+router.get('/payments/:id', authenticate, checkConsultationOwnership, getPaymentById); 
 router.post('/payments', createPayment); 
 router.put('/payments/:id', updatePayment); 
 router.delete('/payments/:id', deletePayment); 

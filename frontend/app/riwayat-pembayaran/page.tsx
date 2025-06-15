@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, CreditCard, Clock, CheckCircle, XCircle, Info, User, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, CreditCard, Clock, CheckCircle, XCircle, Info, User, MessageCircle, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Cookies from 'js-cookie';
@@ -254,6 +254,11 @@ export default function RiwayatPembayaran() {
     setCurrentPage(prev => Math.min(prev + 1, totalPages));
   };
 
+  // Handle card click to navigate to payment page
+  const handleCardClick = (consultationId: number) => {
+    window.location.href = `/payment?consultation_id=${consultationId}`;
+  };
+
   const getPaginationNumbers = () => {
     const delta = 2;
     const range = [];
@@ -417,24 +422,30 @@ export default function RiwayatPembayaran() {
               {currentItems.map((payment) => (
                 <div
                   key={payment.payment_id}
-                  className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 overflow-hidden"
+                  onClick={() => handleCardClick(payment.Consultation?.consultation_id)}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 cursor-pointer transition-all duration-200 overflow-hidden group"
                 >
                   <div className="p-6">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                       {/* Left Section */}
                       <div className="flex-1 space-y-4">
                         {/* Header */}
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                            <CreditCard className="w-5 h-5 text-white" />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                              <CreditCard className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
+                                Payment #{payment.payment_id}
+                              </h3>
+                              <p className="text-sm text-gray-500">
+                                Konsultasi #{payment.Consultation?.consultation_id}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              Payment #{payment.payment_id}
-                            </h3>
-                            <p className="text-sm text-gray-500">
-                              Konsultasi #{payment.Consultation?.consultation_id}
-                            </p>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <ExternalLink className="w-5 h-5 text-blue-500" />
                           </div>
                         </div>
 
@@ -496,6 +507,14 @@ export default function RiwayatPembayaran() {
                           {getStatusText(payment.payment_status)}
                         </div>
                       </div>
+                    </div>
+                  </div>
+                  
+                  {/* Click indicator */}
+                  <div className="px-6 pb-3">
+                    <div className="text-xs text-gray-400 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <span>Klik untuk melihat detail pembayaran</span>
+                      <ExternalLink className="w-3 h-3" />
                     </div>
                   </div>
                 </div>

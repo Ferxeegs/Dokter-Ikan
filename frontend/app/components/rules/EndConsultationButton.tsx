@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from "react";
-import { XCircle, Loader, CheckCircle, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { XCircle, Loader, CheckCircle, AlertCircle, CreditCard } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Cookies from 'js-cookie';
 
 interface EndConsultationButtonProps {
@@ -11,14 +12,62 @@ interface EndConsultationButtonProps {
 
 const EndConsultationButton: React.FC<EndConsultationButtonProps> = ({ consultationId, onEndSession }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingPayment, setIsCheckingPayment] = useState(true);
+  const [hasPayment, setHasPayment] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | null }>({
     message: '',
     type: null
   });
+  
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const router = useRouter();
+
+  // Cek apakah consultation_id sudah ada di tabel payment
+  useEffect(() => {
+    const token = Cookies.get('token');
+    const checkPaymentStatus = async () => {
+      if (!consultationId || !API_BASE_URL) return;
+      
+      setIsCheckingPayment(true);
+      try {
+        const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`,{
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Sertakan token di header
+        },
+      });
+        const paymentLookupData = await paymentLookupResponse.json();
+
+        if (
+          paymentLookupResponse.ok &&
+          paymentLookupData.success &&
+          paymentLookupData.message !== "Payment not found for this consultation"
+        ) {
+          // Jika pembayaran ditemukan
+          setHasPayment(true);
+        } else {
+          // Jika belum ada pembayaran
+          setHasPayment(false);
+        }
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+        setHasPayment(false);
+      } finally {
+        setIsCheckingPayment(false);
+      }
+    };
+
+    checkPaymentStatus();
+  }, [consultationId, API_BASE_URL]);
 
   const closeNotification = () => {
     setNotification({ message: '', type: null });
+  };
+
+  const handlePaymentSummary = () => {
+    // Redirect ke halaman pembayaran/ringkasan
+    router.push(`/payment?consultation_id=${consultationId}`);
   };
 
   const endConsultation = async () => {
@@ -53,18 +102,43 @@ const EndConsultationButton: React.FC<EndConsultationButtonProps> = ({ consultat
     }
   };
 
+  // Tampilkan loading saat mengecek status pembayaran
+  if (isCheckingPayment) {
+    return (
+      <button 
+        disabled 
+        className="px-4 py-2 flex items-center gap-2 bg-gray-400 text-white rounded-lg shadow-md cursor-not-allowed"
+      >
+        <Loader className="w-5 h-5 animate-spin" />
+        Mengecek Status...
+      </button>
+    );
+  }
+
   return (
     <>
-      <button
-        onClick={endConsultation}
-        disabled={isLoading}
-        className={`px-4 py-2 flex items-center gap-2 bg-red-500 text-white rounded-lg shadow-md transition-all ${
-          isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600 hover:scale-105"
-        }`}
-      >
-        {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : <XCircle className="w-5 h-5" />}
-        {isLoading ? "Mengakhiri..." : "Akhiri Konsultasi"}
-      </button>
+      {hasPayment ? (
+        // Tombol untuk ke ringkasan pembayaran
+        <button
+          onClick={handlePaymentSummary}
+          className="px-4 py-2 flex items-center gap-2 bg-green-500 text-white rounded-lg shadow-md transition-all hover:bg-green-600 hover:scale-105"
+        >
+          <CreditCard className="w-5 h-5" />
+          Ke Ringkasan Pembayaran
+        </button>
+      ) : (
+        // Tombol untuk mengakhiri konsultasi
+        <button
+          onClick={endConsultation}
+          disabled={isLoading}
+          className={`px-4 py-2 flex items-center gap-2 bg-red-500 text-white rounded-lg shadow-md transition-all ${
+            isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600 hover:scale-105"
+          }`}
+        >
+          {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : <XCircle className="w-5 h-5" />}
+          {isLoading ? "Mengakhiri..." : "Akhiri Konsultasi"}
+        </button>
+      )}
 
       {/* Modal Notifikasi */}
       {notification.type && (

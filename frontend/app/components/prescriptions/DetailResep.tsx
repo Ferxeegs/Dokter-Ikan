@@ -106,7 +106,7 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
             consultation_id: consultationId,
             prescription_id: prescriptionId || null,
             total_fee: totalFee,
-            payment_status: "pending",
+            payment_status: "unpaid",
           }),
         });
   

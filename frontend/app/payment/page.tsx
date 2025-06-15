@@ -5,6 +5,7 @@ import Footer from "../components/layout/Footer";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PaymentModal from "../components/modals/ModalPayment";
+import Cookies from "js-cookie";
 
 interface Medicine {
   title: string;
@@ -19,6 +20,7 @@ interface PaymentData {
   totalFee: number;
   chatEnabled: boolean;
   shippingFee: number;
+  paymentStatus: string; // Tambah field payment status
 }
 
 const Payment = () => {
@@ -41,8 +43,17 @@ const Payment = () => {
       setLoading(true);
       setError(null);
       try {
+        const token = Cookies.get('token');
         // Fetch consultation data
-        const consultationResponse = await fetch(`${API_BASE_URL}/consultations/${consultationId}`, { signal });
+        const consultationResponse = await fetch(`${API_BASE_URL}/consultations/${consultationId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            signal
+          });
         if (!consultationResponse.ok) throw new Error("Gagal mengambil data konsultasi.");
         const consultationData = await consultationResponse.json();
 
@@ -58,24 +69,37 @@ const Payment = () => {
         if (!paymentLookupData || !paymentLookupData.data?.payment_id) {
           throw new Error("ID pembayaran tidak ditemukan.");
         }
-        
+
         const paymentId = paymentLookupData.data.payment_id;
 
         // Fetch payment details
-        const paymentResponse = await fetch(`${API_BASE_URL}/payments/${paymentId}`, { signal });
+        
+
+        const paymentResponse = await fetch(
+          `${API_BASE_URL}/payments/${paymentId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            signal
+          }
+        );
+
         if (!paymentResponse.ok) throw new Error("Gagal mengambil data pembayaran.");
         const paymentDetail = await paymentResponse.json();
 
         const formattedDateTime = paymentDetail.data?.createdAt
           ? new Date(paymentDetail.data.createdAt).toLocaleString("id-ID", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-              hour12: false,
-            })
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          })
           : "Waktu Tidak Diketahui";
 
         if (isMounted) {
@@ -87,6 +111,7 @@ const Payment = () => {
             totalFee: paymentDetail?.data?.total_fee || 0,
             chatEnabled: consultationData?.data?.chat_enabled || false,
             shippingFee: paymentDetail?.data?.shipping_fee || 0,
+            paymentStatus: paymentDetail?.data?.payment_status || "unpaid", // Ambil payment status
           });
         }
       } catch (error) {
@@ -106,6 +131,71 @@ const Payment = () => {
     };
   }, [consultationId, API_BASE_URL]);
 
+  // Function untuk render status pembayaran
+  const renderPaymentStatus = () => {
+    if (!paymentData) return null;
+
+    const isShippingFeeValid = paymentData.shippingFee > 0;
+
+    switch (paymentData.paymentStatus.toLowerCase()) {
+      case 'unpaid':
+        return (
+          <>
+            {!isShippingFeeValid && (
+              <p className="text-center text-red-500 mt-4 mb-4">
+                Biaya pengiriman belum ditentukan. Silakan hubungi admin.
+              </p>
+            )}
+            <button
+              onClick={() => setModalOpen(true)}
+              className={`mt-6 w-full py-3 bg-blue-500 text-white font-semibold rounded-xl shadow-md transition hover:bg-blue-600 hover:scale-105 ${!isShippingFeeValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!isShippingFeeValid}
+            >
+              Pilih Metode Pembayaran
+            </button>
+          </>
+        );
+
+      case 'pending':
+        return (
+          <div className="mt-6 w-full py-4 bg-yellow-100 border-2 border-yellow-400 text-yellow-800 font-semibold rounded-xl text-center">
+            <div className="flex items-center justify-center space-x-2">
+              <svg className="animate-spin h-5 w-5 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Pembayaran Sedang Diverifikasi</span>
+            </div>
+            <p className="text-sm mt-2 text-yellow-700">
+              Mohon tunggu, sistem sedang memverifikasi pembayaran Anda.
+            </p>
+          </div>
+        );
+
+      case 'success':
+        return (
+          <div className="mt-6 w-full py-4 bg-green-100 border-2 border-green-400 text-green-800 font-semibold rounded-xl text-center">
+            <div className="flex items-center justify-center space-x-2">
+              <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>Pembayaran Berhasil</span>
+            </div>
+            <p className="text-sm mt-2 text-green-700">
+              Terima kasih! Pembayaran Anda telah berhasil diverifikasi.
+            </p>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="mt-6 w-full py-4 bg-gray-100 border-2 border-gray-400 text-gray-800 font-semibold rounded-xl text-center">
+            Status pembayaran: {paymentData.paymentStatus}
+          </div>
+        );
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center h-screen text-xl font-semibold text-blue-600">Memuat data pembayaran...</div>;
   }
@@ -118,8 +208,6 @@ const Payment = () => {
     return <div className="flex items-center justify-center h-screen text-xl font-semibold text-blue-900">Data pembayaran tidak ditemukan.</div>;
   }
 
-  const isShippingFeeValid = paymentData.shippingFee > 0;
-
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-300 to-blue-100">
       <Navbar />
@@ -131,6 +219,14 @@ const Payment = () => {
             <p><strong>Nama User:</strong> {paymentData.userName}</p>
             <p><strong>Nama Expert:</strong> {paymentData.expertName}</p>
             <p><strong>Tanggal & Jam:</strong> {paymentData.dateTime}</p>
+            <p><strong>Status Pembayaran:</strong>
+              <span className={`ml-2 px-2 py-1 rounded text-sm font-medium ${paymentData.paymentStatus.toLowerCase() === 'success' ? 'bg-green-100 text-green-800' :
+                  paymentData.paymentStatus.toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                }`}>
+                {paymentData.paymentStatus.toUpperCase()}
+              </span>
+            </p>
           </div>
 
           <hr className="my-4 border-blue-300" />
@@ -175,18 +271,10 @@ const Payment = () => {
             Total Biaya: Rp {paymentData.totalFee.toLocaleString()}
           </h3>
 
-          {!isShippingFeeValid && (
-            <p className="text-center text-red-500 mt-4">Biaya pengiriman belum ditentukan. Silakan hubungi admin.</p>
-          )}
+          {/* Render status pembayaran berdasarkan kondisi */}
+          {renderPaymentStatus()}
 
-          <button
-            onClick={() => setModalOpen(true)}
-            className={`mt-6 w-full py-3 bg-blue-500 text-white font-semibold rounded-xl shadow-md transition hover:bg-blue-600 hover:scale-105 ${!isShippingFeeValid ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={!isShippingFeeValid}
-          >
-            Pilih Metode Pembayaran
-          </button>
-          {consultationId && (
+          {consultationId && paymentData.paymentStatus.toLowerCase() === 'unpaid' && (
             <PaymentModal
               isOpen={isModalOpen}
               onClose={() => setModalOpen(false)}

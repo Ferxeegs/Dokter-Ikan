@@ -1,4 +1,5 @@
 import User from '../models/UserModel.js';
+import FishExperts from '../models/FishExpertsModel.js';
 import OtpVerification from '../models/OtpVerificationModel.js';
 import { Op } from 'sequelize';
 import moment from 'moment';
@@ -139,20 +140,37 @@ export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
+    // Check in both User and FishExperts tables
     const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res.fail('User tidak ditemukan', null, 404);
+    const expert = await FishExperts.findOne({ where: { email } });
+
+    // If email not found in either table
+    if (!user && !expert) {
+      return res.fail('Email tidak terdaftar', null, 404);
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     const tokenExpiry = moment().add(10, 'minutes').toDate();
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
-    await PasswordReset.create({
-      user_id: user.user_id,
-      reset_token: hashedToken,
-      reset_token_expiry: tokenExpiry
-    });
+    // Create password reset record based on user type
+    if (user) {
+      await PasswordReset.create({
+        user_id: user.user_id,
+        fishExpert_id: null,
+        reset_token: hashedToken,
+        reset_token_expiry: tokenExpiry,
+        user_type: 'user'
+      });
+    } else {
+      await PasswordReset.create({
+        user_id: null,
+        fishExpert_id: expert.fishExperts_id,
+        reset_token: hashedToken,
+        reset_token_expiry: tokenExpiry,
+        user_type: 'expert'
+      });
+    }
 
     const resetUrl = `${process.env.FRONTEND_URL}/resetpassword?token=${resetToken}&email=${email}`;
 
@@ -168,14 +186,23 @@ export const forgotPassword = async (req, res) => {
       from: `"Dokter Ikan" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'Reset Password Link',
-      text: `Klik link berikut untuk mereset password Anda: ${resetUrl}\nLink ini berlaku selama 10 menit.`
+      text: `Halo ${user ? user.name : expert.name},
+
+Link untuk reset password Anda: ${resetUrl}
+
+Link ini akan kadaluarsa dalam 10 menit.
+
+Jika Anda tidak meminta reset password, abaikan email ini.
+
+Salam,
+Tim Dokter Ikan`
     };
 
     await transporter.sendMail(mailOptions);
 
     return res.success('Link reset password telah dikirim ke email Anda');
   } catch (error) {
-    console.error(error);
+    console.error('Error in forgotPassword:', error);
     return res.fail('Terjadi kesalahan saat mengirim link reset password', error.message, 500);
   }
 };
@@ -188,34 +215,64 @@ export const resetPassword = async (req, res) => {
   }
 
   try {
+    // Check both tables
     const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res.fail('User tidak ditemukan', null, 404);
+    const expert = await FishExperts.findOne({ where: { email } });
+
+    if (!user && !expert) {
+      return res.fail('Email tidak terdaftar', null, 404);
     }
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
+    // Construct where clause based on user type
+    const whereClause = {
+      reset_token: hashedToken,
+      reset_token_expiry: { [Op.gt]: new Date() }
+    };
+
+    // Add the correct ID field based on user type
+    if (user) {
+      whereClause.user_id = user.user_id;
+      whereClause.user_type = 'user';
+    } else {
+      whereClause.fishExpert_id = expert.fishExperts_id;
+      whereClause.user_type = 'expert';
+    }
+
+    // Find the password reset record
     const passwordReset = await PasswordReset.findOne({
-      where: {
-        user_id: user.user_id,
-        reset_token: hashedToken,
-        reset_token_expiry: { [Op.gt]: new Date() }
-      }
+      where: whereClause
     });
 
     if (!passwordReset) {
       return res.fail('Token tidak valid atau sudah kadaluarsa');
     }
 
+    // Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-    await user.save();
 
-    await PasswordReset.destroy({ where: { user_id: user.user_id } });
+    // Update password based on user type
+    if (passwordReset.user_type === 'user' && user) {
+      await User.update(
+        { password: hashedPassword },
+        { where: { user_id: user.user_id } }
+      );
+    } else if (passwordReset.user_type === 'expert' && expert) {
+      await FishExperts.update(
+        { password: hashedPassword },
+        { where: { fishExperts_id: expert.fishExperts_id } }
+      );
+    }
+
+    // Delete all reset tokens for this user/expert
+    await PasswordReset.destroy({
+      where: user ? { user_id: user.user_id } : { fishExpert_id: expert.fishExperts_id }
+    });
 
     return res.success('Password berhasil direset');
   } catch (error) {
-    console.error(error);
+    console.error('Error in resetPassword:', error);
     return res.fail('Terjadi kesalahan saat mereset password', error.message, 500);
   }
 };

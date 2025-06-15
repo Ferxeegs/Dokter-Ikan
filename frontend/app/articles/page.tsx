@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Image from 'next/image';
-import { Calendar, User, ArrowLeft, Bookmark, Share2, Tag, Clock, ExternalLink } from 'lucide-react';
+import { Calendar, User, ArrowLeft,  Share2, Tag, Clock, ExternalLink } from 'lucide-react';
 import Link from "next/link";
 import React, { Suspense } from "react";
 
@@ -143,12 +143,6 @@ function ArticleContent() {
     }
   };
 
-  // Handle bookmark (this would typically interact with user preferences in a real app)
-  const handleBookmark = () => {
-    // Just a placeholder for now
-    alert('Article saved to bookmarks!');
-  };
-
   // Open the original article URL
   const openOriginalArticle = () => {
     if (article?.url) {
@@ -235,14 +229,7 @@ function ArticleContent() {
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             {/* Action buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={handleBookmark}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm transition duration-300"
-              >
-                <Bookmark size={14} />
-                <span className="hidden sm:inline">Simpan</span>
-              </button>
+            <div className="flex gap-2">       
               <button
                 onClick={handleShare}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm transition duration-300"

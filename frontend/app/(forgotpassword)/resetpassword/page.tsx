@@ -4,8 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Head from 'next/head';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import toast, { Toaster } from 'react-hot-toast';
 import Image from 'next/image';
 
 const ResetPassword = () => {
@@ -42,8 +41,17 @@ const ResetPassword = () => {
         body: JSON.stringify({ email: emailFromParams, token: searchParams.get('token'), newPassword: password }),
       });
       if (!response.ok) throw new Error('Gagal mereset password, coba lagi!');
-      toast.success('Password berhasil diubah!');
-      router.push('/login');
+      
+      // Tampilkan toast success terlebih dahulu
+      toast.success('Password berhasil diubah!', {
+        duration: 2000,
+      });
+      
+      // Redirect setelah 2.5 detik untuk memberi waktu toast muncul
+      setTimeout(() => {
+        router.push('/login');
+      }, 2500);
+      
     } catch {
       toast.error('Gagal mereset password, coba lagi!');
     } finally {
@@ -155,7 +163,37 @@ const ResetPassword = () => {
           </div>
         </div>
       </section>
-      <ToastContainer autoClose={2000} />
+      <Toaster 
+        position="top-right"
+        reverseOrder={false}
+        gutter={8}
+        containerClassName=""
+        containerStyle={{}}
+        toastOptions={{
+          // Default toast options
+          duration: 2000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          // Success toast options
+          success: {
+            duration: 2000,
+            style: {
+              background: '#10b981',
+              color: '#fff',
+            },
+          },
+          // Error toast options
+          error: {
+            duration: 2000,
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+            },
+          },
+        }}
+      />
     </div>
   );
 };

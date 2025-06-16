@@ -42,11 +42,20 @@ export const loginUser = async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    // Mengirimkan respons sukses dengan token
+    // Set token sebagai cookie HttpOnly
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
+      domain: '.dokterikan.com', // pastikan ini benar
+      path: '/',
+      maxAge: 3600000, // 1 hour
+    });
+
+    // Kirimkan response tanpa menyertakan token di body
     return res.success('Login berhasil', {
-      token,
       user: {
-        id: userId, // Gunakan ID yang sesuai (user_id atau fishExperts_id)
+        id: userId,
         name: user.name,
         email: user.email,
         role,
@@ -121,7 +130,7 @@ export const getMe = async (req, res) => {
       if (!fishExpert) {
         return res.fail('Expert tidak ditemukan di fishexperts', null, 404);
       }
-      
+
       const expertData = {
         id: fishExpert.fishExperts_id,
         name: fishExpert.name,
@@ -133,7 +142,7 @@ export const getMe = async (req, res) => {
         image: fishExpert.image_url,
         role: 'expert',
       };
-      
+
       return res.success('Data expert berhasil diambil', expertData);
     }
 
@@ -142,7 +151,7 @@ export const getMe = async (req, res) => {
     if (!user) {
       return res.fail('Pengguna tidak ditemukan di users', null, 404);
     }
-    
+
     const userData = {
       id: user.user_id,
       name: user.name,
@@ -153,7 +162,7 @@ export const getMe = async (req, res) => {
       created_at: user.created_at,
       role: 'user',
     };
-    
+
     return res.success('Data pengguna berhasil diambil', userData);
   } catch (error) {
     console.error('Error in getMe:', error);
@@ -164,7 +173,7 @@ export const getMe = async (req, res) => {
 export const updatePassword = async (req, res) => {
   try {
     // Ambil user ID dari token
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     // Ambil data dari request body
     const { currentPassword, newPassword } = req.body;

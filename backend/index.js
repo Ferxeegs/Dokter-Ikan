@@ -26,22 +26,21 @@ import ArticleRoutes from "./routes/ArticleRoutes.js";
 dotenv.config();
 const app = express();
 
-app.use(cookieParser());
-
-// Konfigurasi session
-app.use(session({
-    secret: process.env.SESS_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: 'true' 
-    }
+app.use(cors({
+  credentials: true,
+  origin: process.env.FRONTEND_URL
 }));
 
-// Konfigurasi CORS
-app.use(cors({
-    credentials: true,
-    origin: process.env.FRONTEND_URL || "*", 
+app.use(cookieParser());
+
+app.use(session({
+  secret: process.env.SESS_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: true,
+    sameSite: 'none'
+  }
 }));
 
 app.use(express.json());

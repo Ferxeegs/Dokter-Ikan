@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Image from 'next/image';
-import Cookies from 'js-cookie';
 import { verifyToken } from "./components/utils/auth";
 // import RegisterSW from "./components/utils/RegisterSW";
 
@@ -20,24 +19,13 @@ export default function Home() {
     setIsModalOpen(true);
   };
 
- const handleConsultationClick = async () => {
-    const token = Cookies.get('token');
-    if (!token) {
-      handleOpenModal("Anda harus login terlebih dahulu untuk mengakses halaman konsultasi tenaga ahli.");
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-      return;
-    }
-
+  const handleConsultationClick = async () => {
     try {
-      const isValid = await verifyToken();
-      
+      const isValid = await verifyToken(); 
+
       if (isValid) {
         router.push('/userpost');
       } else {
-        // If token is invalid, remove it and show login message
-        Cookies.remove('token');
         handleOpenModal("Sesi Anda telah berakhir. Silakan login kembali.");
         setTimeout(() => {
           router.push('/login');
@@ -93,13 +81,13 @@ export default function Home() {
             className="flex flex-col items-center bg-gradient-to-b from-white to-[#BCEBFF] text-white px-8 py-10 rounded-lg shadow-lg hover:shadow-2xl transition w-full sm:w-64 mr-0 sm:mr-4 mb-4 sm:mb-0"
           >
             <Link href="/diseasedetection">
-            <div className="flex flex-col items-center">
-              <Image src="/images/icon/ic_fish.png" alt="Artikel Icon" width={64} height={64} className="w-16 h-16 mb-4" />
-              <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">DETEKSI PENYAKIT IKAN</h3>
-              <p className="text-xs text-black text-center">
-                Fitur ini digunakan menganalisis penyakit ikan yang dengan memilih gejala penyakit. Expert System akan mendiagnosa penyakit berdasarkan gejala yang anda pilih.
-              </p>
-            </div>
+              <div className="flex flex-col items-center">
+                <Image src="/images/icon/ic_fish.png" alt="Artikel Icon" width={64} height={64} className="w-16 h-16 mb-4" />
+                <h3 className="font-bold font-sans text-sm text-[#1A83FB] mb-4">DETEKSI PENYAKIT IKAN</h3>
+                <p className="text-xs text-black text-center">
+                  Fitur ini digunakan menganalisis penyakit ikan yang dengan memilih gejala penyakit. Expert System akan mendiagnosa penyakit berdasarkan gejala yang anda pilih.
+                </p>
+              </div>
             </Link>
           </button>
 
@@ -136,9 +124,9 @@ export default function Home() {
           </div>
         )}
         <p className="text-black mt-24 max-w-3xl mx-auto text-justify font-lato text-sm sm:text-base">
-          Dokter Ikan adalah solusi digital inovatif untuk pemilik dan pembudidaya ikan, memanfaatkan teknologi AI untuk deteksi spesies 
-          dan penyakit ikan. Aplikasi ini memudahkan pengguna dalam mendiagnosis masalah kesehatan ikan hanya dengan mengunggah foto, 
-          serta menyediakan akses cepat ke obat yang direkomendasikan. Dengan integrasi fitur konsultasi online dengan tenaga ahli ikan, 
+          Dokter Ikan adalah solusi digital inovatif untuk pemilik dan pembudidaya ikan, memanfaatkan teknologi AI untuk deteksi spesies
+          dan penyakit ikan. Aplikasi ini memudahkan pengguna dalam mendiagnosis masalah kesehatan ikan hanya dengan mengunggah foto,
+          serta menyediakan akses cepat ke obat yang direkomendasikan. Dengan integrasi fitur konsultasi online dengan tenaga ahli ikan,
           pengguna juga dapat langsung mendapatkan saran profesional.
         </p>
       </main>

@@ -116,7 +116,7 @@ export const updateConsultation = async (req, res) => {
 };
 
 export const getConsultationHistory = async (req, res) => {
-  const token = req.headers.authorization ? req.headers.authorization.split(" ")[1] : null;
+  const token = req.cookies.token;
 
   if (!token) {
     return res.fail("Token tidak ditemukan.", null, 401);

@@ -102,7 +102,7 @@ export const verifyOtp = async (req, res) => {
 };
 
 export const completeRegistration = async (req, res) => {
-  const { email, name, password, address } = req.body;
+  const { email, name, password } = req.body;
 
   try {
     const otpRecord = await OtpVerification.findOne({

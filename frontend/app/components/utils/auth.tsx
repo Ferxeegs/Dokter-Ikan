@@ -2,7 +2,7 @@ export const verifyToken = async () => {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/verify-token`, {
       method: 'GET',
-      credentials: 'include', // Important for sending cookies
+      credentials: 'include', 
     });
 
     if (!response.ok) {

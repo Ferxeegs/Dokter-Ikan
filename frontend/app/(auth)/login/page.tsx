@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast, ToastContainer } from 'react-toastify'; // Import notifikasi
 import 'react-toastify/dist/ReactToastify.css'; // Gaya notifikasi
-import Cookies from 'js-cookie';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import Image from 'next/image';
 
@@ -24,9 +23,9 @@ export default function Login() {
   };
 
   // Fungsi untuk menyimpan token di cookies
-  const saveToken = (token: string) => {
-    Cookies.set('token', token, { expires: 1/24, secure: true, sameSite: 'Lax' });
-  };
+  // const saveToken = (token: string) => {
+  //   Cookies.set('token', token, { expires: 1 / 24, secure: true, sameSite: 'None' });
+  // };
 
   // Fungsi untuk menangani pengiriman formulir login
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,14 +48,14 @@ export default function Login() {
 
       if (response.ok) {
         const result = await response.json();
-        saveToken(result.data.token); // Simpan token di cookies
+
         toast.success('Login berhasil! Mengarahkan...');
-        // Arahkan berdasarkan peran
+
         setTimeout(() => {
           if (result.data.user.role === 'user') {
-            router.push('/'); // Halaman home untuk pengguna
+            router.push('/');
           } else if (result.data.user.role === 'expert') {
-            router.push('/expertpage'); // Halaman untuk expert
+            router.push('/expertpage');
           } else {
             toast.error('Peran tidak dikenal. Silakan hubungi dukungan.');
           }

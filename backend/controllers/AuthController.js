@@ -278,16 +278,65 @@ export const resetPassword = async (req, res) => {
 };
 
 export const verifyTokenFromCookie = (req, res) => {
+  console.log('=== VERIFY TOKEN DEBUG ===');
+  console.log('All cookies:', req.cookies);
+  console.log('Cookie header:', req.headers.cookie);
+  console.log('Origin:', req.headers.origin);
+  console.log('User-Agent:', req.headers['user-agent']);
+  
   const token = req.cookies.token;
 
   if (!token) {
-    return res.status(401).json({ success: false, message: 'Token tidak ditemukan di cookies' });
+    console.log('❌ Token tidak ditemukan di cookies');
+    console.log('Available cookies:', Object.keys(req.cookies || {}));
+    
+    // Coba parse manual dari cookie header
+    const cookieHeader = req.headers.cookie;
+    if (cookieHeader) {
+      console.log('Manual cookie parsing dari header...');
+      const tokenMatch = cookieHeader.match(/token=([^;]+)/);
+      if (tokenMatch) {
+        console.log('Token found via manual parsing!');
+        const manualToken = tokenMatch[1];
+        try {
+          const decoded = jwt.verify(manualToken, process.env.JWT_SECRET);
+          return res.status(200).json({ 
+            success: true, 
+            message: 'Token valid (manual parse)', 
+            user: decoded 
+          });
+        } catch (error) {
+          console.log('Manual token invalid:', error.message);
+        }
+      }
+    }
+    
+    return res.status(401).json({ 
+      success: false, 
+      message: 'Token tidak ditemukan di cookies',
+      debug: {
+        cookiesReceived: Object.keys(req.cookies || {}),
+        cookieHeader: req.headers.cookie || 'No cookie header'
+      }
+    });
   }
 
   try {
+    console.log('✅ Token found, verifying...');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return res.status(200).json({ success: true, message: 'Token valid', user: decoded });
+    console.log('✅ Token valid:', { id: decoded.id, role: decoded.role });
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Token valid', 
+      user: decoded 
+    });
   } catch (error) {
-    return res.status(403).json({ success: false, message: 'Token tidak valid', error: error.message });
+    console.log('❌ Token verification failed:', error.message);
+    return res.status(403).json({ 
+      success: false, 
+      message: 'Token tidak valid', 
+      error: error.message 
+    });
   }
 };

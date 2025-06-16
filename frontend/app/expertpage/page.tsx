@@ -50,74 +50,82 @@ export default function DashboardExpert() {
   const [statusFilter, setStatusFilter] = useState<string>("All");
 
   useEffect(() => {
-    const token = Cookies.get("token");
-    if (token) {
+    const fetchExpertId = async () => {
       try {
-        const decodedToken = jwtDecode<DecodedToken>(token);
-        setExpertId(decodedToken.id);
+        const response = await fetch(`${API_BASE_URL}/me`, {
+          credentials: 'include', // Token dikirim lewat HttpOnly cookie
+        });
+
+        if (!response.ok) throw new Error("Gagal mengambil data login");
+
+        const result = await response.json();
+        setExpertId(result.data.id);
       } catch (error) {
-        console.error("Error decoding token:", error);
+        console.error("Error fetching expert ID:", error);
       }
-    }
-  }, []);
+    };
 
+    fetchExpertId();
+  }, [API_BASE_URL]);
+
+  // 🔹 Ambil detail tenaga ahli setelah expertId didapat
   useEffect(() => {
-    if (expertId) {
-      const fetchExpertData = async () => {
-        try {
-          const token = Cookies.get("token");
-          const response = await fetch(`${API_BASE_URL}/fishexperts/${expertId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (!response.ok) throw new Error("Gagal mengambil data tenaga ahli");
-          const data = await response.json();
-          setExpertData(data.data);
-        } catch (error) {
-          console.error("Error fetching expert data:", error);
-        }
-      };
+    if (!expertId) return;
 
-      fetchExpertData();
-    }
+    const fetchExpertData = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/fishexperts/${expertId}`, {
+          credentials: 'include',
+        });
+
+        if (!response.ok) throw new Error("Gagal mengambil data tenaga ahli");
+
+        const data = await response.json();
+        setExpertData(data.data);
+      } catch (error) {
+        console.error("Error fetching expert data:", error);
+      }
+    };
+
+    fetchExpertData();
   }, [expertId, API_BASE_URL]);
 
+  // 🔹 Ambil semua konsultasi lalu filter berdasarkan expertId
   useEffect(() => {
-    if (expertId) {
-      const fetchConsultations = async () => {
-        setIsLoading(true);
-        try {
-          const token = Cookies.get("token");
-          const response = await fetch(`${API_BASE_URL}/consultations`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (!response.ok) throw new Error("Gagal mengambil data konsultasi");
-          const data = await response.json();
-          const filteredData = data.data
-            .filter((consultation: ConsultationData) => consultation.fishExpert_id === expertId)
-            .sort((a: ConsultationData, b: ConsultationData) =>
-              new Date(b.UserConsultation.createdAt).getTime() - new Date(a.UserConsultation.createdAt).getTime()
-            );
+    if (!expertId) return;
 
-          setConsultations(filteredData);
-          setTotalPages(Math.ceil(filteredData.length / itemsPerPage));
-        } catch (error) {
-          console.error("Error fetching consultations:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+    const fetchConsultations = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${API_BASE_URL}/consultations`, {
+          credentials: 'include',
+        });
 
-      fetchConsultations();
-    }
+        if (!response.ok) throw new Error("Gagal mengambil data konsultasi");
+
+        const data = await response.json();
+
+        const filteredData = data.data
+          .filter((consultation: ConsultationData) => consultation.fishExpert_id === expertId)
+          .sort((a: ConsultationData, b: ConsultationData) =>
+            new Date(b.UserConsultation.createdAt).getTime() - new Date(a.UserConsultation.createdAt).getTime()
+          );
+
+        setConsultations(filteredData);
+        setTotalPages(Math.ceil(filteredData.length / itemsPerPage));
+      } catch (error) {
+        console.error("Error fetching consultations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchConsultations();
   }, [expertId, API_BASE_URL]);
 
   // Filter consultations by status
-  const filteredConsultations = statusFilter === "All" 
-    ? consultations 
+  const filteredConsultations = statusFilter === "All"
+    ? consultations
     : consultations.filter(consultation => consultation.consultation_status === statusFilter);
 
   // Calculate total pages based on filtered consultations
@@ -165,31 +173,30 @@ export default function DashboardExpert() {
   const renderPaginationButtons = () => {
     const pageButtons = [];
     const maxButtons = 5; // Maximum number of page buttons to show
-    
+
     let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
     const endPage = Math.min(totalPages, startPage + maxButtons - 1);
-    
+
     if (endPage - startPage + 1 < maxButtons) {
       startPage = Math.max(1, endPage - maxButtons + 1);
     }
-    
+
     // Previous button
     pageButtons.push(
       <button
         key="prev"
         onClick={goToPreviousPage}
         disabled={currentPage === 1}
-        className={`px-3 py-1.5 rounded-md flex items-center ${
-          currentPage === 1 
-            ? 'text-gray-400 cursor-not-allowed' 
+        className={`px-3 py-1.5 rounded-md flex items-center ${currentPage === 1
+            ? 'text-gray-400 cursor-not-allowed'
             : 'text-blue-600 hover:bg-blue-50'
-        }`}
+          }`}
       >
         <ChevronLeft className="w-4 h-4 mr-1" />
         Prev
       </button>
     );
-    
+
     // First page button if not already in view
     if (startPage > 1) {
       pageButtons.push(
@@ -201,7 +208,7 @@ export default function DashboardExpert() {
           1
         </button>
       );
-      
+
       // Ellipsis if needed
       if (startPage > 2) {
         pageButtons.push(
@@ -211,24 +218,23 @@ export default function DashboardExpert() {
         );
       }
     }
-    
+
     // Page number buttons
     for (let i = startPage; i <= endPage; i++) {
       pageButtons.push(
         <button
           key={i}
           onClick={() => goToPage(i)}
-          className={`px-3 py-1 rounded-md ${
-            currentPage === i
+          className={`px-3 py-1 rounded-md ${currentPage === i
               ? 'bg-blue-600 text-white'
               : 'text-blue-600 hover:bg-blue-50'
-          }`}
+            }`}
         >
           {i}
         </button>
       );
     }
-    
+
     // Ellipsis and last page button if needed
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
@@ -238,7 +244,7 @@ export default function DashboardExpert() {
           </span>
         );
       }
-      
+
       pageButtons.push(
         <button
           key={totalPages}
@@ -249,27 +255,26 @@ export default function DashboardExpert() {
         </button>
       );
     }
-    
+
     // Next button
     pageButtons.push(
       <button
         key="next"
         onClick={goToNextPage}
         disabled={currentPage === totalPages}
-        className={`px-3 py-1.5 rounded-md flex items-center ${
-          currentPage === totalPages || totalPages === 0
-            ? 'text-gray-400 cursor-not-allowed' 
+        className={`px-3 py-1.5 rounded-md flex items-center ${currentPage === totalPages || totalPages === 0
+            ? 'text-gray-400 cursor-not-allowed'
             : 'text-blue-600 hover:bg-blue-50'
-        }`}
+          }`}
       >
         Next
         <ChevronRight className="w-4 h-4 ml-1" />
       </button>
     );
-    
+
     return pageButtons;
   };
-  
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
@@ -342,7 +347,7 @@ export default function DashboardExpert() {
             Kelola dan tanggapi konsultasi yang diajukan oleh pengguna platform. Klik pada kartu untuk melihat detail dan menanggapi konsultasi.
           </p>
         </div>
-        
+
         {/* Filter Controls */}
         <div className="w-full max-w-4xl mt-8 mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center">
@@ -352,18 +357,17 @@ export default function DashboardExpert() {
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    statusFilter === status
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${statusFilter === status
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   {status}
                 </button>
               ))}
             </div>
           </div>
-          
+
           <p className="text-gray-600">
             Menampilkan {filteredConsultations.length === 0 ? 0 : indexOfFirstItem + 1}-
             {Math.min(indexOfLastItem, filteredConsultations.length)} dari {filteredConsultations.length} konsultasi
@@ -395,7 +399,7 @@ export default function DashboardExpert() {
         ) : currentConsultations.length === 0 ? (
           <div className="w-full max-w-4xl py-10 my-8 bg-white rounded-lg shadow-md text-center">
             <p className="text-xl text-gray-500">
-              {filteredConsultations.length === 0 
+              {filteredConsultations.length === 0
                 ? "Tidak ada riwayat konsultasi ditemukan."
                 : "Tidak ada konsultasi yang sesuai dengan filter yang dipilih."}
             </p>

@@ -21,22 +21,27 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
 
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/messages/${consultationId}`);
-      if (!response.ok) {
-        throw new Error("Gagal mengambil pesan");
-      }
-      const data = await response.json();
+      const response = await fetch(`${API_BASE_URL}/messages/${consultationId}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
 
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.message || 'Gagal mengambil pesan');
+      }
+
+      const data = await response.json();
       if (JSON.stringify(messages) !== JSON.stringify(data.data)) {
-        setMessages(data.data);
+        setMessages(data.data || []);
       }
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      console.error('Error fetching messages:', error);
     }
   }, [API_BASE_URL, consultationId, messages]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       sendMessage();
     }
@@ -49,23 +54,27 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
 
     try {
       const response = await fetch(`${API_BASE_URL}/messages/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           consultation_id: consultationId,
-          sender_role: "expert",
+          sender_role: 'expert',
           message: newMessage,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Gagal mengirim pesan");
+        const result = await response.json();
+        throw new Error(result.message || 'Gagal mengirim pesan');
       }
 
-      setNewMessage("");
+      setNewMessage('');
       fetchMessages();
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error('Error sending message:', error);
     } finally {
       setIsLoading(false);
     }
@@ -107,8 +116,8 @@ export default function ChatExpert({ consultationId }: ChatExpertProps) {
             >
               <div
                 className={`p-3 rounded-lg max-w-xs text-sm ${msg.sender_role === "expert"
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "bg-gray-200 text-gray-900 shadow-sm"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-gray-200 text-gray-900 shadow-sm"
                   }`}
               >
                 <span className="block font-bold text-xs mb-1">

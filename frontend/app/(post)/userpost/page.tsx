@@ -9,8 +9,6 @@ import UploadFotoButton from '@/app/components/uploads/UploadFoto';
 import ComplaintPost from '@/app/components/complaints/Complaintpost';
 import Answer from '@/app/components/answers/Answer';
 import WelcomeModal from '@/app/components/modals/WelcomeModal';
-import jwt_decode from 'jwt-decode';
-import Cookies from 'js-cookie';
 import Modal from '@/app/components/modals/ModalPost';
 import { ClipLoader } from "react-spinners";
 
@@ -31,7 +29,7 @@ export default function UserPost() {
   const [berat, setBerat] = useState('');
   const [umur, setUmur] = useState('');
   const [message] = useState('');
-  const [, setUserId] = useState<number | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   const [fishtypes, setFishtypes] = useState<FishType[]>([]); // Type for fishtypes state
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Status dropdown
   const [fishTypeId, setFishTypeId] = useState<number | null>(null);
@@ -51,32 +49,59 @@ export default function UserPost() {
     fish_expert_specialization: string;
     consultation_status: string;
   } | null>(null);
+  const router = useRouter();
 
-  const getUserIdFromToken = useCallback((): number | null => {
-    const token = Cookies.get('token');
-
-    if (!token) {
-      console.warn('Token tidak ditemukan.');
-      return null;
-    }
+  const getCurrentUser = useCallback(async (): Promise<any | null> => {
     try {
-      const decodedToken: { id: number } = jwt_decode(token);
-      return decodedToken.id || null; // Pastikan mengembalikan null jika user_id tidak ada
+      console.log('Getting current user...');
+      const response = await fetch(`${API_BASE_URL}/verify-token`, {
+        method: 'GET',
+        credentials: 'include', // PENTING: untuk mengirim cookies
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('User verification response status:', response.status);
+
+      if (!response.ok) {
+        console.warn('User tidak terautentikasi.');
+        return null;
+      }
+
+      const data = await response.json();
+      console.log('Current user data:', data);
+
+      return data.success ? data.user : null;
     } catch (error) {
-      console.error('Error decoding token:', error); // Debugging error decoding
+      console.error('Error getting current user:', error);
       return null;
     }
-  }, []);
+  }, [API_BASE_URL]);
 
   const fetchFishTypes = useCallback(async () => {
-    if (!API_BASE_URL) return; // Don't attempt fetch if BASE_URL is undefined
+    if (!API_BASE_URL) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/fish-types`);
+      console.log('Fetching fish types...');
+      const response = await fetch(`${API_BASE_URL}/fish-types`, {
+        method: 'GET',
+        credentials: 'include', // Konsisten menggunakan credentials
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('Fish types data:', data);
+
       const transformedData = data.data.map((fish: { fish_type_id: number; name: string }) => ({
-        id: fish.fish_type_id, // Ubah fish_type_id ke id
-        name: fish.name, // Tambahkan properti name
+        id: fish.fish_type_id,
+        name: fish.name,
       }));
       setFishtypes(transformedData);
     } catch (error) {
@@ -84,36 +109,39 @@ export default function UserPost() {
     }
   }, [API_BASE_URL]);
 
-  const router = useRouter();
+  // Auth check menggunakan API verification
   useEffect(() => {
-    const token = Cookies.get('token');
-    if (!token) {
-      router.push('/login'); // atau redirect ke halaman login jika ada
-    }
-  }, []);
+    const checkAuth = async () => {
+      console.log('Checking authentication...');
+      const user = await getCurrentUser();
 
+      if (!user) {
+        console.warn('Pengguna tidak terautentikasi, redirect ke login.');
+        router.push('/login');
+      } else {
+        console.log('User authenticated:', user);
+        setUserId(user.id);
+      }
+    };
+
+    checkAuth();
+  }, [getCurrentUser, router]);
+
+  // Fetch fish types setelah auth berhasil
   useEffect(() => {
-    const id = getUserIdFromToken();
-    fetchFishTypes();
-    if (id) {
-      setUserId(id);
-    } else {
-      console.warn('Pengguna tidak terautentikasi.');
+    if (userId) {
+      fetchFishTypes();
     }
-  }, [fetchFishTypes, getUserIdFromToken]);
+  }, [userId, fetchFishTypes]);
 
   const handleSubmit = async () => {
-    const currentUserId = getUserIdFromToken();
+    console.log('Starting submission...');
 
-    if (!currentUserId) {
+    // Get current user untuk memastikan masih authenticated
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
       setModalMessage("Pengguna tidak terautentikasi.");
-      setShowModal(true);
-      return;
-    }
-
-    const token = Cookies.get("token");
-    if (!token) {
-      setModalMessage("Token autentikasi tidak ditemukan.");
       setShowModal(true);
       return;
     }
@@ -125,27 +153,32 @@ export default function UserPost() {
     }
 
     const requestData = {
-      user_id: currentUserId,
+      user_id: currentUser.id,
       fish_type_id: fishTypeId,
       fish_age: String(umur),
       fish_length: String(panjang),
       fish_weight: String(berat),
       consultation_topic: judul,
-      fish_image: JSON.stringify(images.map((image) => image.url)), complaint: inputText,
+      fish_image: JSON.stringify(images.map((image) => image.url)),
+      complaint: inputText,
       consultation_status: 'Waiting',
     };
 
+    console.log('Sending consultation data:', requestData);
+
     try {
+      // Request pertama: buat user consultation
       const response = await fetch(`${API_BASE_URL}/user-consultations`, {
         method: "POST",
+        credentials: 'include', // Gunakan credentials bukan Authorization header
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(requestData),
       });
 
       const responseData = await response.json();
+      console.log('User consultation response:', responseData);
 
       if (response.ok) {
         const userConsultationId = responseData.data?.user_consultation_id || responseData.data?.id;
@@ -155,21 +188,25 @@ export default function UserPost() {
           throw new Error("user_consultation_id not found in response");
         }
 
+        // Request kedua: buat consultation
         const consultationRequest = {
-          user_id: currentUserId,
+          user_id: currentUser.id,
           user_consultation_id: userConsultationId,
         };
 
+        console.log('Sending consultation request:', consultationRequest);
+
         const consultationResponse = await fetch(`${API_BASE_URL}/consultations`, {
           method: "POST",
+          credentials: 'include', // Gunakan credentials bukan Authorization header
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(consultationRequest),
         });
 
         const consultationResponseData = await consultationResponse.json();
+        console.log('Consultation response:', consultationResponseData);
 
         if (!consultationResponse.ok) {
           console.error("Error dari konsultasi API:", consultationResponseData);

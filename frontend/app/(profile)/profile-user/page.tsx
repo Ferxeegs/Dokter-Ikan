@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Cookies from 'js-cookie';
 import Navbar from '@/app/components/layout/Navbar';
 import Footer from '@/app/components/layout/Footer';
 import ProfileInfo from '@/app/components/profile/ProfileUserInfo';
@@ -26,27 +25,30 @@ export default function Profile() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = Cookies.get('token');
-      if (token) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+      try {
+        const response = await fetch(`${API_BASE_URL}/me`, {
+          method: 'GET',
+          credentials: 'include', // Kirim cookie HttpOnly ke server
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-          if (response.ok) {
-            const data = await response.json();
-            setUser({
-              ...data.data,
-              created_at: new Date(data.data.created_at).toLocaleDateString('id-ID', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-              }),
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
+        if (response.ok) {
+          const data = await response.json();
+          setUser({
+            ...data.data,
+            created_at: new Date(data.data.created_at).toLocaleDateString('id-ID', {
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric',
+            }),
+          });
+        } else {
+          console.warn('Gagal mendapatkan data pengguna');
         }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
       }
     };
 
@@ -61,16 +63,14 @@ export default function Profile() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const token = Cookies.get('token');
     const formData = new FormData();
     formData.append('files', file);
 
     try {
+      // Upload ke Cloudinary atau storage server
       const response = await fetch(`${API_BASE_URL}/uploadcloudprofileuser`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: 'include',
         body: formData,
       });
 
@@ -84,9 +84,9 @@ export default function Profile() {
         // Update image di database
         await fetch(`${API_BASE_URL}/update-image-user`, {
           method: 'PATCH',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ image: newImageUrl }),
         });

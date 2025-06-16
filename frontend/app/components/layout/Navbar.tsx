@@ -24,27 +24,40 @@ export default function Navbar() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = Cookies.get('token');
-      if (token) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/me`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+      try {
+        const response = await fetch(`${API_BASE_URL}/me`, {
+          method: 'GET',
+          credentials: 'include', // This will send the httpOnly cookies
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        });
 
-          if (response.ok) {
-            const data = await response.json();
-            setUser(data.data);
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
+        if (response.status === 401) {
+          // Handle unauthorized - maybe redirect to login
+          console.error('Unauthorized: Please login again');
+          router.push('/login');
+          return;
         }
+
+        if (!response.ok) {
+          const err = await response.json();
+          console.error('Gagal fetch user:', err.message);
+          return;
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          setUser(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
       }
     };
 
     fetchUserData();
-  }, [API_BASE_URL]);
+  }, [API_BASE_URL, router]);
+
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

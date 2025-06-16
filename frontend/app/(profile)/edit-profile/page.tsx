@@ -48,7 +48,7 @@ export default function EditProfile() {
     village: '',
     phone_number: '',
   });
-  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [provinces, setProvinces] = useState<Region[]>([]);
   const [cities, setCities] = useState<Region[]>([]);
   const [districts, setDistricts] = useState<Region[]>([]);
@@ -62,51 +62,50 @@ export default function EditProfile() {
   useEffect(() => {
     const fetchUserData = async () => {
       setIsLoading(true);
-      const token = Cookies.get('token');
-      if (token) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/me`, {
-            headers: { Authorization: `Bearer ${token}` },
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/me`, {
+          method: "GET",
+          credentials: "include", // Kirim cookies ke backend
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          setFormData({
+            name: data.data.name || '',
+            email: data.data.email || '',
+            address: data.data.address || '',
+            province: data.data.province || '',
+            city: data.data.city || '',
+            district: data.data.district || '',
+            village: data.data.village || '',
+            phone_number: data.data.phone_number || '',
+            image: data.data.image || '',
           });
 
-          if (response.ok) {
-            const data = await response.json();
-            // Ensure all string fields have default empty string values if null
-            setFormData({
-              name: data.data.name || '',
-              email: data.data.email || '',
-              address: data.data.address || '',
-              province: data.data.province || '',
-              city: data.data.city || '',
-              district: data.data.district || '',
-              village: data.data.village || '',
-              phone_number: data.data.phone_number || '',
-              image: data.data.image || '',
-            });
-            
-            // If province exists, fetch related cities
-            if (data.data.province) {
-              fetchCities(data.data.province);
-            }
-            
-            // If city exists, fetch related districts
-            if (data.data.city) {
-              fetchDistricts(data.data.city);
-            }
-            
-            // If district exists, fetch related villages
-            if (data.data.district) {
-              fetchVillages(data.data.district);
-            }
-          } else {
-            toast.error('Gagal mengambil data profil');
+          if (data.data.province) {
+            fetchCities(data.data.province);
           }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          toast.error('Terjadi kesalahan saat mengambil data profil');
-        } finally {
-          setIsLoading(false);
+
+          if (data.data.city) {
+            fetchDistricts(data.data.city);
+          }
+
+          if (data.data.district) {
+            fetchVillages(data.data.district);
+          }
+        } else {
+          toast.error('Gagal mengambil data profil');
         }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        toast.error('Terjadi kesalahan saat mengambil data profil');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -206,58 +205,54 @@ export default function EditProfile() {
 
   // Validasi form sebelum submit
   const validateForm = (): boolean => {
-    const errors: {[key: string]: string} = {};
-    
+    const errors: { [key: string]: string } = {};
+
     // Validasi nomor telepon
     if (formData.phone_number) {
       if (!validatePhoneNumber(formData.phone_number)) {
         errors.phone_number = 'Nomor HP harus terdiri dari 10-15 digit';
       }
     }
-    
+
     // Validasi field wajib lainnya
     if (!formData.name?.trim()) {
       errors.name = 'Nama tidak boleh kosong';
     }
-    
+
     if (!formData.address?.trim()) {
       errors.address = 'Alamat tidak boleh kosong';
     }
-    
+
     if (!formData.province) {
       errors.province = 'Provinsi harus dipilih';
     }
-    
+
     if (!formData.city) {
       errors.city = 'Kabupaten/Kota harus dipilih';
     }
-    
+
     if (!formData.district) {
       errors.district = 'Kecamatan harus dipilih';
     }
-    
+
     if (!formData.village) {
       errors.village = 'Kelurahan/Desa harus dipilih';
     }
-    
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    // Reset error fields
+
     setFieldErrors({});
-    
-    // Validasi form sebelum mengirim ke server
+
     if (!validateForm()) {
-      // Tampilkan toast untuk error validasi
       toast.error('Form berisi kesalahan. Silakan periksa kembali.');
       return;
     }
-    
-    const token = Cookies.get('token');
+
     setIsSubmitting(true);
 
     try {
@@ -265,42 +260,42 @@ export default function EditProfile() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
+        credentials: 'include', // penting jika menggunakan HttpOnly cookie
         body: JSON.stringify(formData),
       });
 
       const responseData: ServerResponse<User> = await response.json();
-      
+
       if (response.ok) {
         toast.success(responseData.message || 'Profil berhasil diperbarui!');
         setTimeout(() => {
           router.push('/profile-user');
         }, 2000);
       } else {
-        // Handling error berdasarkan format response backend
         const errorMessage = responseData.message || 'Gagal memperbarui profil';
-        
-        // Handling error validasi dari Sequelize
-        if (responseData.error && responseData.error.errors && responseData.error.errors.length > 0) {
-          const newErrors: {[key: string]: string} = {};
-          
-          // Extract specific field errors
-          responseData.error.errors.forEach(err => {
+
+        // Handling Sequelize field validation errors
+        if (
+          responseData.error &&
+          Array.isArray(responseData.error.errors)
+        ) {
+          const newErrors: { [key: string]: string } = {};
+
+          responseData.error.errors.forEach((err) => {
             if (err.path && err.message) {
               newErrors[err.path] = err.message;
-              
-              // Tampilkan toast untuk setiap error field
+
               toast.error(`${err.path}: ${err.message}`, {
                 id: `field-${err.path}`,
-                duration: 4000
+                duration: 4000,
               });
             }
           });
-          
+
           setFieldErrors(newErrors);
         } else {
-          // General error message
+          // General server-side error
           toast.error(errorMessage);
         }
       }
@@ -374,7 +369,7 @@ export default function EditProfile() {
                     onChange={(e) => {
                       setFormData({ ...formData, name: e.target.value });
                       if (fieldErrors.name) {
-                        setFieldErrors({...fieldErrors, name: ''});
+                        setFieldErrors({ ...fieldErrors, name: '' });
                       }
                     }}
                     className={`w-full p-3 text-gray-700 border ${fieldErrors.name ? 'border-red-500 bg-red-50' : 'border-blue-200'} rounded-lg focus:outline-none focus:ring-2 ${fieldErrors.name ? 'focus:ring-red-500' : 'focus:ring-blue-500'} transition duration-200`}
@@ -406,10 +401,10 @@ export default function EditProfile() {
                     onChange={(e) => {
                       const value = e.target.value.replace(/[^0-9]/g, ''); // Hanya terima digit
                       setFormData({ ...formData, phone_number: value });
-                      
+
                       // Reset error jika pengguna mengedit field
                       if (fieldErrors.phone_number) {
-                        setFieldErrors({...fieldErrors, phone_number: ''});
+                        setFieldErrors({ ...fieldErrors, phone_number: '' });
                       }
                     }}
                     className={`w-full p-3 text-gray-700 border ${fieldErrors.phone_number ? 'border-red-500 bg-red-50' : 'border-blue-200'} rounded-lg focus:outline-none focus:ring-2 ${fieldErrors.phone_number ? 'focus:ring-red-500' : 'focus:ring-blue-500'} transition duration-200`}
@@ -433,12 +428,12 @@ export default function EditProfile() {
                     onChange={(e) => {
                       handleProvinceChange(e);
                       if (fieldErrors.province) {
-                        setFieldErrors({...fieldErrors, province: ''});
+                        setFieldErrors({ ...fieldErrors, province: '' });
                       }
                     }}
                     className={`w-full p-3 text-gray-700 border ${fieldErrors.province ? 'border-red-500 bg-red-50' : 'border-blue-200'} rounded-lg focus:outline-none focus:ring-2 ${fieldErrors.province ? 'focus:ring-red-500' : 'focus:ring-blue-500'} transition duration-200`}
                     value={formData.province || ''}
-                    
+
                   >
                     <option value="">Pilih Provinsi</option>
                     {provinces.map((prov) => (
@@ -455,12 +450,12 @@ export default function EditProfile() {
                     onChange={(e) => {
                       handleCityChange(e);
                       if (fieldErrors.city) {
-                        setFieldErrors({...fieldErrors, city: ''});
+                        setFieldErrors({ ...fieldErrors, city: '' });
                       }
                     }}
                     className={`w-full p-3 text-gray-700 border ${fieldErrors.city ? 'border-red-500 bg-red-50' : 'border-blue-200'} rounded-lg focus:outline-none focus:ring-2 ${fieldErrors.city ? 'focus:ring-red-500' : 'focus:ring-blue-500'} transition duration-200`}
                     value={formData.city || ''}
-                    
+
                     disabled={!formData.province}
                   >
                     <option value="">Pilih Kabupaten/Kota</option>
@@ -478,12 +473,12 @@ export default function EditProfile() {
                     onChange={(e) => {
                       handleDistrictChange(e);
                       if (fieldErrors.district) {
-                        setFieldErrors({...fieldErrors, district: ''});
+                        setFieldErrors({ ...fieldErrors, district: '' });
                       }
                     }}
                     className={`w-full p-3 text-gray-700 border ${fieldErrors.district ? 'border-red-500 bg-red-50' : 'border-blue-200'} rounded-lg focus:outline-none focus:ring-2 ${fieldErrors.district ? 'focus:ring-red-500' : 'focus:ring-blue-500'} transition duration-200`}
                     value={formData.district || ''}
-                    
+
                     disabled={!formData.city}
                   >
                     <option value="">Pilih Kecamatan</option>
@@ -501,12 +496,12 @@ export default function EditProfile() {
                     onChange={(e) => {
                       setFormData({ ...formData, village: e.target.value });
                       if (fieldErrors.village) {
-                        setFieldErrors({...fieldErrors, village: ''});
+                        setFieldErrors({ ...fieldErrors, village: '' });
                       }
                     }}
                     className={`w-full p-3 text-gray-700 border ${fieldErrors.village ? 'border-red-500 bg-red-50' : 'border-blue-200'} rounded-lg focus:outline-none focus:ring-2 ${fieldErrors.village ? 'focus:ring-red-500' : 'focus:ring-blue-500'} transition duration-200`}
                     value={formData.village || ''}
-                    
+
                     disabled={!formData.district}
                   >
                     <option value="">Pilih Kelurahan/Desa</option>
@@ -528,7 +523,7 @@ export default function EditProfile() {
                 onChange={(e) => {
                   setFormData({ ...formData, address: e.target.value });
                   if (fieldErrors.address) {
-                    setFieldErrors({...fieldErrors, address: ''});
+                    setFieldErrors({ ...fieldErrors, address: '' });
                   }
                 }}
                 className={`w-full p-3 text-gray-700 border ${fieldErrors.address ? 'border-red-500 bg-red-50' : 'border-blue-200'} rounded-lg focus:outline-none focus:ring-2 ${fieldErrors.address ? 'focus:ring-red-500' : 'focus:ring-blue-500'} transition duration-200`}
@@ -549,15 +544,15 @@ export default function EditProfile() {
             )}
 
             <div className="flex justify-end space-x-4 pt-4 border-t border-blue-100">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => router.push('/profile-user')}
                 className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition duration-200"
               >
                 Batal
               </button>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200 flex items-center"
                 disabled={isSubmitting}
               >
@@ -576,7 +571,7 @@ export default function EditProfile() {
         </div>
       </div>
       <Footer />
-      <Toaster 
+      <Toaster
         position="top-center"
         toastOptions={{
           duration: 3000,

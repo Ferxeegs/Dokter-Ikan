@@ -72,111 +72,104 @@ export default function CardRiwayat() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // Ambil token dari cookies
-  const token = Cookies.get("token");
+  const getCurrentUser = useCallback(async (): Promise<UserFromToken | null> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/verify-token`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-  const getUserFromToken = (token: string | undefined): UserFromToken | null => {
-    if (token) {
-      try {
-        const decodedToken: UserFromToken = jwt_decode(token);
-        return decodedToken;
-      } catch (error) {
-        console.error("Error decoding token:", error);
+      if (!response.ok) {
         return null;
       }
+
+      const data = await response.json();
+      return data.success ? data.user : null;
+    } catch (error) {
+      console.error("Error verifying user:", error);
+      return null;
     }
-    return null;
-  };
+  }, [API_BASE_URL]);
 
   const fetchConsultations = useCallback(async () => {
-    if (!token) {
-      setIsLoggedIn(false);
-      setLoading(false);
-      return;
-    }
-
-    setIsLoggedIn(true);
-    setLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/consultation`, {
         method: "GET",
+        credentials: "include",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
       const data = await response.json();
 
-      // Penanganan respons khusus untuk status 404 (belum ada riwayat konsultasi)
-      // Backend mengirim 404 dengan pesan khusus saat belum ada riwayat konsultasi
       if (response.status === 404 && data.message === "Belum ada riwayat konsultasi.") {
         setConsultations([]);
         setError(null);
-        setLoading(false);
         return;
       }
 
-      if (response.ok) {
-        if (data && data.data) {
-          // Transformasi data agar sesuai dengan tipe `Consultation`
-          const transformedData = data.data.map((item: ApiResponseItem) => ({
-            consultation_id: item.consultation_id,
-            user_consultation_id: item.user_consultation_id,
-            fishExpert_id: item.fishExpert_id,
-            fish_expert_answer_id: item.fish_expert_answer_id,
-            consultation_status: item.consultation_status,
+      if (response.ok && data.data) {
+        const transformedData = data.data.map((item: ApiResponseItem) => ({
+          consultation_id: item.consultation_id,
+          user_consultation_id: item.user_consultation_id,
+          fishExpert_id: item.fishExpert_id,
+          fish_expert_answer_id: item.fish_expert_answer_id,
+          consultation_status: item.consultation_status,
 
-            // UserConsultation data
-            fish_type_id: item["UserConsultation.fish_type_id"],
-            fish_age: item["UserConsultation.fish_age"],
-            fish_length: item["UserConsultation.fish_length"],
-            consultation_topic: item["UserConsultation.consultation_topic"],
-            fish_image: item["UserConsultation.fish_image"],
-            complaint: item["UserConsultation.complaint"],
-            created_at: item["UserConsultation.created_at"],
+          fish_type_id: item["UserConsultation.fish_type_id"],
+          fish_age: item["UserConsultation.fish_age"],
+          fish_length: item["UserConsultation.fish_length"],
+          consultation_topic: item["UserConsultation.consultation_topic"],
+          fish_image: item["UserConsultation.fish_image"],
+          complaint: item["UserConsultation.complaint"],
+          created_at: item["UserConsultation.created_at"],
 
-            // FishExpert data
-            fish_expert_name: item["FishExpert.name"],
-            fish_expert_specialization: item["FishExpert.specialization"],
+          fish_expert_name: item["FishExpert.name"],
+          fish_expert_specialization: item["FishExpert.specialization"],
 
-            // FishExpertAnswer data
-            fish_expert_answer: item["FishExpertAnswer.answer"],
-            fish_expert_answer_created_at: item["FishExpertAnswer.created_at"],
-          }));
-          
-          // Sort by most recent first
-          transformedData.sort((a: Consultation, b: Consultation) => 
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          );
-          
-          setConsultations(transformedData);
-          setError(null);
-        } else {
-          setConsultations([]);
-          setError(null);
-        }
+          fish_expert_answer: item["FishExpertAnswer.answer"],
+          fish_expert_answer_created_at: item["FishExpertAnswer.created_at"],
+        }));
+
+        transformedData.sort((a : Consultation, b : Consultation) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        setConsultations(transformedData);
+        setError(null);
       } else {
-        // Jika bukan 404 dengan pesan "Belum ada riwayat konsultasi", itu adalah error lain
+        setConsultations([]);
         setError(data.message || `Error: ${response.statusText}`);
       }
     } catch (error) {
-      setError("Terjadi kesalahan saat mengambil data konsultasi");
+      setError("Terjadi kesalahan saat mengambil data konsultasi.");
       console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
-  }, [API_BASE_URL, token]);
+  }, [API_BASE_URL]);
 
   useEffect(() => {
-    const user = getUserFromToken(token);
-    if (user) {
-      setUserName(user.name);
+    const init = async () => {
+      setLoading(true);
+      const user = await getCurrentUser();
+
+      if (!user) {
+        setIsLoggedIn(false);
+        setLoading(false);
+        router.push("/login");
+        return;
+      }
+
       setIsLoggedIn(true);
-      fetchConsultations();
-    } else {
-      setIsLoggedIn(false);
-      setLoading(false);
-    }
-  }, [token, fetchConsultations]);
+      setUserName(user.name);
+      await fetchConsultations();
+    };
+
+    init();
+  }, [getCurrentUser, fetchConsultations, router]);
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);

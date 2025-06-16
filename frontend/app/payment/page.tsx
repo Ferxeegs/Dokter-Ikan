@@ -5,7 +5,6 @@ import Footer from "../components/layout/Footer";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PaymentModal from "../components/modals/ModalPayment";
-import Cookies from "js-cookie";
 
 interface Medicine {
   title: string;
@@ -33,103 +32,116 @@ const Payment = () => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
-    if (!consultationId || !API_BASE_URL) return;
+  if (!consultationId || !API_BASE_URL) return;
 
-    const controller = new AbortController();
-    const signal = controller.signal;
-    let isMounted = true;
+  const controller = new AbortController();
+  const signal = controller.signal;
+  let isMounted = true;
 
-    const fetchPaymentData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const token = Cookies.get('token');
-        // Fetch consultation data
-        const consultationResponse = await fetch(`${API_BASE_URL}/consultations/${consultationId}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            signal
-          });
-        if (!consultationResponse.ok) throw new Error("Gagal mengambil data konsultasi.");
-        const consultationData = await consultationResponse.json();
+  const fetchPaymentData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
 
-        // Fetch prescription data
-        const prescriptionResponse = await fetch(`${API_BASE_URL}/prescriptionsbyconsultation?consultation_id=${consultationId}`, { signal });
-        const prescriptionData = prescriptionResponse.ok ? await prescriptionResponse.json() : null;
-
-        // Fetch payment data by consultation ID
-        const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`, { signal });
-        if (!paymentLookupResponse.ok) throw new Error("Gagal mengambil data ID pembayaran.");
-        const paymentLookupData = await paymentLookupResponse.json();
-
-        if (!paymentLookupData || !paymentLookupData.data?.payment_id) {
-          throw new Error("ID pembayaran tidak ditemukan.");
+      // Fetch consultation data
+      const consultationResponse = await fetch(
+        `${API_BASE_URL}/consultations/${consultationId}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal,
         }
+      );
+      if (!consultationResponse.ok) throw new Error("Gagal mengambil data konsultasi.");
+      const consultationData = await consultationResponse.json();
 
-        const paymentId = paymentLookupData.data.payment_id;
+      // Fetch prescription data (jika tidak butuh auth, biarkan)
+      const prescriptionResponse = await fetch(
+        `${API_BASE_URL}/prescriptionsbyconsultation?consultation_id=${consultationId}`,
+        { signal }
+      );
+      const prescriptionData = prescriptionResponse.ok ? await prescriptionResponse.json() : null;
 
-        // Fetch payment details
-        
-
-        const paymentResponse = await fetch(
-          `${API_BASE_URL}/payments/${paymentId}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            signal
-          }
-        );
-
-        if (!paymentResponse.ok) throw new Error("Gagal mengambil data pembayaran.");
-        const paymentDetail = await paymentResponse.json();
-
-        const formattedDateTime = paymentDetail.data?.createdAt
-          ? new Date(paymentDetail.data.createdAt).toLocaleString("id-ID", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
-          })
-          : "Waktu Tidak Diketahui";
-
-        if (isMounted) {
-          setPaymentData({
-            userName: consultationData?.data?.name || "Nama Tidak Diketahui",
-            expertName: consultationData?.data?.fish_expert_name || "Expert Tidak Diketahui",
-            medicines: Array.isArray(prescriptionData?.data?.medicines) ? prescriptionData.data.medicines : [],
-            dateTime: formattedDateTime,
-            totalFee: paymentDetail?.data?.total_fee || 0,
-            chatEnabled: consultationData?.data?.chat_enabled || false,
-            shippingFee: paymentDetail?.data?.shipping_fee || 0,
-            paymentStatus: paymentDetail?.data?.payment_status || "unpaid", // Ambil payment status
-          });
+      // Fetch payment ID
+      const paymentLookupResponse = await fetch(
+        `${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal,
         }
-      } catch (error) {
-        if (isMounted) {
-          setError(error instanceof Error ? error.message : "Terjadi kesalahan yang tidak diketahui.");
-        }
-      } finally {
-        if (isMounted) setLoading(false);
+      );
+      if (!paymentLookupResponse.ok) throw new Error("Gagal mengambil data ID pembayaran.");
+      const paymentLookupData = await paymentLookupResponse.json();
+
+      if (!paymentLookupData || !paymentLookupData.data?.payment_id) {
+        throw new Error("ID pembayaran tidak ditemukan.");
       }
-    };
 
-    fetchPaymentData();
+      const paymentId = paymentLookupData.data.payment_id;
 
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [consultationId, API_BASE_URL]);
+      // Fetch payment detail
+      const paymentResponse = await fetch(
+        `${API_BASE_URL}/payments/${paymentId}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal,
+        }
+      );
+      if (!paymentResponse.ok) throw new Error("Gagal mengambil data pembayaran.");
+      const paymentDetail = await paymentResponse.json();
+
+      const formattedDateTime = paymentDetail.data?.createdAt
+        ? new Date(paymentDetail.data.createdAt).toLocaleString("id-ID", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        })
+        : "Waktu Tidak Diketahui";
+
+      if (isMounted) {
+        setPaymentData({
+          userName: consultationData?.data?.name || "Nama Tidak Diketahui",
+          expertName: consultationData?.data?.fish_expert_name || "Expert Tidak Diketahui",
+          medicines: Array.isArray(prescriptionData?.data?.medicines) ? prescriptionData.data.medicines : [],
+          dateTime: formattedDateTime,
+          totalFee: paymentDetail?.data?.total_fee || 0,
+          chatEnabled: consultationData?.data?.chat_enabled || false,
+          shippingFee: paymentDetail?.data?.shipping_fee || 0,
+          paymentStatus: paymentDetail?.data?.payment_status || "unpaid",
+        });
+      }
+    } catch (error) {
+      if (isMounted) {
+        setError(error instanceof Error ? error.message : "Terjadi kesalahan yang tidak diketahui.");
+      }
+    } finally {
+      if (isMounted) setLoading(false);
+    }
+  };
+
+  // Panggil fetchPaymentData langsung di sini, bukan dalam useEffect lain
+  fetchPaymentData();
+
+  return () => {
+    isMounted = false;
+    controller.abort();
+  };
+}, [consultationId, API_BASE_URL]);
 
   // Function untuk render status pembayaran
   const renderPaymentStatus = () => {
@@ -221,8 +233,8 @@ const Payment = () => {
             <p><strong>Tanggal & Jam:</strong> {paymentData.dateTime}</p>
             <p><strong>Status Pembayaran:</strong>
               <span className={`ml-2 px-2 py-1 rounded text-sm font-medium ${paymentData.paymentStatus.toLowerCase() === 'success' ? 'bg-green-100 text-green-800' :
-                  paymentData.paymentStatus.toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
+                paymentData.paymentStatus.toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
                 }`}>
                 {paymentData.paymentStatus.toUpperCase()}
               </span>

@@ -26,78 +26,87 @@ export default function ProfileExpert() {
 
 
   useEffect(() => {
-    const fetchExpertData = async () => {
-      const token = Cookies.get('token');
-      if (token) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            setFishExpert({
-              ...data.data,
-              created_at: new Date(data.data.created_at).toLocaleDateString('id-ID', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-              }),
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching expert data:', error);
-        }
-      }
-    };
-
-    fetchExpertData();
-  }, [API_BASE_URL]);
-
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const token = Cookies.get('token');
-    const formData = new FormData();
-    formData.append('files', file);
-
+  const fetchExpertData = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/uploadcloudprofileuser`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
+      const response = await fetch(`${API_BASE_URL}/me`, {
+        method: 'GET',
+        credentials: 'include',
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        const newImageUrl = result.data.images[0].url;
-
-        // Update user image di frontend
-        setFishExpert((prev) => prev ? { ...prev, image: newImageUrl } : prev);
-
-        // Update image di database
-        await fetch(`${API_BASE_URL}/update-image-expert`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ image_url: newImageUrl }),
-        });
-      } else {
-        console.error('Upload failed.');
+      if (!response.ok) {
+        console.error('Gagal mengambil data ahli ikan.');
+        return;
       }
+
+      const data = await response.json();
+      setFishExpert({
+        ...data.data,
+        created_at: new Date(data.data.created_at).toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        }),
+      });
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Error fetching expert data:', error);
     }
   };
+
+  fetchExpertData();
+}, [API_BASE_URL]);
+
+// Buka file picker saat gambar diklik
+const handleImageClick = () => {
+  fileInputRef.current?.click();
+};
+
+const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('files', file);
+
+  try {
+    const uploadResponse = await fetch(`${API_BASE_URL}/uploadcloudprofileuser`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+
+    if (!uploadResponse.ok) {
+      console.error('Upload gambar gagal.');
+      return;
+    }
+
+    const uploadResult = await uploadResponse.json();
+    const newImageUrl = uploadResult.data?.images?.[0]?.url;
+
+    if (!newImageUrl) {
+      console.error('URL gambar tidak ditemukan dalam respons.');
+      return;
+    }
+
+    // Update di frontend
+    setFishExpert((prev) => (prev ? { ...prev, image: newImageUrl } : prev));
+
+    // Simpan ke database
+    const updateResponse = await fetch(`${API_BASE_URL}/update-image-expert`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ image_url: newImageUrl }),
+    });
+
+    if (!updateResponse.ok) {
+      console.error('Gagal menyimpan URL gambar ke database.');
+    }
+  } catch (error) {
+    console.error('Error uploading image:', error);
+  }
+};
 
   if (!fishExpert) {
     return <p className="text-center mt-10 text-gray-800">Loading...</p>;

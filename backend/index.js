@@ -26,28 +26,39 @@ import ArticleRoutes from "./routes/ArticleRoutes.js";
 dotenv.config();
 const app = express();
 
+// PENTING: cookieParser harus diletakkan SEBELUM cors dan middleware lainnya
+app.use(cookieParser());
+
+// Perbaikan CORS configuration
 app.use(cors({
   credentials: true,
-  origin: process.env.FRONTEND_URL
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Tambahkan fallback
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'], // Tambahkan Cookie header
+  exposedHeaders: ['Set-Cookie'] // Expose Set-Cookie header
 }));
 
-app.use(cookieParser());
+// Handle preflight requests
+app.options('*', cors());
 
 app.use(session({
   secret: process.env.SESS_SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false, // Ubah ke false untuk keamanan
   cookie: {
-    secure: true,
-    sameSite: 'none'
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
   }
 }));
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
-app.use(responseFormatter); 
+app.use(responseFormatter);
 
-// Gunakan route
+// Routes...
 app.use(UserRoute);
 app.use(FishTypes);
 app.use(FishDiseaseRoute);
@@ -59,13 +70,12 @@ app.use(Consultation);
 app.use(PrescriptionRoutes);
 app.use(Payment);
 app.use(PrescriptionMedicine);
-app.use(AuthRoutes)
+app.use(AuthRoutes);
 app.use(UploadRoute);
 app.use(MessageRoutes);
 app.use(SymptomRoute);
 app.use(ArticleRoutes);
 
-// Menjalankan server
 app.listen(process.env.APP_PORT, () => {
     console.log(`Server up and running on port ${process.env.APP_PORT}...`);
 });

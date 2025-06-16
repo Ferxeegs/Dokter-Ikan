@@ -33,39 +33,63 @@ export default function RiwayatExpert() {
   const [consultations, setConsultations] = useState<ConsultationData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(6);
-  
+
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
-    const token = Cookies.get("token");
-    if (token) {
+    const fetchExpertId = async () => {
+      setLoading(true);
       try {
-        const decodedToken = jwtDecode<DecodedToken>(token);
-        setExpertId(decodedToken.id);
-      } catch (error) {
-        console.error("Error decoding token:", error);
-        setError("Terjadi kesalahan saat memverifikasi identitas. Silakan login kembali.");
+        const response = await fetch(`${API_BASE_URL}/me`, {
+          method: 'GET',
+          credentials: 'include', // ⬅️ Kirim cookie HttpOnly
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Sesi login telah berakhir. Silakan login kembali.");
+          }
+          throw new Error("Gagal mengambil data pengguna.");
+        }
+
+        const userData = await response.json();
+        if (!userData.success || !userData.data?.id) {
+          throw new Error("Data pengguna tidak valid.");
+        }
+
+        setExpertId(userData.data.id);
+        setError(null);
+      } catch (err: any) {
+        console.error("Error decoding token atau mengambil data:", err);
+        setError(err.message || "Terjadi kesalahan. Silakan login kembali.");
+      } finally {
         setLoading(false);
       }
-    } else {
-      setError("Anda perlu login untuk mengakses halaman ini");
-      setLoading(false);
-    }
-  }, []);
+    };
+
+    fetchExpertId();
+  }, [API_BASE_URL]);
 
   useEffect(() => {
     if (expertId) {
       const fetchConsultations = async () => {
         setLoading(true);
         try {
-          const response = await fetch(`${API_BASE_URL}/consultations`);
-          if (!response.ok) throw new Error("Failed to fetch consultations");
-          
+          const response = await fetch(`${API_BASE_URL}/consultations`, {
+            method: 'GET',
+            credentials: 'include', // ⬅️ Gunakan cookie HttpOnly
+          });
+
+          if (!response.ok) {
+            throw new Error("Gagal mengambil data konsultasi.");
+          }
+
           const data = await response.json();
+
           const filteredData = data.data
             .filter((consultation: ConsultationData) => consultation.fishExpert_id === expertId)
             .sort((a: ConsultationData, b: ConsultationData) =>
@@ -85,6 +109,7 @@ export default function RiwayatExpert() {
       fetchConsultations();
     }
   }, [expertId, API_BASE_URL]);
+
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -106,12 +131,12 @@ export default function RiwayatExpert() {
     if (expertId) {
       setLoading(true);
       setError(null);
-      
+
       const fetchConsultations = async () => {
         try {
           const response = await fetch(`${API_BASE_URL}/consultations`);
           if (!response.ok) throw new Error("Failed to fetch consultations");
-          
+
           const data: ConsultationData[] = await response.json();
           const filteredData = data
             .filter((consultation: ConsultationData) => consultation.fishExpert_id === expertId)
@@ -173,8 +198,8 @@ export default function RiwayatExpert() {
             <div className="flex justify-center items-center w-full py-20">
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm">
                 <p>{error}</p>
-                <button 
-                  onClick={handleRetry} 
+                <button
+                  onClick={handleRetry}
                   className="mt-3 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition"
                 >
                   Coba Lagi
@@ -183,12 +208,12 @@ export default function RiwayatExpert() {
             </div>
           ) : consultations.length === 0 ? (
             <div className="flex flex-col items-center justify-center bg-blue-50 rounded-lg p-8 my-8 shadow-sm">
-              <Image 
-                src="/images/no-data.svg" 
-                alt="Tidak ada data" 
-                width={150} 
-                height={150} 
-                className="mb-4" 
+              <Image
+                src="/images/no-data.svg"
+                alt="Tidak ada data"
+                width={150}
+                height={150}
+                className="mb-4"
                 unoptimized={true}
               />
               <p className="text-gray-600 text-lg">Belum ada riwayat konsultasi yang Anda tangani.</p>
@@ -209,21 +234,20 @@ export default function RiwayatExpert() {
                   />
                 ))}
               </div>
-              
+
               {/* Pagination Controls */}
               {totalPages > 1 && (
                 <div className="flex justify-center items-center space-x-2 my-8">
                   <button
                     onClick={goToPreviousPage}
                     disabled={currentPage === 1}
-                    className={`px-3 py-1 rounded-md flex items-center ${
-                      currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                    }`}
+                    className={`px-3 py-1 rounded-md flex items-center ${currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                      }`}
                   >
                     <ChevronLeft className="w-4 h-4 mr-1" />
                     <span>Prev</span>
                   </button>
-                  
+
                   <div className="flex space-x-1">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => {
                       // Show first page, current page, last page, and one page before and after current
@@ -238,17 +262,16 @@ export default function RiwayatExpert() {
                           <button
                             key={number}
                             onClick={() => paginate(number)}
-                            className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                              currentPage === number
+                            className={`w-8 h-8 flex items-center justify-center rounded-md ${currentPage === number
                                 ? 'bg-blue-500 text-white font-medium'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
+                              }`}
                           >
                             {number}
                           </button>
                         );
                       }
-                      
+
                       // Show ellipsis if needed
                       if (
                         (number === 2 && currentPage > 3) ||
@@ -256,28 +279,27 @@ export default function RiwayatExpert() {
                       ) {
                         return <span key={number} className="w-8 h-8 flex items-center justify-center">...</span>;
                       }
-                      
+
                       return null;
                     })}
                   </div>
-                  
+
                   <button
                     onClick={goToNextPage}
                     disabled={currentPage === totalPages}
-                    className={`px-3 py-1 rounded-md flex items-center ${
-                      currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                    }`}
+                    className={`px-3 py-1 rounded-md flex items-center ${currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                      }`}
                   >
                     <span>Next</span>
                     <ChevronRight className="w-4 h-4 ml-1" />
                   </button>
                 </div>
               )}
-              
+
               {/* Items per page selector */}
               <div className="flex justify-end items-center text-sm text-gray-500 mb-8">
                 <span className="mr-2">Tampilkan:</span>
-                <select 
+                <select
                   value={itemsPerPage}
                   onChange={(e) => {
                     setItemsPerPage(Number(e.target.value));

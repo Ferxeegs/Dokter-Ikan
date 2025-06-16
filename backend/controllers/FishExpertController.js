@@ -98,7 +98,7 @@ export const updateProfileExpert = async (req, res) => {
 
 export const updateProfileImage = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(' ')[1];
+    const token = req.cookies.token; 
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // atau SECRET yang kamu pakai
     const fishExpertId = decoded.id;
 

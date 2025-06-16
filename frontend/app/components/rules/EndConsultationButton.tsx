@@ -71,36 +71,39 @@ const EndConsultationButton: React.FC<EndConsultationButtonProps> = ({ consultat
   };
 
   const endConsultation = async () => {
-    const token = Cookies.get('token');
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}/end`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  setIsLoading(true);
 
-      if (!response.ok) {
-        throw new Error("Gagal mengakhiri sesi konsultasi");
-      }
+  try {
+    const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}/end`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: 'include', // ⬅️ Kirim cookie HttpOnly ke server
+    });
 
-      setNotification({ message: "Sesi konsultasi telah berakhir.", type: "success" });
-
-      // 🔹 Setelah 3 detik, reload halaman
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-
-      onEndSession();
-    } catch (error) {
-      console.error("Error:", error);
-      setNotification({ message: "Terjadi kesalahan saat mengakhiri sesi konsultasi.", type: "error" });
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      throw new Error("Gagal mengakhiri sesi konsultasi");
     }
-  };
+
+    setNotification({ message: "Sesi konsultasi telah berakhir.", type: "success" });
+
+    // 🔹 Reload halaman setelah 3 detik
+    setTimeout(() => {
+      window.location.reload();
+    }, 3000);
+
+    onEndSession(); // 🔹 Callback jika ada proses lain
+  } catch (error) {
+    console.error("Error:", error);
+    setNotification({
+      message: "Terjadi kesalahan saat mengakhiri sesi konsultasi.",
+      type: "error",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // Tampilkan loading saat mengecek status pembayaran
   if (isCheckingPayment) {

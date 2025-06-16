@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import jwtDecode from 'jwt-decode';
-import Cookies from 'js-cookie';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import Complaint from '@/app/components/complaints/Complaint';
@@ -72,21 +70,30 @@ function ExpertPostContent() {
 
   const handleSubmit = async () => {
     try {
-      const token = Cookies.get("token");
-      if (!token) {
-        setModalMessage("Token tidak ditemukan. Silakan login ulang.");
+      // Ambil informasi fishExpert_id dari backend melalui /verify-token
+      const verifyResponse = await fetch(`${API_BASE_URL}/verify-token`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!verifyResponse.ok) {
+        setModalMessage("Pengguna tidak terautentikasi. Silakan login ulang.");
         setIsModalPostOpen(true);
         return;
       }
 
-      const decoded: { id: string } = jwtDecode(token);
-      const fishExpert_id = decoded.id;
+      const userData = await verifyResponse.json();
+      const fishExpert_id = userData?.user?.id;
 
+      // Kirim jawaban fish expert
       const answerResponse = await fetch(`${API_BASE_URL}/fish-expert-answers`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           fishExpert_id,
@@ -104,11 +111,12 @@ function ExpertPostContent() {
       const answerResult = await answerResponse.json();
       const fish_expert_answer_id = answerResult.data.fish_expert_answer_id;
 
+      // Update status konsultasi
       const consultationUpdateResponse = await fetch(`${API_BASE_URL}/consultations/${id}`, {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           fish_expert_answer_id,
@@ -123,7 +131,7 @@ function ExpertPostContent() {
 
       setModalMessage("Jawaban berhasil dikirim");
       setIsModalPostOpen(true);
-      setInputText(""); // Reset input setelah sukses
+      setInputText(""); // Reset input
     } catch (error) {
       setModalMessage((error as Error).message || "Terjadi kesalahan.");
       setIsModalPostOpen(true);
@@ -135,10 +143,15 @@ function ExpertPostContent() {
 
     const fetchData = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/consultations/${id}`);
+        const response = await fetch(`${API_BASE_URL}/consultations/${id}`, {
+          method: 'GET',
+          credentials: 'include', // Kirim cookie HttpOnly
+        });
+
         if (!response.ok) {
           throw new Error('Gagal memuat data');
         }
+
         const result = await response.json();
         setData(result.data);
       } catch {
@@ -150,6 +163,7 @@ function ExpertPostContent() {
 
     fetchData();
   }, [id, API_BASE_URL]);
+
 
   if (isLoading) {
     return (
@@ -330,7 +344,7 @@ function ExpertPostContent() {
         ) : null}
 
         <div className="mt-10 mx-auto w-full max-w-4xl px-4">
-          {data.chat_enabled === true  && <ChatExpert consultationId={id} />}
+          {data.chat_enabled === true && <ChatExpert consultationId={id} />}
         </div>
       </main>
 

@@ -9,50 +9,45 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Mencari pengguna di tabel User terlebih dahulu
     let user = await User.findOne({ where: { email } });
-    let role = 'user'; // Default role
-    let userId = null; // Variabel untuk menyimpan ID pengguna
+    let role = 'user';
+    let userId = null;
 
     if (!user) {
-      // Jika tidak ditemukan di tabel User, cari di tabel FishExpert
       user = await FishExperts.findOne({ where: { email } });
-      role = 'expert'; // Ubah role jika ditemukan di tabel FishExpert
+      role = 'expert';
 
       if (!user) {
-        // Jika tidak ditemukan di kedua tabel
         return res.fail('Email atau password salah', null, 404);
       }
 
-      userId = user.fishExperts_id; // Ambil ID dari tabel FishExperts
+      userId = user.fishExperts_id;
     } else {
-      userId = user.user_id; // Ambil ID dari tabel User
+      userId = user.user_id;
     }
 
-    // Memverifikasi apakah password cocok
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.fail('Email atau password salah');
     }
 
-    // Membuat token JWT
     const token = jwt.sign(
       { id: userId, name: user.name, email: user.email, role },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    // Set token sebagai cookie HttpOnly
+    const isProduction = process.env.NODE_ENV === 'production';
+
     res.cookie('token', token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'None',
-      domain: '.dokterikan.com', // pastikan ini benar
+      secure: isProduction,
+      sameSite: isProduction ? 'None' : 'Lax',
+      domain: isProduction ? '.dokterikan.com' : undefined,
       path: '/',
-      maxAge: 3600000, // 1 hour
+      maxAge: 3600000,
     });
 
-    // Kirimkan response tanpa menyertakan token di body
     return res.success('Login berhasil', {
       user: {
         id: userId,
@@ -66,6 +61,7 @@ export const loginUser = async (req, res) => {
     return res.fail('Terjadi kesalahan saat login', error.message, 500);
   }
 };
+
 
 export const getAllUsers = async (req, res) => {
   try {

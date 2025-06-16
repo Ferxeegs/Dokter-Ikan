@@ -19,26 +19,30 @@ export default function Home() {
     setIsModalOpen(true);
   };
 
-  const handleConsultationClick = async () => {
-    try {
-      const isValid = await verifyToken(); 
-
-      if (isValid) {
-        router.push('/userpost');
-      } else {
-        handleOpenModal("Sesi Anda telah berakhir. Silakan login kembali.");
-        setTimeout(() => {
-          router.push('/login');
-        }, 2000);
-      }
-    } catch (error) {
-      console.error('Error verifying token:', error);
-      handleOpenModal("Terjadi kesalahan saat memverifikasi sesi. Silakan coba lagi.");
+ const handleConsultationClick = async () => {
+  try {
+    console.log('Calling verifyToken...');
+    const isValid = await verifyToken();
+    console.log('isValid result:', isValid, typeof isValid); // Debug ini
+    
+    if (isValid === true) { // Explicit comparison
+      console.log('Token valid, redirecting to /userpost');
+      router.push('/userpost');
+    } else {
+      console.log('Token invalid, showing modal');
+      handleOpenModal("Sesi Anda telah berakhir. Silakan login kembali.");
       setTimeout(() => {
         router.push('/login');
       }, 2000);
     }
-  };
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    handleOpenModal("Terjadi kesalahan saat memverifikasi sesi. Silakan coba lagi.");
+    setTimeout(() => {
+      router.push('/login');
+    }, 2000);
+  }
+};
 
   return (
     <div className="flex flex-col min-h-screen">

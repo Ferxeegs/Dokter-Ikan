@@ -69,20 +69,20 @@ export default function UploadPaymentProof() {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-  
+
     const formData = new FormData();
     Array.from(files).forEach((file) => formData.append("files", file));
-  
+
     try {
       setIsUploading(true);
-  
+
       const response = await fetch(`${API_BASE_URL}/uploadcloudpayment`, {
         method: "POST",
         body: formData,
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
         // Validasi apakah result.images ada dan berbentuk array
         if (Array.isArray(result.data?.images)) {
@@ -117,6 +117,7 @@ export default function UploadPaymentProof() {
     try {
       const response = await fetch(`${API_BASE_URL}/payments/${paymentId}`, {
         method: "PUT",
+        credentials: "include", // ⬅️ Kirim cookie HttpOnly secara otomatis
         headers: {
           "Content-Type": "application/json",
         },
@@ -127,14 +128,16 @@ export default function UploadPaymentProof() {
       });
 
       const result = await response.json();
-      if (response.ok) {
+
+      if (response.ok && result.success) {
         setModalOpen(true);
       } else {
-        alert(`Gagal mengupdate pembayaran: ${result.message}`);
+        const message = result?.message || "Gagal mengupdate pembayaran.";
+        alert(`Gagal mengupdate pembayaran: ${message}`);
       }
     } catch (error) {
       console.error("Error updating payment:", error);
-      alert("Terjadi kesalahan saat mengupdate pembayaran.");
+      alert("Terjadi kesalahan saat mengupdate pembayaran. Silakan coba lagi.");
     }
   };
 
@@ -177,9 +180,8 @@ export default function UploadPaymentProof() {
             />
             <label
               htmlFor="paymentProof"
-              className={`cursor-pointer flex items-center space-x-3 ${
-                isUploading ? "text-gray-400" : "text-blue-600 hover:text-blue-800"
-              }`}
+              className={`cursor-pointer flex items-center space-x-3 ${isUploading ? "text-gray-400" : "text-blue-600 hover:text-blue-800"
+                }`}
             >
               <PaperClipIcon className="h-6 w-6" />
               <span className="text-sm">
@@ -217,11 +219,10 @@ export default function UploadPaymentProof() {
         <button
           onClick={handlePaymentUpdate}
           disabled={isUploading || imageUrls.length === 0}
-          className={`w-full py-3 mt-4 text-white font-semibold rounded-lg transition duration-300 ease-in-out ${
-            isUploading || imageUrls.length === 0
+          className={`w-full py-3 mt-4 text-white font-semibold rounded-lg transition duration-300 ease-in-out ${isUploading || imageUrls.length === 0
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700 transform hover:scale-105"
-          }`}
+            }`}
         >
           {isUploading ? "Sedang Mengupload..." : "Kirim Bukti Pembayaran"}
         </button>

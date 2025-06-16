@@ -34,23 +34,26 @@ export default function ChangePassword() {
     setLoading(true);
 
     try {
-      const token = Cookies.get('token');
-      if (!token) {
-        throw new Error('Token tidak ditemukan, silakan login ulang.');
+      // Ambil role user dari backend (bukan dari token di frontend)
+      const roleResponse = await fetch(`${API_BASE_URL}/me`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!roleResponse.ok) {
+        throw new Error('Gagal mendapatkan data pengguna. Silakan login ulang.');
       }
 
-      // Decode token untuk mendapatkan role
-      const decodedToken = JSON.parse(atob(token.split('.')[1]));
-      const role = decodedToken.role;
+      const userData = await roleResponse.json();
+      const role = userData.data.role;
 
-      // Tentukan endpoint berdasarkan role
       const endpoint = role === 'expert' ? 'update-expert-password' : 'update-password';
 
       const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           currentPassword: currentPassword,

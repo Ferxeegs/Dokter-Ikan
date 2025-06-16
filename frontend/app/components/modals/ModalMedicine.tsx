@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import jwt_decode from 'jwt-decode';
-import Cookies from 'js-cookie';
 import Image from 'next/image';
 
 interface Medicine {
@@ -20,9 +18,6 @@ interface ModalObatProps {
   consultationId: string;
 }
 
-interface DecodedToken {
-  id: number;
-}
 
 const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultationId }) => {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
@@ -32,100 +27,76 @@ const ModalObat: React.FC<ModalObatProps> = ({ isOpen, toggleModal, consultation
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const token = Cookies.get('token');
-  let expert_id: number | null = null;
-
-  if (token) {
-    try {
-      const decoded = jwt_decode<DecodedToken>(token);
-      expert_id = decoded.id;
-    } catch (error) {
-      console.error('Error decoding token:', error);
-    }
-  }
-
   useEffect(() => {
-    if (isOpen) {
-      fetch(`${API_BASE_URL}/medicines`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then(response => response.json())
-        .then(data => setMedicines(data.data))
-        .catch(error => console.error('Error fetching medicines:', error));
-    }
-  }, [isOpen, API_BASE_URL, token]);
-
-  const handleSelectMedicine = (medicine_id: number) => {
-    setSelectedMedicines((prev) =>
-      prev.includes(medicine_id) ? prev.filter(id => id !== medicine_id) : [...prev, medicine_id]
-    );
-  };
-
-  const handleConfirm = async () => {
-    if (!consultationId || !expert_id) {
-      alert('Gagal mendapatkan ID konsultasi atau ID ahli ikan.');
-      return;
-    }
-
-    const requestPayload = {
-      consultation_id: consultationId,
-      fishExperts_id: expert_id,
-      instruction,
-    };
+  const fetchMedicines = async () => {
+    if (!isOpen) return;
 
     try {
-      // Create prescription
-      const prescriptionResponse = await fetch(`${API_BASE_URL}/prescriptions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestPayload),
+      const response = await fetch(`${API_BASE_URL}/medicines`, {
+        credentials: 'include', // ⬅️ penting agar cookie HttpOnly terkirim
       });
 
-      if (!prescriptionResponse.ok) {
-        const errorData = await prescriptionResponse.json();
-        throw new Error(errorData.message || 'Gagal menambahkan prescription');
+      if (!response.ok) {
+        throw new Error("Gagal mengambil daftar obat");
       }
 
-      const prescriptionData = await prescriptionResponse.json();
-      const prescription_id = prescriptionData.data.prescription_id;
-
-      // Add medicines to prescription
-      const medicinePayloads = selectedMedicines.map(medicine_id => ({
-        prescription_id,
-        medicine_id,
-      }));
-
-      const medicineResponses = await Promise.all(
-        medicinePayloads.map(payload =>
-          fetch(`${API_BASE_URL}/prescriptions-medicines`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(payload),
-          })
-        )
-      );
-
-      // Check if any medicine addition failed
-      const failedResponses = medicineResponses.filter(response => !response.ok);
-      if (failedResponses.length > 0) {
-        throw new Error('Gagal menambahkan beberapa obat ke resep.');
-      }
-
-      setShowConfirmation(false);
-      toggleModal();
+      const data = await response.json();
+      setMedicines(data.data || []);
     } catch (error) {
-      console.error('Error submitting prescription:', error);
-      alert('Gagal mengirim resep.');
+      console.error("Error fetching medicines:", error);
     }
   };
+
+  fetchMedicines();
+}, [isOpen, API_BASE_URL]);
+
+const handleSelectMedicine = (medicine_id: number) => {
+  setSelectedMedicines((prev) =>
+    prev.includes(medicine_id)
+      ? prev.filter((id) => id !== medicine_id)
+      : [...prev, medicine_id]
+  );
+};
+
+const handleConfirm = async () => {
+  if (!consultationId) {
+    alert("ID konsultasi tidak ditemukan.");
+    return;
+  }
+
+  if (selectedMedicines.length === 0) {
+    alert("Pilih minimal satu obat.");
+    return;
+  }
+
+  const requestPayload = {
+    consultation_id: consultationId,
+    instruction,
+    medicines: selectedMedicines,
+  };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/prescriptions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // ⬅️ penting agar cookie HttpOnly terkirim
+      body: JSON.stringify(requestPayload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Gagal menambahkan resep");
+    }
+
+    setShowConfirmation(false);
+    toggleModal();
+  } catch (error) {
+    console.error("Error submitting prescription:", error);
+    alert(error instanceof Error ? error.message : "Gagal mengirim resep.");
+  }
+};
 
   if (!isOpen) return null;
 

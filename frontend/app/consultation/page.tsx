@@ -47,31 +47,44 @@ function ConsultationContent() {
   };
 
   useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const token = Cookies.get('token'); 
+    const fetchData = async () => {
+      try {
+        // Verifikasi user terlebih dahulu (opsional jika diperlukan user info)
+        const userResponse = await fetch(`${API_BASE_URL}/verify-token`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-      const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Sertakan token di header
-        },
-      });
+        if (!userResponse.ok) {
+          throw new Error('Pengguna tidak terautentikasi');
+        }
 
-      if (!response.ok) {
-        throw new Error('Gagal memuat data');
+        // Jika user valid, lanjut fetch data konsultasi
+        const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}`, {
+          method: 'GET',
+          credentials: 'include', // Kirim cookie secara otomatis
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Gagal memuat data konsultasi');
+        }
+
+        const result = await response.json();
+        setData(result.data);
+        setIsChatEnabled(result.data.chat_enabled);
+      } catch (error) {
+        console.error('Error:', error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
       }
-
-      const result = await response.json();
-      setData(result.data);
-      setIsChatEnabled(result.data.chat_enabled);
-    } catch {
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
     fetchData();
   }, [consultationId, API_BASE_URL]);
@@ -112,13 +125,12 @@ function ConsultationContent() {
   }
 
   const enableChat = async () => {
-    const token = Cookies.get('token');
     try {
       const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}/enable-chat`, {
         method: "PATCH",
+        credentials: "include", // Kirim cookies ke backend
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ chat_enabled: true }),
       });

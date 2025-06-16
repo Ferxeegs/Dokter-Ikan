@@ -22,66 +22,65 @@ export default function ChatConsultation({ consultationId }: ChatConsultationPro
   const lastMessageRef = useRef<string | null>(null);
 
   const fetchMessages = useCallback(async () => {
-    try {
-      const token = Cookies.get("token");
-      const response = await fetch(`${API_BASE_URL}/messages/${consultationId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Gagal mengambil pesan");
-      }
-      const data = await response.json();
+  try {
+    const response = await fetch(`${API_BASE_URL}/messages/${consultationId}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
 
-      if (JSON.stringify(messages) !== JSON.stringify(data.data)) {
-        setMessages(data.data); // Sesuaikan dengan struktur respons controller
-      }
-    } catch (error) {
-      console.error("Error fetching messages:", error);
+    if (!response.ok) {
+      throw new Error('Gagal mengambil pesan');
     }
-  }, [API_BASE_URL, consultationId, messages]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      sendMessage();
+    const data = await response.json();
+
+    if (JSON.stringify(messages) !== JSON.stringify(data.data)) {
+      setMessages(data.data || []); // fallback jika data.data undefined
     }
-  };
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+  }
+}, [API_BASE_URL, consultationId, messages]);
 
-  const sendMessage = async () => {
-    if (!newMessage.trim()) return;
+const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    sendMessage();
+  }
+};
 
-    setIsLoading(true);
+const sendMessage = async () => {
+  if (!newMessage.trim()) return;
 
-    try {
-      const token = Cookies.get("token");
-      const response = await fetch(`${API_BASE_URL}/messages/send`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          consultation_id: consultationId,
-          sender_role: "user",
-          message: newMessage,
-        }),
-      });
+  setIsLoading(true);
 
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.message || "Gagal mengirim pesan");
-      }
+  try {
+    const response = await fetch(`${API_BASE_URL}/messages/send`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        consultation_id: consultationId,
+        sender_role: 'user',
+        message: newMessage,
+      }),
+    });
 
-      setNewMessage("");
-      fetchMessages();
-    } catch (error) {
-      console.error("Error sending message:", error);
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.message || 'Gagal mengirim pesan');
     }
-  };
+
+    setNewMessage('');
+    fetchMessages(); // Refresh messages after sending
+  } catch (error) {
+    console.error('Error sending message:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchMessages();

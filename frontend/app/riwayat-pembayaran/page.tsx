@@ -54,31 +54,25 @@ export default function RiwayatPembayaran() {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      
-      try {
-        const token = Cookies.get('token');
-        if (!token) {
-          throw new Error('Token tidak ditemukan. Silakan login kembali.');
-        }
 
-        // Step 1: Fetch user data first
+      try {
+        // Step 1: Fetch user data from /me endpoint
         console.log('Fetching user data...');
         const userResponse = await fetch(`${API_BASE_URL}/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          method: 'GET',
+          credentials: 'include', // ⬅️ penting untuk kirim cookie HttpOnly
         });
 
         if (!userResponse.ok) {
           if (userResponse.status === 401) {
             throw new Error('Sesi telah berakhir. Silakan login kembali.');
           }
-          throw new Error(`Failed to fetch user data: ${userResponse.status}`);
+          throw new Error(`Gagal mengambil data user: ${userResponse.status}`);
         }
 
         const userData = await userResponse.json();
         console.log('User data response:', userData);
-        
+
         if (!userData.success || !userData.data?.id) {
           throw new Error('Data user tidak valid atau user_id tidak ditemukan');
         }
@@ -86,32 +80,31 @@ export default function RiwayatPembayaran() {
         const user = userData.data;
         setUser(user);
 
-        // Step 2: Fetch payment history using the user ID
+        // Step 2: Fetch payment history by user ID
         console.log(`Fetching payment history for user ID: ${user.id}`);
-        const paymentResponse = await fetch(`${API_BASE_URL}/payments/history/${user.id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+        const paymentResponse = await fetch(
+          `${API_BASE_URL}/payments/history/${user.id}`,
+          {
+            method: 'GET',
+            credentials: 'include',
           }
-        });
+        );
 
         if (!paymentResponse.ok) {
           if (paymentResponse.status === 404) {
-            // If no payment history found, set empty array
-            console.log('No payment history found');
+            console.log('Tidak ada riwayat pembayaran');
             setPaymentHistory([]);
             return;
           }
-          throw new Error(`Failed to fetch payment history: ${paymentResponse.status}`);
+          throw new Error(`Gagal mengambil riwayat pembayaran: ${paymentResponse.status}`);
         }
 
         const paymentData = await paymentResponse.json();
         console.log('Payment data response:', paymentData);
-        
+
         if (paymentData.success && Array.isArray(paymentData.data)) {
           setPaymentHistory(paymentData.data);
         } else if (paymentData.success && paymentData.data === null) {
-          // Handle case where API returns null for no data
           setPaymentHistory([]);
         } else {
           throw new Error('Format data pembayaran tidak valid');
@@ -126,7 +119,7 @@ export default function RiwayatPembayaran() {
       }
     };
 
-    // Add a small delay to prevent too rapid requests
+    // Tambahkan sedikit delay agar tidak memicu request terlalu cepat
     const timeoutId = setTimeout(fetchData, 100);
     return () => clearTimeout(timeoutId);
   }, [API_BASE_URL]);
@@ -217,7 +210,7 @@ export default function RiwayatPembayaran() {
 
   const getPaymentMethodIcon = (method: string | null) => {
     if (!method) return <CreditCard className="w-4 h-4 text-gray-400" />;
-    
+
     switch (method.toLowerCase()) {
       case 'bank transfer':
         return <CreditCard className="w-4 h-4 text-blue-600" />;
@@ -509,7 +502,7 @@ export default function RiwayatPembayaran() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Click indicator */}
                   <div className="px-6 pb-3">
                     <div className="text-xs text-gray-400 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -536,26 +529,25 @@ export default function RiwayatPembayaran() {
                     <ChevronLeft className="w-4 h-4" />
                     Sebelumnya
                   </button>
-                  
+
                   <div className="flex items-center gap-1">
                     {getPaginationNumbers().map((page, index) => (
                       <button
                         key={index}
                         onClick={() => typeof page === 'number' && goToPage(page)}
                         disabled={page === '...'}
-                        className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                          page === currentPage
+                        className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${page === currentPage
                             ? 'bg-blue-500 text-white'
                             : page === '...'
-                            ? 'text-gray-400 cursor-default'
-                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                        }`}
+                              ? 'text-gray-400 cursor-default'
+                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                          }`}
                       >
                         {page}
                       </button>
                     ))}
                   </div>
-                  
+
                   <button
                     onClick={goToNextPage}
                     disabled={currentPage === totalPages}

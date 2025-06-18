@@ -1,4 +1,4 @@
-// Definisikan tipe yang valid untuk handler caching
+// Definisikan tipe handler caching
 type StrategyName = 'CacheFirst' | 'NetworkFirst' | 'CacheOnly' | 'NetworkOnly' | 'StaleWhileRevalidate';
 
 interface RuntimeCaching {
@@ -16,43 +16,7 @@ interface RuntimeCaching {
 }
 
 const runtimeCaching: RuntimeCaching[] = [
-  // Cache untuk sumber daya statis
-  {
-    urlPattern: /\.(?:js|css|png|jpg|jpeg|svg|gif|ico|webp)$/i,
-    handler: 'CacheFirst',
-    options: {
-      cacheName: 'static-resources',
-      expiration: {
-        maxEntries: 60,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 hari
-      },
-    },
-  },
-  // Cache untuk manifest.json
-  {
-    urlPattern: /manifest\.json$/i,
-    handler: 'CacheFirst',
-    options: {
-      cacheName: 'manifest',
-      expiration: {
-        maxEntries: 1,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 hari
-      },
-    },
-  },
-  // Cache untuk model ONNX
-  {
-    urlPattern: /\/models\/.*\.onnx$/i,
-    handler: 'CacheFirst',
-    options: {
-      cacheName: 'onnx-models',
-      expiration: {
-        maxEntries: 5,
-        maxAgeSeconds: 365 * 24 * 60 * 60, // 1 tahun
-      },
-    },
-  },
-  // Cache untuk navigasi halaman
+  // ✅ Cache untuk halaman navigasi (dengan fallback offline)
   {
     urlPattern: ({ request }) => request.mode === 'navigate',
     handler: 'NetworkFirst',
@@ -63,93 +27,22 @@ const runtimeCaching: RuntimeCaching[] = [
         maxEntries: 50,
         maxAgeSeconds: 24 * 60 * 60, // 1 hari
       },
+      plugins: [
+        {
+          cacheWillUpdate: async ({ response }: { response: Response }) => {
+            // Hanya cache response yang berhasil dan berisi HTML
+            return response.status === 200 && 
+                   response.headers.get('content-type')?.includes('text/html') ? response : null;
+          },
+          handlerDidError: async (): Promise<Response | undefined> => {
+            return await caches.match('/fallback.html') ?? undefined;
+          },
+        },
+      ],
     },
   },
-  // Cache untuk halaman utama
-  {
-    urlPattern: ({ url }) => url.pathname === '/' || url.pathname === '',
-    handler: 'NetworkFirst',
-    options: {
-      cacheName: 'start-page',
-      expiration: {
-        maxEntries: 1,
-        maxAgeSeconds: 24 * 60 * 60, // 1 hari
-      },
-    },
-  },
-  // Cache untuk halaman deteksi ikan
-  {
-    urlPattern: ({ url }) => url.pathname.startsWith('/fishdetection'),
-    handler: 'NetworkFirst',
-    options: {
-      cacheName: 'fishdetection',
-      expiration: {
-        maxEntries: 1,
-        maxAgeSeconds: 24 * 60 * 60, // 1 hari
-      },
-    },
-  },
-  // Cache untuk halaman deteksi penyakit
-  {
-    urlPattern: ({ url }) => url.pathname.startsWith('/diseasedetection'),
-    handler: 'NetworkFirst',
-    options: {
-      cacheName: 'diseasedetection',
-      expiration: {
-        maxEntries: 1,
-        maxAgeSeconds: 24 * 60 * 60, // 1 hari
-      },
-    },
-  },
-  // Cache untuk halaman hasil deteksi ikan
-  {
-    urlPattern: ({ url }) => url.pathname.startsWith('/result-fish-detection'),
-    handler: 'NetworkFirst',
-    options: {
-      cacheName: 'result-fish-detection',
-      expiration: {
-        maxEntries: 1,
-        maxAgeSeconds: 24 * 60 * 60, // 1 hari
-      },
-    },
-  },
-  // Cache untuk halaman hasil sistem pakar
-  {
-    urlPattern: ({ url }) => url.pathname.startsWith('/result-expert-system'),
-    handler: 'NetworkFirst',
-    options: {
-      cacheName: 'result-expert-system',
-      expiration: {
-        maxEntries: 1,
-        maxAgeSeconds: 24 * 60 * 60, // 1 hari
-      },
-    },
-  },
-  // Cache untuk Google Fonts
-  {
-    urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\/.*/i,
-    handler: 'CacheFirst',
-    options: {
-      cacheName: 'google-fonts',
-      expiration: {
-        maxEntries: 20,
-        maxAgeSeconds: 365 * 24 * 60 * 60, // 1 tahun
-      },
-    },
-  },
-  // Cache untuk gambar Cloudinary
-  {
-    urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
-    handler: 'CacheFirst',
-    options: {
-      cacheName: 'cloudinary-images',
-      expiration: {
-        maxEntries: 50,
-        maxAgeSeconds: 7 * 24 * 60 * 60, // 7 hari
-      },
-    },
-  },
-  // Cache untuk halaman fallback
+
+  // ✅ Fallback page cache
   {
     urlPattern: /\/fallback\.html$/i,
     handler: 'CacheFirst',
@@ -157,11 +50,134 @@ const runtimeCaching: RuntimeCaching[] = [
       cacheName: 'fallback-cache',
       expiration: {
         maxEntries: 1,
-        maxAgeSeconds: 365 * 24 * 60 * 60, // 1 tahun
+        maxAgeSeconds: 365 * 24 * 60 * 60,
       },
     },
   },
-  // Cache untuk API calls
+
+  // ✅ Cache untuk sumber daya statis
+  {
+    urlPattern: /\.(?:js|css|png|jpg|jpeg|svg|gif|ico|webp)$/i,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'static-resources',
+      expiration: {
+        maxEntries: 60,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+      },
+    },
+  },
+
+  // Cache manifest
+  {
+    urlPattern: /manifest\.json$/i,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'manifest',
+      expiration: {
+        maxEntries: 1,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+      },
+    },
+  },
+
+  // ONNX models
+  {
+    urlPattern: /\/models\/.*\.onnx$/i,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'onnx-models',
+      expiration: {
+        maxEntries: 5,
+        maxAgeSeconds: 365 * 24 * 60 * 60,
+      },
+    },
+  },
+
+  // Cache halaman spesifik
+  {
+    urlPattern: ({ url }) => url.pathname === '/' || url.pathname === '',
+    handler: 'NetworkFirst',
+    options: {
+      cacheName: 'start-page',
+      expiration: {
+        maxEntries: 1,
+        maxAgeSeconds: 24 * 60 * 60,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }) => url.pathname.startsWith('/fishdetection'),
+    handler: 'NetworkFirst',
+    options: {
+      cacheName: 'fishdetection',
+      expiration: {
+        maxEntries: 1,
+        maxAgeSeconds: 24 * 60 * 60,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }) => url.pathname.startsWith('/diseasedetection'),
+    handler: 'NetworkFirst',
+    options: {
+      cacheName: 'diseasedetection',
+      expiration: {
+        maxEntries: 1,
+        maxAgeSeconds: 24 * 60 * 60,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }) => url.pathname.startsWith('/result-fish-detection'),
+    handler: 'NetworkFirst',
+    options: {
+      cacheName: 'result-fish-detection',
+      expiration: {
+        maxEntries: 1,
+        maxAgeSeconds: 24 * 60 * 60,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }) => url.pathname.startsWith('/result-expert-system'),
+    handler: 'NetworkFirst',
+    options: {
+      cacheName: 'result-expert-system',
+      expiration: {
+        maxEntries: 1,
+        maxAgeSeconds: 24 * 60 * 60,
+      },
+    },
+  },
+
+  // Google Fonts
+  {
+    urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\/.*/i,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'google-fonts',
+      expiration: {
+        maxEntries: 20,
+        maxAgeSeconds: 365 * 24 * 60 * 60,
+      },
+    },
+  },
+
+  // Cloudinary
+  {
+    urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'cloudinary-images',
+      expiration: {
+        maxEntries: 50,
+        maxAgeSeconds: 7 * 24 * 60 * 60,
+      },
+    },
+  },
+
+  // API
   {
     urlPattern: /\/api\//,
     handler: 'NetworkFirst',
@@ -170,7 +186,7 @@ const runtimeCaching: RuntimeCaching[] = [
       networkTimeoutSeconds: 5,
       expiration: {
         maxEntries: 20,
-        maxAgeSeconds: 24 * 60 * 60, // 1 hari
+        maxAgeSeconds: 24 * 60 * 60,
       },
     },
   },

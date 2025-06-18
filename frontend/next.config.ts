@@ -12,11 +12,11 @@ const nextConfig = {
 
 export default withPWA({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development', // Disable PWA in development mode
+  disable: process.env.NODE_ENV === 'development',
   register: true,
   skipWaiting: true,
   runtimeCaching,
-  maximumFileSizeToCacheInBytes: 25 * 1024 * 1024, // 25 MB
+  maximumFileSizeToCacheInBytes: 100 * 1024 * 1024, // 100 MB
   buildExcludes: [
     /app-build-manifest\.json$/,
     /build-manifest\.json$/,

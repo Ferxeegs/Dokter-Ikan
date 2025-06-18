@@ -1,25 +1,383 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
   <head>
     <title>Offline</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100vh;
-        font-family: sans-serif;
-        background: #f5f5f5;
+        position: relative;
+        padding: 20px;
+      }
+
+      /* Subtle background patterns */
+      body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+          radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        padding: clamp(32px, 5vw, 48px);
         text-align: center;
+        box-shadow: 
+          0 8px 32px rgba(33, 150, 243, 0.12),
+          0 1px 3px rgba(33, 150, 243, 0.08);
+        max-width: 420px;
+        width: 100%;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .icon-container {
+        width: clamp(80px, 15vw, 100px);
+        height: clamp(80px, 15vw, 100px);
+        margin: 0 auto 24px;
+        background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 4px 16px rgba(33, 150, 243, 0.25);
+      }
+
+      .icon-container::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+        opacity: 0.3;
+        animation: subtlePulse 3s ease-in-out infinite;
+        z-index: -1;
+      }
+
+      @keyframes subtlePulse {
+        0%, 100% { transform: scale(1); opacity: 0.3; }
+        50% { transform: scale(1.1); opacity: 0.1; }
+      }
+
+      .wifi-icon {
+        position: relative;
+        width: 48px;
+        height: 36px;
+      }
+
+      .wifi-signal {
+        position: absolute;
+        bottom: 0;
+        width: 6px;
+        background: white;
+        border-radius: 1px;
+        opacity: 0.4;
+        animation: signalFade 2s ease-in-out infinite;
+      }
+
+      .wifi-signal:nth-child(1) {
+        height: 6px;
+        left: 6px;
+        animation-delay: 0s;
+      }
+
+      .wifi-signal:nth-child(2) {
+        height: 14px;
+        left: 16px;
+        animation-delay: 0.3s;
+      }
+
+      .wifi-signal:nth-child(3) {
+        height: 22px;
+        left: 26px;
+        animation-delay: 0.6s;
+      }
+
+      .wifi-signal:nth-child(4) {
+        height: 30px;
+        left: 36px;
+        animation-delay: 0.9s;
+      }
+
+      @keyframes signalFade {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 0.8; }
+      }
+
+      h1 {
+        font-size: clamp(1.75rem, 4vw, 2.25rem);
+        font-weight: 600;
+        color: #1565c0;
+        margin-bottom: 12px;
+        letter-spacing: -0.025em;
+      }
+
+      .subtitle {
+        font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        color: #546e7a;
+        line-height: 1.6;
+        margin-bottom: 32px;
+        font-weight: 400;
+      }
+
+      .status-card {
+        background: rgba(239, 245, 255, 0.8);
+        border: 1px solid rgba(33, 150, 243, 0.15);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .status-indicator {
+        width: 8px;
+        height: 8px;
+        background: #f57c00;
+        border-radius: 50%;
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      .status-indicator::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #f57c00;
+        animation: statusPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes statusPulse {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(2.5); opacity: 0; }
+      }
+
+      .status-text {
+        font-size: 0.9rem;
+        color: #5d4037;
+        font-weight: 500;
+        margin: 0;
+      }
+
+      .action-button {
+        background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(33, 150, 243, 0.25);
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        max-width: 200px;
+      }
+
+      .action-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.35);
+      }
+
+      .action-button:active {
+        transform: translateY(0);
+      }
+
+      .retry-info {
+        margin-top: 20px;
+        font-size: 0.85rem;
+        color: #78909c;
+        opacity: 0.8;
+      }
+
+      /* Responsive breakpoints */
+      @media (max-width: 480px) {
+        body {
+          padding: 16px;
+        }
+        
+        .container {
+          padding: 28px 24px;
+        }
+
+        .status-card {
+          padding: 14px 16px;
+          flex-direction: column;
+          gap: 8px;
+          text-align: center;
+        }
+
+        .action-button {
+          padding: 16px 24px;
+          font-size: 1rem;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .container {
+          padding: 24px 20px;
+        }
+        
+        h1 {
+          margin-bottom: 8px;
+        }
+        
+        .subtitle {
+          margin-bottom: 24px;
+        }
+      }
+
+      @media (min-width: 768px) {
+        .container {
+          padding: 56px 48px;
+        }
+      }
+
+      /* Subtle loading animation */
+      .loading-dots {
+        display: inline-flex;
+        gap: 4px;
+        margin-left: 8px;
+      }
+
+      .loading-dot {
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        animation: loadingBounce 1.4s ease-in-out infinite both;
+      }
+
+      .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+      .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+      @keyframes loadingBounce {
+        0%, 80%, 100% {
+          transform: scale(0);
+          opacity: 0.5;
+        }
+        40% {
+          transform: scale(1);
+          opacity: 1;
+        }
       }
     </style>
   </head>
   <body>
-    <div>
-      <h1>Kamu sedang offline</h1>
-      <p>Periksa koneksi internet kamu dan coba lagi.</p>
+    <div class="container">
+      <div class="icon-container">
+        <div class="wifi-icon">
+          <div class="wifi-signal"></div>
+          <div class="wifi-signal"></div>
+          <div class="wifi-signal"></div>
+          <div class="wifi-signal"></div>
+        </div>
+      </div>
+
+      <h1>Sedang Offline</h1>
+      <p class="subtitle">Koneksi internet tidak tersedia. Mohon periksa jaringan Anda dan coba kembali.</p>
+
+      <div class="status-card">
+        <div class="status-indicator"></div>
+        <p class="status-text">Tidak ada koneksi internet</p>
+      </div>
+
+      <button class="action-button" onclick="window.location.reload()" id="retryButton">
+        Coba Lagi
+        <div class="loading-dots" style="display: none;">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+      </button>
+
+      <p class="retry-info">Otomatis memeriksa koneksi setiap 30 detik</p>
     </div>
+
+    <script>
+      let retryCount = 0;
+      const maxRetries = 20;
+      const retryButton = document.getElementById('retryButton');
+      const loadingDots = retryButton.querySelector('.loading-dots');
+
+      function showLoading() {
+        retryButton.style.pointerEvents = 'none';
+        retryButton.style.opacity = '0.8';
+        loadingDots.style.display = 'inline-flex';
+        retryButton.childNodes[0].textContent = 'Memeriksa';
+      }
+
+      function hideLoading() {
+        retryButton.style.pointerEvents = 'auto';
+        retryButton.style.opacity = '1';
+        loadingDots.style.display = 'none';
+        retryButton.childNodes[0].textContent = 'Coba Lagi';
+      }
+
+      function checkConnection() {
+        if (navigator.onLine) {
+          showLoading();
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(checkConnection, 30000);
+        }
+      }
+
+      // Manual retry with loading state
+      retryButton.addEventListener('click', () => {
+        showLoading();
+        setTimeout(() => {
+          if (navigator.onLine) {
+            window.location.reload();
+          } else {
+            hideLoading();
+          }
+        }, 1500);
+      });
+
+      // Auto check after 30 seconds
+      setTimeout(checkConnection, 30000);
+
+      // Listen for online/offline events
+      window.addEventListener('online', () => {
+        showLoading();
+        setTimeout(() => window.location.reload(), 800);
+      });
+
+      window.addEventListener('offline', () => {
+        console.log('Connection lost');
+      });
+    </script>
   </body>
 </html>

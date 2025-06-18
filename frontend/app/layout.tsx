@@ -1,8 +1,8 @@
-// app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import Head from "next/head"; // <-- Tambahkan ini
 import "./globals.css";
-// import RegisterSW from "./components/utils/RegisterSW";
+import RegisterSW from "./components/utils/RegisterSW";
 import PWAInstallHandler from "./components/utils/PWAInstallHandler";
 
 const geistSans = localFont({
@@ -48,8 +48,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
+      <Head>
+        <noscript>
+          <link rel="prefetch" href="/fallback.html" />
+        </noscript>
+      </Head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* <RegisterSW /> */}
+        <RegisterSW />
         <PWAInstallHandler 
           apiBaseUrl={process.env.NEXT_PUBLIC_API_BASE_URL}
         />

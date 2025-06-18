@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/navigation";
 
 interface ModalProps {
   message: string;
@@ -6,9 +7,10 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ message, onClose }) => {
+  const router = useRouter();
   const handleClose = () => {
     onClose(); // Menjalankan fungsi penutupan modal
-    window.location.reload(); // Refresh halaman
+    router.push('/'); // Refresh halaman
   };
 
   return (

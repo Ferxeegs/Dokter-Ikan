@@ -340,3 +340,22 @@ export const verifyTokenFromCookie = (req, res) => {
     });
   }
 };
+
+export const logoutUser = async (req, res) => {
+  try {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'None' : 'Lax',
+      domain: isProduction ? '.dokterikan.com' : undefined,
+      path: '/',
+    });
+
+    return res.success('Logout berhasil');
+  } catch (error) {
+    console.error(error);
+    return res.fail('Terjadi kesalahan saat logout', error.message, 500);
+  }
+};

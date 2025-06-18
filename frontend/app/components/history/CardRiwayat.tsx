@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import jwt_decode from "jwt-decode";
-import Cookies from "js-cookie";
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Calendar, Clock, User, LogIn } from "lucide-react";
 

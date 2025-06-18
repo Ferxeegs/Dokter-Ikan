@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Cookies from 'js-cookie';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function ChangePassword() {

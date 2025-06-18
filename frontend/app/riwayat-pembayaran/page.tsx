@@ -4,9 +4,8 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, CreditCard, Clock, CheckCircle, XCircle, Info, User, MessageCircle, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-import Cookies from 'js-cookie';
 
-// Dynamic data from API
+
 
 interface Consultation {
   consultation_id: number;

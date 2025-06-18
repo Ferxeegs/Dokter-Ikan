@@ -10,7 +10,7 @@ import DetailResep from '@/app/components/prescriptions/DetailResep';
 import ChatConsultation from '@/app/components/chat/ChatConsultation';
 import ConsultationRules from '@/app/components/rules/ConsultationRules';
 import EndConsultationButton from '@/app/components/rules/EndConsultationButton';
-import Cookies from 'js-cookie';
+
 
 function ConsultationContent() {
   const searchParams = useSearchParams();

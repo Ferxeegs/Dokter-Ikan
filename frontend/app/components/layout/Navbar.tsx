@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
 
 interface User {
   name: string;
@@ -36,7 +35,6 @@ export default function Navbar() {
         if (response.status === 401) {
           // Handle unauthorized - maybe redirect to login
           console.error('Unauthorized: Please login again');
-          router.push('/login');
           return;
         }
 
@@ -77,11 +75,19 @@ export default function Navbar() {
     };
   }, [dropdownOpen]);
 
-  const handleLogout = () => {
-    Cookies.remove('token');
+  const handleLogout = async () => {
+  try {
+    await fetch(`${API_BASE_URL}/logout`, {
+      method: 'POST',
+      credentials: 'include', // Wajib agar cookie HttpOnly ikut terkirim
+    });
+
     setUser(null);
     router.push('/login');
-  };
+  } catch (error) {
+    console.error('Gagal logout:', error);
+  }
+};
 
   return (
     <nav className="flex items-center justify-between bg-white text-black font-bold p-4 sticky top-0 z-10">

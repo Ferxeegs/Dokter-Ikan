@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Send } from "lucide-react";
-import Cookies from "js-cookie";
 
 interface Message {
   sender_role: string;

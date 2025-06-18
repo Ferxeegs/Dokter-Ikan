@@ -5,13 +5,7 @@ import { Info, ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import CardRiwayatExpert from "../components/history/CardRiwayatExpert";
-import jwtDecode from "jwt-decode";
-import Cookies from "js-cookie";
 import Image from 'next/image';
-
-interface DecodedToken {
-  id: number;
-}
 
 interface ConsultationData {
   consultation_id: number;
@@ -46,7 +40,7 @@ export default function RiwayatExpert() {
       try {
         const response = await fetch(`${API_BASE_URL}/me`, {
           method: 'GET',
-          credentials: 'include', // ⬅️ Kirim cookie HttpOnly
+          credentials: 'include', 
         });
 
         if (!response.ok) {
@@ -63,9 +57,13 @@ export default function RiwayatExpert() {
 
         setExpertId(userData.data.id);
         setError(null);
-      } catch (err: any) {
+      } catch (err: unknown) {
+        let message = "Terjadi kesalahan. Silakan login kembali.";
+        if (err instanceof Error) {
+          message = err.message;
+        }
         console.error("Error decoding token atau mengambil data:", err);
-        setError(err.message || "Terjadi kesalahan. Silakan login kembali.");
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -263,8 +261,8 @@ export default function RiwayatExpert() {
                             key={number}
                             onClick={() => paginate(number)}
                             className={`w-8 h-8 flex items-center justify-center rounded-md ${currentPage === number
-                                ? 'bg-blue-500 text-white font-medium'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              ? 'bg-blue-500 text-white font-medium'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                               }`}
                           >
                             {number}

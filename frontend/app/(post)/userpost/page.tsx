@@ -17,6 +17,10 @@ type FishType = {
   name: string;
 };
 
+interface User {
+  id: number;
+}
+
 export default function UserPost() {
   const [inputText, setInputText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,18 +55,15 @@ export default function UserPost() {
   } | null>(null);
   const router = useRouter();
 
-  const getCurrentUser = useCallback(async (): Promise<any | null> => {
+  const getCurrentUser = useCallback(async (): Promise<User | null> => {
     try {
-      console.log('Getting current user...');
       const response = await fetch(`${API_BASE_URL}/verify-token`, {
         method: 'GET',
-        credentials: 'include', // PENTING: untuk mengirim cookies
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-
-      console.log('User verification response status:', response.status);
 
       if (!response.ok) {
         console.warn('User tidak terautentikasi.');
@@ -70,8 +71,6 @@ export default function UserPost() {
       }
 
       const data = await response.json();
-      console.log('Current user data:', data);
-
       return data.success ? data.user : null;
     } catch (error) {
       console.error('Error getting current user:', error);
@@ -135,8 +134,6 @@ export default function UserPost() {
   }, [userId, fetchFishTypes]);
 
   const handleSubmit = async () => {
-    console.log('Starting submission...');
-
     // Get current user untuk memastikan masih authenticated
     const currentUser = await getCurrentUser();
 
@@ -164,8 +161,6 @@ export default function UserPost() {
       consultation_status: 'Waiting',
     };
 
-    console.log('Sending consultation data:', requestData);
-
     try {
       // Request pertama: buat user consultation
       const response = await fetch(`${API_BASE_URL}/user-consultations`, {
@@ -178,7 +173,6 @@ export default function UserPost() {
       });
 
       const responseData = await response.json();
-      console.log('User consultation response:', responseData);
 
       if (response.ok) {
         const userConsultationId = responseData.data?.user_consultation_id || responseData.data?.id;
@@ -194,8 +188,6 @@ export default function UserPost() {
           user_consultation_id: userConsultationId,
         };
 
-        console.log('Sending consultation request:', consultationRequest);
-
         const consultationResponse = await fetch(`${API_BASE_URL}/consultations`, {
           method: "POST",
           credentials: 'include', // Gunakan credentials bukan Authorization header
@@ -206,13 +198,11 @@ export default function UserPost() {
         });
 
         const consultationResponseData = await consultationResponse.json();
-        console.log('Consultation response:', consultationResponseData);
 
         if (!consultationResponse.ok) {
           console.error("Error dari konsultasi API:", consultationResponseData);
           throw new Error("Gagal menambahkan data ke tabel consultations");
         }
-
         setModalMessage("Konsultasi berhasil ditambahkan, silahkan menunggu hingga ahli ikan memberikan respons!");
       } else {
         console.error("Error dari backend:", responseData);

@@ -4,14 +4,8 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import ConsultationCard from "../components/history/CardRiwayatExpert";
-import jwtDecode from "jwt-decode";
-import Cookies from "js-cookie";
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Briefcase, Award, Calendar } from "lucide-react";
-
-interface DecodedToken {
-  id: number;
-}
 
 interface ExpertData {
   name: string;

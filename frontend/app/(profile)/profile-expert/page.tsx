@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Cookies from 'js-cookie';
 import Navbar from '@/app/components/layout/Navbar';
 import Footer from '@/app/components/layout/Footer';
 import ProfileExpertInfo from '@/app/components/profile/ProfileExpertInfo';

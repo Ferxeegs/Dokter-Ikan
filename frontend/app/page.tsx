@@ -12,37 +12,91 @@ import { verifyToken } from "./components/utils/auth";
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [modalType, setModalType] = useState<'warning' | 'error' | 'info'>('warning');
+  const [showLaterButton, setShowLaterButton] = useState(false);
   const router = useRouter();
 
-  const handleOpenModal = (message: string) => {
+  const handleOpenModal = (message: string, type: 'warning' | 'error' | 'info' = 'warning', showLater: boolean = false) => {
     setModalMessage(message);
+    setModalType(type);
+    setShowLaterButton(showLater);
     setIsModalOpen(true);
   };
 
- const handleConsultationClick = async () => {
-  try {
-    console.log('Calling verifyToken...');
-    const isValid = await verifyToken();
-    console.log('isValid result:', isValid, typeof isValid); // Debug ini
-    
-    if (isValid === true) { // Explicit comparison
-      console.log('Token valid, redirecting to /userpost');
-      router.push('/userpost');
-    } else {
-      console.log('Token invalid, showing modal');
-      handleOpenModal("Sesi Anda telah berakhir. Silakan login kembali.");
+  const handleConsultationClick = async () => {
+    try {
+      console.log('Calling verifyToken...');
+      const result = await verifyToken();
+      console.log('Verify token result:', result);
+      
+      if (result.success === true) {
+        console.log('Token valid, redirecting to /userpost');
+        router.push('/userpost');
+      } else {
+        // Handle different error cases
+        switch (result.reason) {
+          case 'no_token':
+            console.log('No token found, user not logged in');
+            handleOpenModal(
+              "Anda belum login. Silakan login terlebih dahulu untuk mengakses fitur konsultasi.",
+              'info',
+              true
+            );
+            break;
+          case 'invalid_token':
+            console.log('Token invalid, session expired');
+            handleOpenModal(
+              "Sesi Anda telah berakhir. Silakan login kembali untuk melanjutkan.",
+              'warning',
+              true
+            );
+            break;
+          case 'network_error':
+            console.log('Network error occurred');
+            handleOpenModal(
+              "Terjadi kesalahan jaringan. Silakan periksa koneksi internet Anda dan coba lagi.",
+              'error',
+              true
+            );
+            break;
+          default:
+            console.log('Unknown error occurred');
+            handleOpenModal(
+              "Terjadi kesalahan saat memverifikasi sesi. Silakan coba lagi.",
+              'error',
+              true
+            );
+        }
+      }
+    } catch (error) {
+      console.error('Error verifying token:', error);
+      handleOpenModal(
+        "Terjadi kesalahan tak terduga. Silakan coba lagi.",
+        'error',
+        true
+      );
+    }
+  };
+
+  const handleModalOK = () => {
+    setIsModalOpen(false);
+    if (!showLaterButton) {
+      // Auto redirect if no "Later" button
       setTimeout(() => {
         router.push('/login');
-      }, 2000);
+      }, 500);
     }
-  } catch (error) {
-    console.error('Error verifying token:', error);
-    handleOpenModal("Terjadi kesalahan saat memverifikasi sesi. Silakan coba lagi.");
-    setTimeout(() => {
-      router.push('/login');
-    }, 2000);
-  }
-};
+  };
+
+  const handleModalLater = () => {
+    setIsModalOpen(false);
+    // User chose to stay on current page
+  };
+
+  const handleModalLogin = () => {
+    setIsModalOpen(false);
+    router.push('/login');
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -114,19 +168,73 @@ export default function Home() {
         </div>
 
         {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
-              <h2 className="text-lg text-gray-800 font-semibold mb-4">Peringatan</h2>
-              <p className="text-gray-700 mb-4">{modalMessage}</p>
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                onClick={() => setIsModalOpen(false)}
-              >
-                OK
-              </button>
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-80 sm:w-96 text-center mx-4">
+              <div className="mb-4">
+                {modalType === 'warning' && (
+                  <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                )}
+                {modalType === 'error' && (
+                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
+                    </svg>
+                  </div>
+                )}
+                {modalType === 'info' && (
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+              
+              <h2 className={`text-lg font-semibold mb-4 ${
+                modalType === 'warning' ? 'text-yellow-800' :
+                modalType === 'error' ? 'text-red-800' :
+                'text-blue-800'
+              }`}>
+                {modalType === 'warning' ? 'Peringatan' :
+                 modalType === 'error' ? 'Error' :
+                 'Informasi'}
+              </h2>
+              
+              <p className="text-gray-700 mb-6 text-sm leading-relaxed">{modalMessage}</p>
+              
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                {showLaterButton ? (
+                  <>
+                    <button
+                      className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                      onClick={handleModalLogin}
+                    >
+                      Login Sekarang
+                    </button>
+                    <button
+                      className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+                      onClick={handleModalLater}
+                    >
+                      Nanti Saja
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                    onClick={handleModalOK}
+                  >
+                    OK
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}
+        
         <p className="text-black mt-24 max-w-3xl mx-auto text-justify font-lato text-sm sm:text-base">
           Dokter Ikan adalah solusi digital inovatif untuk pemilik dan pembudidaya ikan, memanfaatkan teknologi AI untuk deteksi spesies
           dan penyakit ikan. Aplikasi ini memudahkan pengguna dalam mendiagnosis masalah kesehatan ikan hanya dengan mengunggah foto,

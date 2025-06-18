@@ -40,6 +40,7 @@ export default function UserPost() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<{ url: string; publicId: string }[]>([]);
+  const [shouldResetForm, setShouldResetForm] = useState(false);
   const [data] = useState<{
     title: string;
     description: string;
@@ -53,6 +54,11 @@ export default function UserPost() {
     fish_expert_specialization: string;
     consultation_status: string;
   } | null>(null);
+
+  // State untuk modal login
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null = loading, true = authenticated, false = not authenticated
+
   const router = useRouter();
 
   const getCurrentUser = useCallback(async (): Promise<User | null> => {
@@ -115,16 +121,18 @@ export default function UserPost() {
       const user = await getCurrentUser();
 
       if (!user) {
-        console.warn('Pengguna tidak terautentikasi, redirect ke login.');
-        router.push('/login');
+        console.warn('Pengguna tidak terautentikasi.');
+        setIsAuthenticated(false);
+        setShowLoginModal(true); // Tampilkan modal login
       } else {
         console.log('User authenticated:', user);
         setUserId(user.id);
+        setIsAuthenticated(true);
       }
     };
 
     checkAuth();
-  }, [getCurrentUser, router]);
+  }, [getCurrentUser]);
 
   // Fetch fish types setelah auth berhasil
   useEffect(() => {
@@ -133,7 +141,43 @@ export default function UserPost() {
     }
   }, [userId, fetchFishTypes]);
 
+  // Handler untuk modal login
+  const handleLoginModalClose = () => {
+    setShowLoginModal(false);
+    router.push('/login'); // Redirect ke login setelah modal ditutup
+  };
+
+  const handleLoginRedirect = () => {
+    setShowLoginModal(false);
+    router.push('/login');
+  };
+
   const handleSubmit = async () => {
+    // Cek authentication terlebih dahulu
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    // Validasi input
+    if (!judul.trim()) {
+      setModalMessage("Judul keluhan tidak boleh kosong.");
+      setShowModal(true);
+      return;
+    }
+
+    if (!inputText.trim()) {
+      setModalMessage("Deskripsi keluhan tidak boleh kosong.");
+      setShowModal(true);
+      return;
+    }
+
+    if (!fishTypeId) {
+      setModalMessage("Jenis ikan harus dipilih.");
+      setShowModal(true);
+      return;
+    }
+
     // Get current user untuk memastikan masih authenticated
     const currentUser = await getCurrentUser();
 
@@ -148,6 +192,8 @@ export default function UserPost() {
       setShowModal(true);
       return;
     }
+
+    setLoading(true); // Start loading
 
     const requestData = {
       user_id: currentUser.id,
@@ -165,7 +211,7 @@ export default function UserPost() {
       // Request pertama: buat user consultation
       const response = await fetch(`${API_BASE_URL}/user-consultations`, {
         method: "POST",
-        credentials: 'include', // Gunakan credentials bukan Authorization header
+        credentials: 'include',
         headers: {
           "Content-Type": "application/json",
         },
@@ -190,7 +236,7 @@ export default function UserPost() {
 
         const consultationResponse = await fetch(`${API_BASE_URL}/consultations`, {
           method: "POST",
-          credentials: 'include', // Gunakan credentials bukan Authorization header
+          credentials: 'include',
           headers: {
             "Content-Type": "application/json",
           },
@@ -203,16 +249,43 @@ export default function UserPost() {
           console.error("Error dari konsultasi API:", consultationResponseData);
           throw new Error("Gagal menambahkan data ke tabel consultations");
         }
-        setModalMessage("Konsultasi berhasil ditambahkan, silahkan menunggu hingga ahli ikan memberikan respons!");
+
+        // Success message
+        setModalMessage("Konsultasi berhasil ditambahkan! Silakan menunggu hingga ahli ikan memberikan respons.");
+        setShouldResetForm(true); // Set flag untuk reset form
       } else {
         console.error("Error dari backend:", responseData);
         setModalMessage(responseData.message || "Terjadi kesalahan pada backend");
       }
     } catch (error) {
       console.error("Error saat mengirim data:", error);
-      setModalMessage("Terjadi kesalahan saat mengirim data");
+      setModalMessage("Terjadi kesalahan saat mengirim data. Silakan coba lagi.");
+    } finally {
+      setLoading(false); // Stop loading
+      setShowModal(true);
     }
-    setShowModal(true);
+  };
+
+  const resetForm = () => {
+    setJudul('');
+    setInputText('');
+    setJenisIkan('');
+    setPanjang('');
+    setBerat('');
+    setUmur('');
+    setImages([]);
+    setFishTypeId(null);
+    setShouldResetForm(false);
+  };
+
+  // Update modal onClose handler
+  const handleModalClose = () => {
+    setShowModal(false);
+
+    // Reset form jika berhasil submit
+    if (shouldResetForm) {
+      resetForm();
+    }
   };
 
   const toggleModal = () => {
@@ -220,14 +293,22 @@ export default function UserPost() {
   };
 
   const handleUploadStart = useCallback(() => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     setLoading(true);
-  }, []);
+  }, [isAuthenticated]);
 
   const handleUploadEnd = useCallback(() => {
     setLoading(false);
   }, []);
 
   const handleJenisIkanClick = () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     setIsDropdownOpen(!isDropdownOpen); // Toggle dropdown visibility
   };
 
@@ -243,6 +324,11 @@ export default function UserPost() {
   };
 
   const handleDeleteImage = async (publicId: string) => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+
     if (!publicId) {
       alert("No public_id provided");
       return;
@@ -291,6 +377,15 @@ export default function UserPost() {
     setIsWelcomeModalOpen(false);
   };
 
+  // Handler untuk input yang memerlukan authentication
+  const handleAuthenticatedInput = (callback: () => void) => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+    callback();
+  };
+
   return (
     <div
       className="flex flex-col min-h-screen"
@@ -305,7 +400,46 @@ export default function UserPost() {
       <Navbar />
 
       {/* Welcome Modal that shows on page load */}
-      <WelcomeModal isOpen={isWelcomeModalOpen} onClose={closeWelcomeModal} />
+      {isAuthenticated && (
+        <WelcomeModal isOpen={isWelcomeModalOpen} onClose={closeWelcomeModal} />
+      )}
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 mx-4 max-w-md w-full shadow-lg">
+            <div className="text-center">
+              <div className="mb-4">
+                <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Akses Terbatas
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Anda harus login terlebih dahulu untuk mengakses fitur posting keluhan dan konsultasi dengan ahli ikan.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={handleLoginRedirect}
+                  className="flex-1 bg-[#1A83FB] hover:bg-[#0066CC] text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+                >
+                  Login Sekarang
+                </button>
+                <button
+                  onClick={handleLoginModalClose}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200"
+                >
+                  Nanti Saja
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1">
         <div className="ml-6 mt-32 font-sans text-center">
@@ -336,32 +470,33 @@ export default function UserPost() {
           />
         </div>
 
-
         <div className="mt-8 flex justify-center">
-          <div className="w-full max-w-5xl p-4"> {/* Lebarkan container */}
+          <div className="w-full max-w-5xl p-4">
             <input
               type="text"
               className="w-full p-4 mb-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
               placeholder="Masukkan judul keluhan..."
               value={judul}
-              onChange={(e) => setJudul(e.target.value)}
+              onChange={(e) => handleAuthenticatedInput(() => setJudul(e.target.value))}
+              onFocus={() => handleAuthenticatedInput(() => { })}
             />
 
             <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
-              <div className="relative w-full md:w-1/4"> {/* Semua input dalam flex-1 agar ukurannya sama */}
+              <div className="relative w-full md:w-1/4">
                 <input
                   type="text"
                   className="w-full p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
                   placeholder="Jenis Ikan"
                   value={jenisIkan}
                   onClick={handleJenisIkanClick}
-                  onChange={(e) => setJenisIkan(e.target.value)}
+                  onChange={(e) => handleAuthenticatedInput(() => setJenisIkan(e.target.value))}
+                  onFocus={() => handleAuthenticatedInput(() => { })}
                 />
-                {isDropdownOpen && fishtypes.length > 0 && (
+                {isDropdownOpen && fishtypes.length > 0 && isAuthenticated && (
                   <div className="absolute left-0 w-full text-black bg-white shadow-lg border-2 border-[#0795D2] rounded-lg z-50 mt-1 max-h-60 overflow-y-auto">
                     {fishtypes.map((fish) => (
                       <div
-                        key={fish.id} // Use ONLY fish.id as the key, not combined with index
+                        key={fish.id}
                         className="p-2 cursor-pointer hover:bg-[#0795D2] hover:text-white"
                         onClick={() => handleSelectFishType(fish.name)}
                       >
@@ -377,21 +512,24 @@ export default function UserPost() {
                 className="w-full md:w-1/4 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
                 placeholder="Panjang ikan (cm)"
                 value={panjang}
-                onChange={(e) => setPanjang(e.target.value)}
+                onChange={(e) => handleAuthenticatedInput(() => setPanjang(e.target.value))}
+                onFocus={() => handleAuthenticatedInput(() => { })}
               />
               <input
                 type="number"
                 className="w-full md:w-1/4 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
                 placeholder="Berat ikan (g)"
                 value={berat}
-                onChange={(e) => setBerat(e.target.value)}
+                onChange={(e) => handleAuthenticatedInput(() => setBerat(e.target.value))}
+                onFocus={() => handleAuthenticatedInput(() => { })}
               />
               <input
                 type="number"
                 className="w-full md:w-1/4 p-4 border-2 border-[#0795D2] rounded-lg outline-none text-black font-sans bg-white"
                 placeholder="Umur ikan (bulan)"
                 value={umur}
-                onChange={(e) => setUmur(e.target.value)}
+                onChange={(e) => handleAuthenticatedInput(() => setUmur(e.target.value))}
+                onFocus={() => handleAuthenticatedInput(() => { })}
               />
             </div>
 
@@ -408,11 +546,11 @@ export default function UserPost() {
                   className="flex-1 w-full h-32 p-4 rounded-lg outline-none resize-none text-black font-sans bg-white"
                   placeholder="Masukkan keluhan yang ingin anda sampaikan..."
                   value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
+                  onChange={(e) => handleAuthenticatedInput(() => setInputText(e.target.value))}
+                  onFocus={() => handleAuthenticatedInput(() => { })}
                 />
               </div>
               <div className="flex flex-wrap gap-4 mt-4 relative min-h-[100px] ml-24">
-                {/* Loading indicator centered in the image preview area */}
                 {loading && (
                   <div className="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center bg-white bg-opacity-50 z-1 rounded-lg">
                     <ClipLoader color="#69CBF4" size={50} />
@@ -475,8 +613,12 @@ export default function UserPost() {
       </main>
 
       {/* Regular modal for messages */}
-      {showModal && <Modal message={modalMessage} onClose={() => setShowModal(false)} />}
-
+      {showModal && (
+        <Modal
+          message={modalMessage}
+          onClose={handleModalClose}
+        />
+      )}
       <Footer />
     </div>
   );

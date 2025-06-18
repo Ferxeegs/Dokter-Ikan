@@ -15,17 +15,27 @@ export const verifyToken = async () => {
     if (!response.ok) {
       const errorData = await response.json();
       console.log('❌ Verification failed:', errorData);
-      return false;
+      
+      // Return object dengan status dan alasan
+      return {
+        success: false,
+        reason: response.status === 401 ? 'no_token' : 'invalid_token'
+      };
     }
 
     const data = await response.json();
     console.log('✅ Verification success:', data);
     console.log('data.success value:', data.success, typeof data.success);
     
-    // Pastikan return boolean yang benar
-    return data.success === true;
+    return {
+      success: data.success === true,
+      reason: data.success === true ? 'valid' : 'invalid_token'
+    };
   } catch (error) {
     console.error('❌ Token verification error:', error);
-    return false;
+    return {
+      success: false,
+      reason: 'network_error'
+    };
   }
 };

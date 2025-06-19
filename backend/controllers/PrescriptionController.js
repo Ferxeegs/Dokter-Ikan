@@ -110,3 +110,47 @@ export const getPrescriptionsByConsultationId = async (req, res) => {
     return res.fail('Gagal mengambil data resep dan obat', error.message, 500);
   }
 };
+
+export const checkPrescriptionExists = async (req, res) => {
+  const { consultation_id } = req.params;
+
+  try {
+    if (!consultation_id) {
+      return res.fail('Data tidak lengkap', 'Consultation ID wajib diberikan');
+    }
+
+    console.log(`Mengecek prescription untuk consultation_id: ${consultation_id}`);
+
+    // Mencari prescription berdasarkan consultation_id
+    const prescription = await Prescription.findOne({
+      where: { consultation_id },
+      attributes: ['prescription_id', 'consultation_id', 'fishExperts_id', 'instruction', 'created_at'],
+    });
+
+    console.log('Prescription check result:', prescription);
+
+    if (prescription) {
+      // Jika prescription ditemukan, kirim response bahwa sudah ada
+      return res.success('Prescription sudah ada untuk konsultasi ini', {
+        exists: true,
+        prescription: {
+          prescription_id: prescription.prescription_id,
+          consultation_id: prescription.consultation_id,
+          fishExperts_id: prescription.fishExperts_id,
+          instruction: prescription.instruction,
+          created_at: prescription.created_at,
+        }
+      });
+    } else {
+      // Jika prescription tidak ditemukan, kirim response bahwa belum ada
+      return res.success('Prescription belum ada untuk konsultasi ini', {
+        exists: false,
+        prescription: null
+      });
+    }
+
+  } catch (error) {
+    console.error('Error checking prescription existence:', error);
+    return res.fail('Gagal mengecek keberadaan prescription', error.message, 500);
+  }
+};

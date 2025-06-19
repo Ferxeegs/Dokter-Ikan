@@ -86,8 +86,15 @@ export const updatePayment = async (req, res) => {
       return res.fail('Payment not found', null, 404);
     }
 
+    // Update payment fields
     payment.payment_method = payment_method;
     payment.payment_proof = payment_proof;
+    
+    // Set payment status to pending when proof is uploaded
+    if (payment_proof) {
+      payment.payment_status = 'pending';
+    }
+    
     await payment.save();
 
     return res.success('Payment updated successfully', payment);

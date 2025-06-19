@@ -55,7 +55,13 @@ const DetailResep: React.FC<DetailResepProps> = ({ isOpen, toggleModal, consulta
 
     const fetchConsultationData = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}`);
+        const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}`, {
+          method: 'GET',
+          credentials: 'include', // Kirim cookie secara otomatis
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         if (!response.ok) throw new Error("Gagal mengambil data konsultasi");
         const data = await response.json();
 

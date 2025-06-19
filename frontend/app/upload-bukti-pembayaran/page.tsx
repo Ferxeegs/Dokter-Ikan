@@ -36,6 +36,7 @@ export default function UploadPaymentProof() {
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -111,10 +112,17 @@ export default function UploadPaymentProof() {
       return;
     }
 
+    if (imageUrls.length === 0) {
+      alert("Silakan upload bukti pembayaran terlebih dahulu.");
+      return;
+    }
+
     const paymentMethod = selectedBank;
     const paymentProof = imageUrls.join(",");
 
     try {
+      setIsSubmitting(true);
+
       const response = await fetch(`${API_BASE_URL}/payments/${paymentId}`, {
         method: "PUT",
         credentials: "include", // ⬅️ Kirim cookie HttpOnly secara otomatis
@@ -124,13 +132,21 @@ export default function UploadPaymentProof() {
         body: JSON.stringify({
           payment_method: paymentMethod,
           payment_proof: paymentProof,
+          // Backend akan otomatis set payment_status ke 'pending' ketika payment_proof ada
         }),
       });
 
       const result = await response.json();
 
       if (response.ok && result.success) {
+        // Tampilkan modal sukses
         setModalOpen(true);
+        
+        // Optional: Log untuk konfirmasi bahwa status sudah diupdate ke pending
+        console.log("Payment updated successfully. Status should now be 'pending'");
+        
+        // Optional: Bisa tambahkan notifikasi sukses yang lebih detail
+        // alert("Bukti pembayaran berhasil dikirim! Status pembayaran telah diubah menjadi pending.");
       } else {
         const message = result?.message || "Gagal mengupdate pembayaran.";
         alert(`Gagal mengupdate pembayaran: ${message}`);
@@ -138,11 +154,20 @@ export default function UploadPaymentProof() {
     } catch (error) {
       console.error("Error updating payment:", error);
       alert("Terjadi kesalahan saat mengupdate pembayaran. Silakan coba lagi.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (!selectedBank || !bankInfo) {
-    return <div>Bank tidak ditemukan. Harap pilih bank terlebih dahulu.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 via-blue-100 to-blue-200 p-4">
+        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-lg text-center">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Bank Tidak Ditemukan</h2>
+          <p className="text-gray-700">Harap pilih bank terlebih dahulu untuk melanjutkan proses pembayaran.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -173,19 +198,26 @@ export default function UploadPaymentProof() {
             <input
               type="file"
               accept="image/*, .pdf"
+              multiple
               className="hidden"
               id="paymentProof"
               onChange={handleFileChange}
-              disabled={isUploading}
+              disabled={isUploading || isSubmitting}
             />
             <label
               htmlFor="paymentProof"
-              className={`cursor-pointer flex items-center space-x-3 ${isUploading ? "text-gray-400" : "text-blue-600 hover:text-blue-800"
-                }`}
+              className={`cursor-pointer flex items-center space-x-3 ${
+                isUploading || isSubmitting 
+                  ? "text-gray-400" 
+                  : "text-blue-600 hover:text-blue-800"
+              }`}
             >
               <PaperClipIcon className="h-6 w-6" />
               <span className="text-sm">
-                {isUploading ? "Sedang mengupload..." : "Klik untuk memilih file"}
+                {isUploading 
+                  ? "Sedang mengupload..." 
+                  : "Klik untuk memilih file"
+                }
               </span>
             </label>
             {isUploading && (
@@ -194,40 +226,68 @@ export default function UploadPaymentProof() {
               </div>
             )}
           </div>
+          <p className="text-sm text-gray-500 mt-2">
+            Format yang didukung: JPG, PNG, PDF. Maksimal beberapa file sekaligus.
+          </p>
         </div>
 
         {imageUrls.length > 0 && (
           <div className="mt-6">
-            <h3 className="text-lg font-semibold text-blue-700 mb-2">Bukti Pembayaran yang Diupload:</h3>
-            <ul className="space-y-2">
+            <h3 className="text-lg font-semibold text-blue-700 mb-2">
+              Bukti Pembayaran yang Diupload ({imageUrls.length}):
+            </h3>
+            <div className="space-y-3">
               {imageUrls.map((url, index) => (
-                <li key={index} className="text-sm text-gray-700">
+                <div key={index} className="border rounded-lg overflow-hidden">
                   <Image
                     src={url}
-                    alt={`Uploaded Image ${index + 1}`}
+                    alt={`Bukti Pembayaran ${index + 1}`}
                     width={500}
-                    height={500}
-                    className="w-full h-auto rounded-lg"
+                    height={300}
+                    className="w-full h-auto max-h-60 object-contain bg-gray-50"
                     unoptimized={true}
                   />
-                </li>
+                  <div className="p-2 bg-gray-50">
+                    <p className="text-xs text-gray-600">File {index + 1}</p>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
         <button
           onClick={handlePaymentUpdate}
-          disabled={isUploading || imageUrls.length === 0}
-          className={`w-full py-3 mt-4 text-white font-semibold rounded-lg transition duration-300 ease-in-out ${isUploading || imageUrls.length === 0
+          disabled={isUploading || isSubmitting || imageUrls.length === 0}
+          className={`w-full py-3 mt-6 text-white font-semibold rounded-lg transition duration-300 ease-in-out ${
+            isUploading || isSubmitting || imageUrls.length === 0
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700 transform hover:scale-105"
-            }`}
+          }`}
         >
-          {isUploading ? "Sedang Mengupload..." : "Kirim Bukti Pembayaran"}
+          {isSubmitting 
+            ? "Sedang Memproses..." 
+            : isUploading 
+            ? "Sedang Mengupload..." 
+            : "Kirim Bukti Pembayaran"
+          }
         </button>
+
+        {imageUrls.length === 0 && (
+          <p className="text-sm text-gray-500 text-center mt-2">
+            Silakan upload bukti pembayaran terlebih dahulu
+          </p>
+        )}
       </div>
-      <SuccessModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
+      
+      <SuccessModal 
+        isOpen={isModalOpen} 
+        onClose={() => {
+          setModalOpen(false);
+          // Optional: Redirect ke halaman lain setelah sukses
+          // window.location.href = '/payment-status';
+        }} 
+      />
     </div>
   );
 }

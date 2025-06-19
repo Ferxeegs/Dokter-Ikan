@@ -1,7 +1,7 @@
 import UserConsultation from "../models/UserConsultationModel.js";
 import { validationResult } from "express-validator"; // Untuk validasi input
 import db from "../config/Database.js";
-import jwt from "jsonwebtoken"; 
+import jwt from "jsonwebtoken";
 import "regenerator-runtime/runtime.js";
 
 // Fungsi untuk mendapatkan semua data konsultasi
@@ -62,7 +62,8 @@ export const getUserConsultationById = async (req, res) => {
 };
 
 export const getUserConsultationHistory = async (req, res) => {
-  const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+  const token = req.cookies.token ||
+    (req.headers.authorization && req.headers.authorization.split(' ')[1]);
 
   if (!token) {
     return res.fail('Akses ditolak', 'Token tidak ditemukan.', 401);
@@ -114,7 +115,7 @@ export const createUserConsultation = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.fail(
-      'Validasi gagal', 
+      'Validasi gagal',
       'Harap mengisi semua kolom yang tersedia!',
       400,
       errors.array()

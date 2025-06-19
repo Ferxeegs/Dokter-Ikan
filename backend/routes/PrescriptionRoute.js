@@ -1,5 +1,6 @@
 import express from 'express';
-import { createPrescription, getAllPrescriptions, getPrescriptionsByConsultationId} from '../controllers/PrescriptionController.js';
+import { createPrescription, getAllPrescriptions, getPrescriptionsByConsultationId, checkPrescriptionExists} from '../controllers/PrescriptionController.js';
+import { authenticate } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -7,5 +8,7 @@ const router = express.Router();
 router.get('/prescriptions', getAllPrescriptions);
 router.get('/prescriptionsbyconsultation', getPrescriptionsByConsultationId);
 router.post('/prescriptions', createPrescription);
+router.get('/check/:consultation_id', authenticate, checkPrescriptionExists);
+
 
 export default router;

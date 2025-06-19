@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { XCircle, Loader, CheckCircle, AlertCircle, CreditCard } from "lucide-react";
+import { XCircle, Loader, CheckCircle, AlertCircle, CreditCard, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Cookies from 'js-cookie';
 
 interface EndConsultationButtonProps {
   consultationId: string;
@@ -12,8 +11,9 @@ interface EndConsultationButtonProps {
 
 const EndConsultationButton: React.FC<EndConsultationButtonProps> = ({ consultationId, onEndSession }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isCheckingPayment, setIsCheckingPayment] = useState(true);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const [hasPayment, setHasPayment] = useState(false);
+  const [consultationStatus, setConsultationStatus] = useState<'active' | 'closed'>('active');
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | null }>({
     message: '',
     type: null
@@ -22,43 +22,66 @@ const EndConsultationButton: React.FC<EndConsultationButtonProps> = ({ consultat
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const router = useRouter();
 
-  // Cek apakah consultation_id sudah ada di tabel payment
+  // Cek status pembayaran dan konsultasi dari server
   useEffect(() => {
-    const token = Cookies.get('token');
-    const checkPaymentStatus = async () => {
+    const checkStatus = async () => {
       if (!consultationId || !API_BASE_URL) return;
       
-      setIsCheckingPayment(true);
+      setIsCheckingStatus(true);
       try {
-        const paymentLookupResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`,{
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Sertakan token di header
-        },
-      });
-        const paymentLookupData = await paymentLookupResponse.json();
+        // Cek status konsultasi menggunakan endpoint baru
+        const consultationResponse = await fetch(`${API_BASE_URL}/consultations/${consultationId}/status`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        const consultationData = await consultationResponse.json();
+
+        if (consultationResponse.ok && consultationData.success) {
+          // Set status berdasarkan response dari API
+          setConsultationStatus(consultationData.data.is_closed ? 'closed' : 'active');
+        } else {
+          console.error("Error fetching consultation status:", consultationData.message);
+          setConsultationStatus('active'); // Default ke active jika error
+        }
+
+        // Cek status pembayaran hanya jika konsultasi masih aktif atau sudah ditutup
+        const paymentResponse = await fetch(`${API_BASE_URL}/paymentsbyconsultation?consultation_id=${consultationId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        const paymentData = await paymentResponse.json();
 
         if (
-          paymentLookupResponse.ok &&
-          paymentLookupData.success &&
-          paymentLookupData.message !== "Payment not found for this consultation"
+          paymentResponse.ok &&
+          paymentData.success &&
+          paymentData.message !== "Payment not found for this consultation"
         ) {
-          // Jika pembayaran ditemukan
           setHasPayment(true);
         } else {
-          // Jika belum ada pembayaran
           setHasPayment(false);
         }
+
       } catch (error) {
-        console.error("Error checking payment status:", error);
+        console.error("Error checking status:", error);
         setHasPayment(false);
+        setConsultationStatus('active'); // Default ke active jika error
       } finally {
-        setIsCheckingPayment(false);
+        setIsCheckingStatus(false);
       }
     };
 
-    checkPaymentStatus();
+    checkStatus();
+
+    // Optional: Set interval untuk auto-refresh status setiap 30 detik
+    const interval = setInterval(checkStatus, 30000);
+    
+    return () => clearInterval(interval);
   }, [consultationId, API_BASE_URL]);
 
   const closeNotification = () => {
@@ -66,47 +89,45 @@ const EndConsultationButton: React.FC<EndConsultationButtonProps> = ({ consultat
   };
 
   const handlePaymentSummary = () => {
-    // Redirect ke halaman pembayaran/ringkasan
     router.push(`/payment?consultation_id=${consultationId}`);
   };
 
   const endConsultation = async () => {
-  setIsLoading(true);
+    setIsLoading(true);
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}/end`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: 'include', // ⬅️ Kirim cookie HttpOnly ke server
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/consultations/${consultationId}/end`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: 'include',
+      });
 
-    if (!response.ok) {
-      throw new Error("Gagal mengakhiri sesi konsultasi");
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message || "Gagal mengakhiri sesi konsultasi");
+      }
+
+      setNotification({ message: "Sesi konsultasi telah berakhir.", type: "success" });
+      setConsultationStatus('closed'); // Update status lokal
+      onEndSession();
+      
+    } catch (error) {
+      console.error("Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan saat mengakhiri sesi konsultasi.";
+      setNotification({
+        message: errorMessage,
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    setNotification({ message: "Sesi konsultasi telah berakhir.", type: "success" });
-
-    // 🔹 Reload halaman setelah 3 detik
-    setTimeout(() => {
-      window.location.reload();
-    }, 3000);
-
-    onEndSession(); // 🔹 Callback jika ada proses lain
-  } catch (error) {
-    console.error("Error:", error);
-    setNotification({
-      message: "Terjadi kesalahan saat mengakhiri sesi konsultasi.",
-      type: "error",
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-  // Tampilkan loading saat mengecek status pembayaran
-  if (isCheckingPayment) {
+  // Tampilkan loading awal
+  if (isCheckingStatus) {
     return (
       <button 
         disabled 
@@ -118,10 +139,11 @@ const EndConsultationButton: React.FC<EndConsultationButtonProps> = ({ consultat
     );
   }
 
-  return (
-    <>
-      {hasPayment ? (
-        // Tombol untuk ke ringkasan pembayaran
+  // Logika tampilan berdasarkan kondisi
+  const renderButton = () => {
+    // 1. Jika sudah ada pembayaran - tampilkan tombol ke ringkasan pembayaran
+    if (hasPayment) {
+      return (
         <button
           onClick={handlePaymentSummary}
           className="px-4 py-2 flex items-center gap-2 bg-green-500 text-white rounded-lg shadow-md transition-all hover:bg-green-600 hover:scale-105"
@@ -129,19 +151,37 @@ const EndConsultationButton: React.FC<EndConsultationButtonProps> = ({ consultat
           <CreditCard className="w-5 h-5" />
           Ke Ringkasan Pembayaran
         </button>
-      ) : (
-        // Tombol untuk mengakhiri konsultasi
-        <button
-          onClick={endConsultation}
-          disabled={isLoading}
-          className={`px-4 py-2 flex items-center gap-2 bg-red-500 text-white rounded-lg shadow-md transition-all ${
-            isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600 hover:scale-105"
-          }`}
-        >
-          {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : <XCircle className="w-5 h-5" />}
-          {isLoading ? "Mengakhiri..." : "Akhiri Konsultasi"}
-        </button>
-      )}
+      );
+    }
+
+    // 2. Jika konsultasi sudah ditutup tapi belum ada pembayaran - tampilkan keterangan
+    if (consultationStatus === 'closed') {
+      return (
+        <div className="px-4 py-2 flex items-center gap-2 bg-gray-100 text-gray-700 rounded-lg shadow-md border border-gray-300">
+          <Info className="w-5 h-5 text-gray-500" />
+          <span className="text-sm font-medium">Konsultasi sudah ditutup</span>
+        </div>
+      );
+    }
+
+    // 3. Jika konsultasi masih aktif dan belum ada pembayaran - tampilkan tombol akhiri
+    return (
+      <button
+        onClick={endConsultation}
+        disabled={isLoading}
+        className={`px-4 py-2 flex items-center gap-2 bg-red-500 text-white rounded-lg shadow-md transition-all ${
+          isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600 hover:scale-105"
+        }`}
+      >
+        {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : <XCircle className="w-5 h-5" />}
+        {isLoading ? "Mengakhiri..." : "Akhiri Konsultasi"}
+      </button>
+    );
+  };
+
+  return (
+    <>
+      {renderButton()}
 
       {/* Modal Notifikasi */}
       {notification.type && (
@@ -150,11 +190,7 @@ const EndConsultationButton: React.FC<EndConsultationButtonProps> = ({ consultat
             notification.type === "success" ? "bg-green-100 border-green-500" : "bg-red-100 border-red-500"
           } border-l-4`}>
             <div className="flex items-center justify-center gap-3">
-              {notification.type === "success" ? (
-                <CheckCircle className="w-6 h-6 text-green-500" />
-              ) : (
-                <AlertCircle className="w-6 h-6 text-red-500" />
-              )}
+              {notification.type === "success" ? <CheckCircle className="w-6 h-6 text-green-500" /> : <AlertCircle className="w-6 h-6 text-red-500" />}
               <h2 className="text-lg font-semibold text-gray-800">
                 {notification.type === "success" ? "Berhasil" : "Gagal"}
               </h2>

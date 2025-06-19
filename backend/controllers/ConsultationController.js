@@ -316,3 +316,29 @@ export const endConsultation = async (req, res) => {
     return res.fail("Terjadi kesalahan saat mengakhiri konsultasi", error.message, 500);
   }
 };
+
+
+// Controller untuk mengecek status konsultasi
+export const getConsultationStatus = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Cek apakah konsultasi ada
+    const consultation = await Consultation.findByPk(id);
+    if (!consultation) {
+      return res.fail("Konsultasi tidak ditemukan", null, 404);
+    }
+
+    // Return data status konsultasi
+    const statusData = {
+      consultation_id: consultation.id,
+      consultation_status: consultation.consultation_status,
+      is_closed: consultation.consultation_status === "Closed"
+    };
+
+    return res.success("Status konsultasi berhasil diambil", statusData);
+  } catch (error) {
+    console.error("Error saat mengambil status konsultasi:", error.message);
+    return res.fail("Terjadi kesalahan saat mengambil status konsultasi", error.message, 500);
+  }
+};

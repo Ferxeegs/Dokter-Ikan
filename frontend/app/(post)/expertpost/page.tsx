@@ -9,7 +9,7 @@ import UploadFile from '@/app/components/uploads/UploadFile';
 import UploadFotoButton from '@/app/components/uploads/UploadFoto';
 import ModalObat from '@/app/components/modals/ModalMedicine';
 import { useSearchParams } from 'next/navigation';
-import Modal from '@/app/components/modals/ModalPost';
+import ModalExpert from '@/app/components/modals/ModalExpert'; // Import ModalExpert
 import ChatExpert from '@/app/components/chat/ChatExpert';
 import Image from 'next/image';
 import { ClipLoader } from "react-spinners";
@@ -132,6 +132,7 @@ function ExpertPostContent() {
       setModalMessage("Jawaban berhasil dikirim");
       setIsModalPostOpen(true);
       setInputText(""); // Reset input
+      setImages([]); // Reset images
     } catch (error) {
       setModalMessage((error as Error).message || "Terjadi kesalahan.");
       setIsModalPostOpen(true);
@@ -339,7 +340,7 @@ function ExpertPostContent() {
               <Image src="/images/icon/ic_send.png" alt="Kirim" width={16} height={16} />
               <span>Kirim</span>
             </button>
-            {isModalPostOpen && <Modal message={modalMessage} onClose={handleCloseModal} />}
+            {isModalPostOpen && <ModalExpert message={modalMessage} onClose={handleCloseModal} />}
           </div>
         ) : null}
 

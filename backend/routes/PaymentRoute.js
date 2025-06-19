@@ -14,7 +14,7 @@ import { checkConsultationOwnership } from '../middlewares/Authorization.js';
 const router = express.Router();
 
 router.get('/payments', getAllPayments); 
-router.get('/payments/:id', authenticate, checkConsultationOwnership, getPaymentById); 
+router.get('/payments/:id', authenticate, getPaymentById); 
 router.post('/payments', createPayment); 
 router.put('/payments/:id', updatePayment); 
 router.delete('/payments/:id', deletePayment); 

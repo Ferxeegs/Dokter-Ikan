@@ -16,6 +16,29 @@ interface Symptom {
   type: 'fisik' | 'perilaku';
 }
 
+// Add proper type definition for diagnosis result
+interface DiagnosisResult {
+  success?: boolean;
+  data?: {
+    disease: string;
+    confidence: number;
+    symptoms: string[];
+    recommendations?: string[];
+  };
+  message?: string;
+  // Add other possible properties based on your API response
+  [key: string]: unknown;
+}
+
+interface DiagnosisData {
+  result: DiagnosisResult;
+  timestamp: string;
+  selectedSymptoms: {
+    physical: string[];
+    behavioral: string[];
+  };
+}
+
 export default function DiseaseDetection() {
   const [selectedPhysicalSymptoms, setSelectedPhysicalSymptoms] = useState<Set<string>>(new Set());
   const [selectedBehavioralSymptoms, setSelectedBehavioralSymptoms] = useState<Set<string>>(new Set());
@@ -136,6 +159,38 @@ export default function DiseaseDetection() {
     }
   }, []);
 
+  // Fungsi untuk menyimpan data ke sessionStorage
+  const saveDiagnosisToSession = (result: DiagnosisResult): string | null => {
+    try {
+      const diagnosisData: DiagnosisData = {
+        result: result,
+        timestamp: new Date().toISOString(),
+        selectedSymptoms: {
+          physical: Array.from(selectedPhysicalSymptoms),
+          behavioral: Array.from(selectedBehavioralSymptoms)
+        }
+      };
+      
+      // Simpan ke sessionStorage
+      sessionStorage.setItem('diagnosisResult', JSON.stringify(diagnosisData));
+      
+      // Clear any previous diagnosis data to prevent accumulation
+      const keys = Object.keys(sessionStorage);
+      keys.forEach(key => {
+        if (key.startsWith('diagnosisResult_') && key !== 'diagnosisResult') {
+          sessionStorage.removeItem(key);
+        }
+      });
+      
+      console.log('Diagnosis data saved to sessionStorage:', diagnosisData);
+    } catch (error) {
+      console.error('Error saving to sessionStorage:', error);
+      // Fallback to URL params if sessionStorage fails
+      return JSON.stringify(result);
+    }
+    return null;
+  };
+
   const handleSubmit = async () => {
     const selectedSymptoms = [
       ...Array.from(selectedPhysicalSymptoms),
@@ -151,11 +206,12 @@ export default function DiseaseDetection() {
     setIsLoading(true);
 
     try {
+      let result: DiagnosisResult;
+      
       if (isOffline) {
         // Diagnosa offline menggunakan logic.ts
-        const result = diagnoseDisease(selectedSymptoms);
+        result = diagnoseDisease(selectedSymptoms);
         console.log('Offline diagnosis result:', result);
-        router.push(`/result-expert-system?data=${encodeURIComponent(JSON.stringify(result))}`);
       } else {
         // Online diagnosis menggunakan API
         const response = await fetch(`${API_BASE_URL}/diagnose`, {
@@ -166,18 +222,49 @@ export default function DiseaseDetection() {
           body: JSON.stringify({ symptoms: selectedSymptoms }),
         });
 
-        const result = await response.json();
-        if (response.ok) {
-          console.log('Online diagnosis result:', result);
-          router.push(`/result-expert-system?data=${encodeURIComponent(JSON.stringify(result))}`);
-        } else {
+        result = await response.json() as DiagnosisResult;
+        if (!response.ok) {
           console.error('Failed to diagnose:', result.message);
           alert('Gagal mendiagnosa: ' + result.message);
+          return;
         }
+        console.log('Online diagnosis result:', result);
       }
+
+      // Simpan hasil diagnosis ke sessionStorage
+      const fallbackData = saveDiagnosisToSession(result);
+      
+      // Navigate ke halaman hasil
+      if (fallbackData) {
+        // Jika sessionStorage gagal, gunakan URL params sebagai fallback
+        router.push(`/result-expert-system?data=${encodeURIComponent(fallbackData)}`);
+      } else {
+        // Jika berhasil disimpan ke sessionStorage, navigate tanpa params
+        router.push('/result-expert-system');
+      }
+      
     } catch (error) {
       console.error('Error diagnosing:', error);
-      alert('Terjadi kesalahan saat mendiagnosa');
+      
+      // Jika online gagal, coba offline sebagai fallback
+      if (!isOffline) {
+        try {
+          console.log('Mencoba diagnosa offline sebagai fallback...');
+          const offlineResult = diagnoseDisease(selectedSymptoms);
+          const fallbackData = saveDiagnosisToSession(offlineResult);
+          
+          if (fallbackData) {
+            router.push(`/result-expert-system?data=${encodeURIComponent(fallbackData)}`);
+          } else {
+            router.push('/result-expert-system');
+          }
+        } catch (offlineError) {
+          console.error('Offline fallback also failed:', offlineError);
+          alert('Terjadi kesalahan saat mendiagnosa');
+        }
+      } else {
+        alert('Terjadi kesalahan saat mendiagnosa');
+      }
     } finally {
       setIsLoading(false);
     }

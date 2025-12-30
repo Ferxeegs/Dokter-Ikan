@@ -28,6 +28,6 @@
 - **Inference System**: Python (Flask)
 - **Database**: MySQL
 - **Offline AI Integration**: WebAssembly + IndexedDB
-- **Deployment**: Domainesia (dokterikan.com)
+- **Deployment**: Domainesia (dokterikan.my.id)
 
 ---
